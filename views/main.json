@@ -1,0 +1,43 @@
+{
+  "type": "AppView",
+
+  "title": "resource: IDS_APP_TITLE",
+  "icon": "resource: IDI_UIGLUE",
+  "smallIcon": "resource: IDI_SMALL",
+
+  "menu": {
+    "menu": "resource: IDC_UIGLUE",
+    "commands": {
+      "IDM_EXIT": "onExit",
+      "IDM_ABOUT": "onAbout"
+    }
+  },
+
+  "layout": {
+    "direction": "vertical",
+    "content": [
+      {
+        "type": "Static",
+        "text": "Name:"
+      },
+      {
+        "type": "Edit",
+        "value": "bind: name"
+      },
+      {
+        "type": "Button",
+        "text": "Generate greeting",
+        "visible": "bind: !automatic"
+      },
+      {
+        "type": "Checkbox",
+        "text": "Automatically generate greeting",
+        "checked": "bind: automatic"
+      },
+      {
+        "type": "Static",
+        "text": "bind: greeting"
+      }
+    ]
+  }
+}
