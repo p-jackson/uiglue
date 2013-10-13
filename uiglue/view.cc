@@ -42,6 +42,12 @@ namespace {
     return wnd;
   }
 
+  Font defaultFont() {
+    NONCLIENTMETRICSW metrics = { sizeof(NONCLIENTMETRICSW) };
+    SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
+    return { CreateFontIndirectW(&metrics.lfMessageFont) };
+  }
+
 
 }
 
@@ -83,9 +89,10 @@ namespace uiglue {
     }
   }
 
-  View::View() : m_wnd{ nullptr } {}
+  View::View() : m_wnd{ nullptr } {
+  }
 
-  View::View(string className, ViewType type) : m_type{type} {
+  View::View(string className, ViewType type) : m_type{type}, m_font{ defaultFont() } {
     m_wnd = createWindow(util::utf8ToWide(className), type, this);
   }
 
@@ -101,6 +108,7 @@ namespace uiglue {
     std::swap(o.m_wnd, m_wnd);
     std::swap(o.m_vm, m_vm);
     std::swap(o.m_commands, m_commands);
+    std::swap(o.m_font, m_font);
 
     SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
   }
@@ -118,11 +126,15 @@ namespace uiglue {
     m_commands[id] = command;
   }
 
+  HFONT View::getFont() const {
+    return m_font.get();
+  }
+
   void View::detachViewModel() {
     m_vm.reset();
   }
 
-  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM, LRESULT&) {
+  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM, LRESULT& result) {
     if (msg == WM_DESTROY && m_type == ViewType::App) {
       PostQuitMessage(0);
       return true;
@@ -136,6 +148,11 @@ namespace uiglue {
         m_vm->runCommand(found->second, *this);
         return true;
       }
+    }
+
+    if (msg == WM_CTLCOLORBTN || msg == WM_CTLCOLOREDIT || msg == WM_CTLCOLORSTATIC) {
+      result = reinterpret_cast<LRESULT>(GetStockObject(WHITE_BRUSH));
+      return true;
     }
 
     return false;

@@ -103,6 +103,7 @@
     <ClInclude Include="view_factory.h" />
     <ClInclude Include="view_parser.h" />
     <ClInclude Include="view_type.h" />
+    <ClInclude Include="win_types.h" />
     <ClInclude Include="win_util.h" />
   </ItemGroup>
   <ItemGroup>

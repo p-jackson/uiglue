@@ -13,31 +13,45 @@
     }
   },
 
+  "children": {
+    "editLabel": {
+      "type": "Static",
+      "text": "Name:"
+    },
+    "nameEdit": {
+      "type": "Edit",
+      "value": "bind: name"
+    },
+    "generateButton": {
+      "type": "Button",
+      "text": "Generate greeting",
+      "visible": "bind: !automatic"
+    },
+    "autoCheckbox": {
+      "type": "Checkbox",
+      "text": "Automatically generate greeting",
+      "checked": "bind: automatic"
+    },
+    "message": {
+      "type": "Static",
+      "text": "bind: greeting"
+    }
+  },
+
   "layout": {
     "direction": "vertical",
-    "content": [
+    "contents": [
+      "editLabel",
       {
-        "type": "Static",
-        "text": "Name:"
+        "direction": "horizontal",
+        "grow": [1, 0],
+        "contents": [
+          "nameEdit",
+          "generateButton"
+        ]
       },
-      {
-        "type": "Edit",
-        "value": "bind: name"
-      },
-      {
-        "type": "Button",
-        "text": "Generate greeting",
-        "visible": "bind: !automatic"
-      },
-      {
-        "type": "Checkbox",
-        "text": "Automatically generate greeting",
-        "checked": "bind: automatic"
-      },
-      {
-        "type": "Static",
-        "text": "bind: greeting"
-      }
+      "autoCheckbox",
+      "message"
     ]
   }
 }

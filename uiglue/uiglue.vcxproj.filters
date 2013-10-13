@@ -55,6 +55,9 @@
     <ClInclude Include="view_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="win_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cc">

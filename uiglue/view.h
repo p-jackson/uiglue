@@ -6,6 +6,7 @@
 
 #include "view_type.h"
 #include "fwd_windows.h"
+#include "win_types.h"
 
 namespace uiglue {
 
@@ -42,6 +43,7 @@ namespace uiglue {
 
   class View {
     HWND m_wnd;
+    Font m_font;
     ViewType m_type;
     std::unique_ptr<ViewModelRef> m_vm;
     std::unordered_map<int, std::string> m_commands;
@@ -58,6 +60,7 @@ namespace uiglue {
     HWND get() const;
 
     void addCommand(int id, std::string command);
+    HFONT getFont() const;
 
     template<class ViewModel>
     void attachViewModel(ViewModel& vm) {

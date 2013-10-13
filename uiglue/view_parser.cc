@@ -193,4 +193,18 @@ namespace uiglue {
     return commands;
   }
 
+  void ViewParser::eachChild(EachChildCallback callback) const {
+    auto children = pimpl->tree.get_child_optional("children");
+    if (!children)
+      return;
+
+    for (auto& c : children.get()) {
+      auto type = c.second.get<string>("type");
+      std::vector<std::pair<string, string>> bindings;
+      for (auto& b : c.second)
+        bindings.emplace_back(b.first, b.second.data());
+      callback(c.first, type, bindings);
+    }
+  }
+
 }

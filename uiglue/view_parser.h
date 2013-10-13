@@ -27,6 +27,9 @@ namespace uiglue {
     boost::optional<unsigned int> getMenuResourceId() const;
     boost::optional<std::vector<std::pair<int, std::string>>> getMenuCommands() const;
 
+    typedef std::function<void(std::string, std::string, std::vector<std::pair<std::string, std::string>>)> EachChildCallback;
+    void eachChild(EachChildCallback callback) const;
+
   };
 
 }
