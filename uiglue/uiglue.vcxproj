@@ -99,6 +99,7 @@
     <ClInclude Include="include_windows.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="builtin_controls.h" />
     <ClInclude Include="view.h" />
     <ClInclude Include="view_factory.h" />
     <ClInclude Include="view_parser.h" />

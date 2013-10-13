@@ -24,6 +24,9 @@ namespace uiglue {
   public:
     ViewModelRefImpl(ViewModel& vm_) : vm{vm_} {}
 
+    ViewModelRefImpl(ViewModelRefImpl&) = delete;
+    ViewModelRefImpl& operator=(ViewModelRefImpl&) = delete;
+
     void runCommand(std::string name, View& view) override {
       auto map = ViewModel::uiglueGetPropertyMap(name);
       if (!map)
@@ -35,10 +38,6 @@ namespace uiglue {
 
       throw std::runtime_error("Command handler doesn't exist: " + name);
     }
-
-  private:
-    ViewModelRefImpl(ViewModelRefImpl&); // = delete;
-    ViewModelRefImpl& operator=(ViewModelRefImpl&); // = delete;
   };
 
   class View {

@@ -58,6 +58,9 @@
     <ClInclude Include="win_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="builtin_controls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cc">

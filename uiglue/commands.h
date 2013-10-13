@@ -21,7 +21,7 @@ namespace uiglue {
 
   template<class VM>
   struct Command {
-    typedef void (*HandlerSig) (VM&, uiglue::View&);
+    using HandlerSig = void (*) (VM&, uiglue::View&);
 
     const char* name;
     HandlerSig handler;

@@ -7,7 +7,7 @@ namespace uiglue {
 
   template<class Traits>
   class Handle {
-    typedef typename Traits::Type Type;
+    using Type = typename Traits::Type;
     Type handle;
 
   public:
@@ -43,11 +43,11 @@ namespace uiglue {
   };
 
   struct FontTraits {
-    typedef HFONT Type;
+    using Type = HFONT;
     static void destroy(HFONT h) { DeleteObject(h); }
   };
 
-  typedef Handle<FontTraits> Font;
+  using Font = Handle<FontTraits>;
 
 };
 

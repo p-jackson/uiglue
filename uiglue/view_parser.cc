@@ -130,7 +130,7 @@ namespace uiglue {
     pimpl->header = resHeader;
   }
 
-  ViewParser::~ViewParser() {} // = default;
+  ViewParser::~ViewParser() = default;
 
   ViewType ViewParser::getType() const {
     auto type = pimpl->tree.get<string>("type");
