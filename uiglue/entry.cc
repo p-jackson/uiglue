@@ -1,12 +1,16 @@
 #include "resource.h"
 
-#include "win_util.h"
+#include "commands.h"
+#include "observable.h"
 #include "view.h"
 #include "view_factory.h"
-#include "commands.h"
+#include "win_util.h"
 
 #include <functional>
 #include <unordered_map>
+
+using uiglue::Observable;
+using std::string;
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM) {
@@ -33,6 +37,10 @@ class MainViewModel {
   UIGLUE_END_COMMAND_MAP()
 
 private:
+
+  Observable<string> name;
+  Observable<string> greeting;
+  Observable<bool> automatic;
 
   void onExit(uiglue::View& view) {
     DestroyWindow(view.get());

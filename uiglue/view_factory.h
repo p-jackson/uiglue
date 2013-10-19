@@ -4,6 +4,7 @@
 #include "fwd.h"
 #include "filesystem.h"
 #include "view.h"
+#include "observable.h"
 
 #include <memory>
 #include <unordered_map>
@@ -21,10 +22,19 @@ namespace uiglue {
     virtual HWND create(HWND parent, int ctrlId) const = 0;
   };
 
+  struct Binding {
+    virtual ~Binding() {}
+
+    virtual std::string name() const = 0;
+    virtual void init(HWND control, UntypedObservable observable) const = 0;
+    virtual void update(HWND control, UntypedObservable observable) const = 0;
+  };
+
   class ViewFactory {
     filesystem::path m_viewFolder;
     filesystem::path m_resourceHeader;
     std::unordered_map<std::string, std::shared_ptr<const ControlFactory>> m_controlFactories;
+    std::unordered_map<std::string, std::shared_ptr<const Binding>> m_bindings;
 
   public:
     ViewFactory(filesystem::path viewFolder, filesystem::path resourceHeader);
@@ -36,12 +46,21 @@ namespace uiglue {
       registerControl(std::make_shared<Factory>());
     }
 
+    template<class T>
+    void registerBinding() {
+      registerBinding(std::make_shared<T>());
+    }
+
   private:
     void registerControl(std::shared_ptr<const ControlFactory> factory);
+    void registerBinding(std::shared_ptr<const Binding> factory);
     void applyViewDeclaration(View& view, const ViewParser& parser) const;
 
     template<class Factory>
     void registerBuiltinControl();
+
+    template<class T>
+    void registerBuiltinBinding();
   };
 
 }

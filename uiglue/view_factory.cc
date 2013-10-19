@@ -1,5 +1,6 @@
 #include "view_factory.h"
 
+#include "builtin_bindings.h"
 #include "builtin_controls.h"
 #include "view.h"
 #include "win_util.h"
@@ -34,6 +35,22 @@ namespace {
         throw std::runtime_error("Failed to create child control: " + name());
 
       return control;
+    }
+  };
+
+  template<class Traits>
+  class BindingT : public Binding {
+  public:
+    std::string name() const override {
+      return Traits::name();
+    }
+
+    void init(HWND wnd, UntypedObservable observable) const override {
+      Traits::init(wnd, std::move(observable));
+    }
+
+    void update(HWND wnd, UntypedObservable observable) const override {
+      Traits::update(wnd, std::move(observable));
     }
   };
 
@@ -78,8 +95,8 @@ namespace {
 namespace uiglue {
 
   ViewFactory::ViewFactory(filesystem::path viewFolder, filesystem::path resourceHeader)
-  : m_viewFolder(filesystem::absolute(viewFolder)),
-    m_resourceHeader(filesystem::absolute(resourceHeader))
+    : m_viewFolder(filesystem::absolute(viewFolder)),
+      m_resourceHeader(filesystem::absolute(resourceHeader))
   {
     if (!filesystem::is_directory(m_viewFolder))
       throw std::invalid_argument("viewFolder must be a folder: " + m_viewFolder.string());
@@ -87,10 +104,12 @@ namespace uiglue {
     if (!filesystem::is_regular_file(m_resourceHeader))
       throw std::invalid_argument("resourceHeader doesn't exist: " + m_resourceHeader.string());
 
-    registerBuiltinControl<Static>();
-    registerBuiltinControl<Edit>();
-    registerBuiltinControl<Button>();
-    registerBuiltinControl<Checkbox>();
+    registerBuiltinControl<controls::Static>();
+    registerBuiltinControl<controls::Edit>();
+    registerBuiltinControl<controls::Button>();
+    registerBuiltinControl<controls::Checkbox>();
+
+    registerBuiltinBinding<bindings::Text>();
   }
 
   View ViewFactory::createView(string name) const {
@@ -119,9 +138,19 @@ namespace uiglue {
     m_controlFactories[name] = std::move(factory);
   }
 
+  void ViewFactory::registerBinding(std::shared_ptr<const Binding> binding) {
+    auto name = binding->name();
+    m_bindings[name] = std::move(binding);
+  }
+
   template<class Builtin>
   void ViewFactory::registerBuiltinControl() {
     registerControl<ControlFactoryT<Builtin>>();
+  }
+
+  template<class Builtin>
+  void ViewFactory::registerBuiltinBinding() {
+    registerBinding<BindingT<Builtin>>();
   }
 
   void ViewFactory::applyViewDeclaration(View& view, const ViewParser& parser) const {
@@ -147,6 +176,15 @@ namespace uiglue {
       idToName.push_back(name);
       auto control = factory->second->create(view.get(), static_cast<int>(idToName.size()));
       SendMessageW(control, WM_SETFONT, reinterpret_cast<WPARAM>(view.getFont()), true);
+
+      for (auto& b : bindings) {
+        auto binding = m_bindings.find(b.first);
+        if (binding == end(m_bindings))
+          continue;
+
+        auto observable = Observable<std::string>{ b.second };
+        binding->second->init(control, observable.asUntyped());
+      }
     });
   }
 

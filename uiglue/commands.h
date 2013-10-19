@@ -1,6 +1,8 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
+#include "fwd.h"
+
 #include <string>
 
 #define UIGLUE_BEGIN_COMMAND_MAP(VM) \

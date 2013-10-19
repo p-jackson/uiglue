@@ -92,11 +92,13 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="builtin_bindings.h" />
     <ClInclude Include="commands.h" />
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="fwd.h" />
     <ClInclude Include="fwd_windows.h" />
     <ClInclude Include="include_windows.h" />
+    <ClInclude Include="observable.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="builtin_controls.h" />
