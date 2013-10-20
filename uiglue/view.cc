@@ -110,6 +110,9 @@ namespace uiglue {
     std::swap(o.m_type, m_type);
     std::swap(o.m_vm, m_vm);
     std::swap(o.m_commands, m_commands);
+    std::swap(o.m_childIds, m_childIds);
+    std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
+    std::swap(o.m_bindingHandlers, m_bindingHandlers);
 
     SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
   }
@@ -120,6 +123,9 @@ namespace uiglue {
     std::swap(o.m_type, m_type);
     std::swap(o.m_vm, m_vm);
     std::swap(o.m_commands, m_commands);
+    std::swap(o.m_childIds, m_childIds);
+    std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
+    std::swap(o.m_bindingHandlers, m_bindingHandlers);
 
     SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
@@ -137,6 +143,15 @@ namespace uiglue {
 
   void View::addCommand(int id, std::string command) {
     m_commands[id] = command;
+  }
+
+  void View::addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers) {
+    m_bindingDeclarations = std::move(bindingDeclarations);
+    m_bindingHandlers = std::move(bindingHandlers);
+  }
+
+  void View::addChildId(int id, std::string name) {
+    m_childIds[std::move(name)] = id;
   }
 
   HFONT View::getFont() const {
@@ -169,6 +184,34 @@ namespace uiglue {
     }
 
     return false;
+  }
+
+  void View::applyBindings() {
+    for (auto& control : m_bindingDeclarations) {
+      auto controlHandle = getChildControl(control.first);
+
+      for (auto& binding : control.second) {
+        auto handler = m_bindingHandlers.find(binding.first);
+        if (handler == end(m_bindingHandlers))
+          continue;
+
+        auto observable = Observable<std::string>{ binding.second };
+        handler->second->init(controlHandle, observable.asUntyped());
+      }
+    }
+  }
+
+  HWND View::getChildControl(std::string name) const {
+    auto found = m_childIds.find(name);
+    if (found == end(m_childIds))
+      throw std::runtime_error("Child control doesn't exist: " + name);
+
+    auto handle = GetDlgItem(get(), found->second);
+
+    if (!handle)
+      throw std::runtime_error("Child control doesn't exist: " + name);
+
+    return handle;
   }
 
 }

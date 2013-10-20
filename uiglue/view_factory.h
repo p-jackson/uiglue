@@ -1,6 +1,7 @@
 #ifndef VIEW_FACTORY_H
 #define VIEW_FACTORY_H
 
+#include "binding.h"
 #include "fwd.h"
 #include "filesystem.h"
 #include "view.h"
@@ -22,19 +23,11 @@ namespace uiglue {
     virtual HWND create(HWND parent, int ctrlId) const = 0;
   };
 
-  struct Binding {
-    virtual ~Binding() {}
-
-    virtual std::string name() const = 0;
-    virtual void init(HWND control, UntypedObservable observable) const = 0;
-    virtual void update(HWND control, UntypedObservable observable) const = 0;
-  };
-
   class ViewFactory {
     filesystem::path m_viewFolder;
     filesystem::path m_resourceHeader;
     std::unordered_map<std::string, std::shared_ptr<const ControlFactory>> m_controlFactories;
-    std::unordered_map<std::string, std::shared_ptr<const Binding>> m_bindings;
+    BindingHandlers m_bindingHandlers;
 
   public:
     ViewFactory(filesystem::path viewFolder, filesystem::path resourceHeader);

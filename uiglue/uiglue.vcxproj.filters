@@ -67,6 +67,9 @@
     <ClInclude Include="observable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="binding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cc">

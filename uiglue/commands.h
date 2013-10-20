@@ -19,6 +19,10 @@ public: \
     return commandMap;\
   }
 
+#define UIGLUE_BEGIN_PROPERTY_MAP(VM)
+#define UIGLUE_DECLARE_PROPERTY(property)
+#define UIGLUE_END_PROPERTY_MAP()
+
 namespace uiglue {
 
   template<class VM>

@@ -1,12 +1,14 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include <string>
-#include <unordered_map>
-
+#include "binding.h"
+#include "view_parser.h"
 #include "view_type.h"
 #include "fwd_windows.h"
 #include "win_types.h"
+
+#include <string>
+#include <unordered_map>
 
 namespace uiglue {
 
@@ -46,6 +48,9 @@ namespace uiglue {
     ViewType m_type;
     std::unique_ptr<ViewModelRef> m_vm;
     std::unordered_map<int, std::string> m_commands;
+    std::unordered_map<std::string, int> m_childIds;
+    BindingDeclarations m_bindingDeclarations;
+    BindingHandlers m_bindingHandlers;
 
     static std::exception_ptr s_lastError;
 
@@ -63,11 +68,14 @@ namespace uiglue {
     HWND get() const;
 
     void addCommand(int id, std::string command);
+    void addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers);
+    void addChildId(int id, std::string name);
     HFONT getFont() const;
 
     template<class ViewModel>
     void attachViewModel(ViewModel& vm) {
       m_vm = std::make_unique<ViewModelRefImpl<ViewModel>>(vm);
+      applyBindings();
     }
 
     void detachViewModel();
@@ -77,6 +85,8 @@ namespace uiglue {
 
   private:
     bool onMessage(unsigned int, WPARAM, LPARAM, LRESULT& result);
+    void applyBindings();
+    HWND getChildControl(std::string name) const;
   };
 
 }

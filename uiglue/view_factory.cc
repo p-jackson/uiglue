@@ -29,7 +29,7 @@ namespace {
 
       auto y = (ctrlId - 1) * 50;
 
-      auto control = CreateWindowExW(exStyle, cls.c_str(), cls.c_str(), style, 0, y, 300, 50, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
+      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, 0, y, 300, 50, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
 
       if (!control)
         throw std::runtime_error("Failed to create child control: " + name());
@@ -130,6 +130,10 @@ namespace uiglue {
 
     applyViewDeclaration(newView, parser);
 
+    auto bindings = parser.getBindingDeclarations();
+    if (bindings)
+      newView.addBindings(std::move(bindings.get()), m_bindingHandlers);
+
     return newView;
   }
 
@@ -140,7 +144,7 @@ namespace uiglue {
 
   void ViewFactory::registerBinding(std::shared_ptr<const Binding> binding) {
     auto name = binding->name();
-    m_bindings[name] = std::move(binding);
+    m_bindingHandlers[name] = std::move(binding);
   }
 
   template<class Builtin>
@@ -164,28 +168,24 @@ namespace uiglue {
         view.addCommand(pair.first, pair.second);
     }
 
-    auto idToName = vector<string>{};
-    parser.eachChild([&](string name, string type, vector<pair<string, string>> bindings) {
-      if (idToName.size() + 1 > std::numeric_limits<int>::max())
-        throw std::runtime_error("View has too many children");
-      
-      auto factory = m_controlFactories.find(type);
-      if (factory == end(m_controlFactories))
-        throw std::runtime_error("Control factory hasn't been registered: " + type);
+    auto children = parser.getChildControls();
+    if (children) {
+      auto childId = 0;
 
-      idToName.push_back(name);
-      auto control = factory->second->create(view.get(), static_cast<int>(idToName.size()));
-      SendMessageW(control, WM_SETFONT, reinterpret_cast<WPARAM>(view.getFont()), true);
+      for (auto& child : children.get()) {
+        auto& name = child.first;
+        auto& type = child.second;
 
-      for (auto& b : bindings) {
-        auto binding = m_bindings.find(b.first);
-        if (binding == end(m_bindings))
-          continue;
+        auto factory = m_controlFactories.find(type);
+        if (factory == end(m_controlFactories))
+          throw std::runtime_error("Control factory hasn't been registered: " + type);
 
-        auto observable = Observable<std::string>{ b.second };
-        binding->second->init(control, observable.asUntyped());
+        auto control = factory->second->create(view.get(), ++childId);
+        SendMessageW(control, WM_SETFONT, reinterpret_cast<WPARAM>(view.getFont()), true);
+
+        view.addChildId(childId, name);
       }
-    });
+    }
   }
 
 }

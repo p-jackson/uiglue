@@ -199,18 +199,39 @@ namespace uiglue {
     return commands;
   }
 
-  void ViewParser::eachChild(EachChildCallback callback) const {
+  boost::optional<KeyValues> ViewParser::getChildControls() const {
     auto children = pimpl->tree.get_child_optional("children");
     if (!children)
-      return;
+      return {};
 
-    for (auto& c : children.get()) {
-      auto type = c.second.get<string>("type");
-      auto bindings = std::vector<std::pair<string, string>>{};
-      for (auto& b : c.second)
-        bindings.emplace_back(b.first, b.second.data());
-      callback(c.first, type, bindings);
+    auto result = KeyValues{};
+
+    for (auto& child : children.get()) {
+      auto type = child.second.get<string>("type");
+      result.emplace_back(child.first, type);
     }
+
+    return result;
+  }
+
+  boost::optional<BindingDeclarations> ViewParser::getBindingDeclarations() const {
+    auto children = pimpl->tree.get_child_optional("children");
+    if (!children)
+      return {};
+
+    auto result = BindingDeclarations{};
+
+    for (auto& child : children.get()) {
+      auto name = child.first;
+      for (auto& binding : child.second) {
+        if (binding.first == "type")
+          continue;
+
+        result[name].emplace_back(binding.first, binding.second.data());
+      }
+    }
+
+    return result;
   }
 
 }

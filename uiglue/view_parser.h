@@ -9,8 +9,12 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace uiglue {
+
+  using KeyValues = std::vector<std::pair<std::string, std::string>>;
+  using BindingDeclarations = std::unordered_map<std::string, KeyValues>;
 
   class ViewParser {
     struct Impl;
@@ -30,9 +34,8 @@ namespace uiglue {
     boost::optional<unsigned int> getMenuResourceId() const;
     boost::optional<std::vector<std::pair<int, std::string>>> getMenuCommands() const;
 
-    using EachChildCallback = std::function<void(std::string, std::string, std::vector<std::pair<std::string, std::string>>)>;
-    void eachChild(EachChildCallback callback) const;
-
+    boost::optional<KeyValues> getChildControls() const;
+    boost::optional<BindingDeclarations> getBindingDeclarations() const;
   };
 
 }

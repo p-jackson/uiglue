@@ -92,6 +92,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="binding.h" />
     <ClInclude Include="builtin_bindings.h" />
     <ClInclude Include="commands.h" />
     <ClInclude Include="filesystem.h" />
