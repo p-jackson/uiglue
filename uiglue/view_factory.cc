@@ -63,7 +63,7 @@ namespace {
   void registerClass(string name, const ViewParser& parser) {
     auto wideName = util::utf8ToWide(name);
 
-    WNDCLASSEXW wcex = { sizeof(WNDCLASSEXW) };
+    auto wcex = WNDCLASSEXW{ sizeof(WNDCLASSEXW) };
 
     wcex.lpfnWndProc = &View::WndProc;
     wcex.hInstance = util::thisModule();
@@ -95,8 +95,8 @@ namespace {
 namespace uiglue {
 
   ViewFactory::ViewFactory(filesystem::path viewFolder, filesystem::path resourceHeader)
-    : m_viewFolder(filesystem::absolute(viewFolder)),
-      m_resourceHeader(filesystem::absolute(resourceHeader))
+    : m_viewFolder{ filesystem::absolute(viewFolder) },
+      m_resourceHeader{ filesystem::absolute(resourceHeader) }
   {
     if (!filesystem::is_directory(m_viewFolder))
       throw std::invalid_argument("viewFolder must be a folder: " + m_viewFolder.string());
@@ -118,7 +118,7 @@ namespace uiglue {
     if (!filesystem::is_regular_file(jsonPath))
       throw std::runtime_error("View description doesn't exist: " + jsonPath.string());
 
-    ViewParser parser(jsonPath, m_resourceHeader);
+    auto parser = ViewParser{ jsonPath, m_resourceHeader };
 
     const auto viewType = parser.getType();
 
@@ -126,7 +126,7 @@ namespace uiglue {
     if (!isClassRegistered(clsName))
       registerClass(clsName, parser);
 
-    auto newView = View{clsName, viewType};
+    auto newView = View{ clsName, viewType };
 
     applyViewDeclaration(newView, parser);
 
@@ -164,7 +164,7 @@ namespace uiglue {
         view.addCommand(pair.first, pair.second);
     }
 
-    vector<string> idToName;
+    auto idToName = vector<string>{};
     parser.eachChild([&](string name, string type, vector<pair<string, string>> bindings) {
       if (idToName.size() + 1 > std::numeric_limits<int>::max())
         throw std::runtime_error("View has too many children");

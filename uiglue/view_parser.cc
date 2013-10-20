@@ -73,7 +73,7 @@ namespace {
 
   unsigned int getResourceId(string name, filesystem::path resHeader) {
     boost::filesystem::ifstream resources(resHeader);
-    std::string line;
+    auto line = std::string{};
     while (std::getline(resources, line)) {
       auto pos = line.find(name);
       if (pos == line.npos)
@@ -119,15 +119,21 @@ namespace uiglue {
     filesystem::path header;
   };
 
-  ViewParser::ViewParser(filesystem::path viewPath, filesystem::path resHeader) {
+  ViewParser::ViewParser(filesystem::path viewPath, filesystem::path resHeader)
+    : pimpl{ std::make_unique<Impl>() }
+  {
     resHeader = filesystem::absolute(resHeader);
     if (!filesystem::is_regular_file(resHeader))
       throw std::invalid_argument("Resource header doesn't exist: " + resHeader.string());
 
-    pimpl.reset(new Impl);
     boost::filesystem::ifstream file(viewPath);
     boost::property_tree::read_json(file, pimpl->tree);
     pimpl->header = resHeader;
+  }
+
+  ViewParser::ViewParser(ViewParser&& o)
+    : pimpl{ std::move(o.pimpl) }
+  {
   }
 
   ViewParser::~ViewParser() = default;
@@ -178,7 +184,7 @@ namespace uiglue {
     if (!menu)
       return {};
 
-    std::vector<std::pair<int, string>> commands;
+    auto commands = std::vector<std::pair<int, string>>{};
 
     for (auto& v : menu.get()) {
       if (v.first.empty())
@@ -200,7 +206,7 @@ namespace uiglue {
 
     for (auto& c : children.get()) {
       auto type = c.second.get<string>("type");
-      std::vector<std::pair<string, string>> bindings;
+      auto bindings = std::vector<std::pair<string, string>>{};
       for (auto& b : c.second)
         bindings.emplace_back(b.first, b.second.data());
       callback(c.first, type, bindings);

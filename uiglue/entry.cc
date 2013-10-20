@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 using uiglue::Observable;
+using uiglue::View;
 using std::string;
 
 // Message handler for about box.
@@ -42,11 +43,11 @@ private:
   Observable<string> greeting;
   Observable<bool> automatic;
 
-  void onExit(uiglue::View& view) {
+  void onExit(View& view) {
     DestroyWindow(view.get());
   }
 
-  void onAbout(uiglue::View& view) {
+  void onAbout(View& view) {
     DialogBoxParamW(uiglue::util::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
   }
 
@@ -72,7 +73,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPTSTR, _In
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
         
-        auto error = uiglue::View::getLastError();
+        auto error = View::getLastError();
         if (error != std::exception_ptr())
           std::rethrow_exception(error);
       }

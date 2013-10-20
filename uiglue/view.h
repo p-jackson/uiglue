@@ -53,8 +53,12 @@ namespace uiglue {
     View();
     View(std::string className, ViewType type);
     View(View&& o);
-    View(const View& o);
+    View(View&) = delete;
+
     ~View();
+
+    View& operator=(View&& o);
+    View& operator=(View&) = delete;
 
     HWND get() const;
 

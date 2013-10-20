@@ -18,7 +18,10 @@ namespace uiglue {
 
   public:
     ViewParser(filesystem::path viewPath, filesystem::path resHeader);
+    ViewParser(ViewParser&& o);
     ~ViewParser();
+
+    ViewParser& operator=(ViewParser&) = delete;
 
     ViewType getType() const;
     boost::optional<std::string> getText() const;
