@@ -88,7 +88,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPTSTR, _In
     return static_cast<int>(msg.wParam);
   }
   catch (std::exception& e) {
-    MessageBoxA(nullptr, e.what(), "Exception", MB_YESNO | MB_ICONERROR);
+    MessageBoxA(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);
     return 0;
   }
   catch (...) {
