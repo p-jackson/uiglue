@@ -46,9 +46,6 @@
     <ClInclude Include="filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="commands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="view_parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -68,6 +65,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="binding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="member_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

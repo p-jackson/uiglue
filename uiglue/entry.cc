@@ -1,6 +1,6 @@
 #include "resource.h"
 
-#include "commands.h"
+#include "member_map.h"
 #include "observable.h"
 #include "view.h"
 #include "view_factory.h"
@@ -32,16 +32,15 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM) {
 
 class MainViewModel {
 
-  UIGLUE_BEGIN_COMMAND_MAP(MainViewModel)
+  UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
     UIGLUE_DECLARE_COMMAND(onExit)
     UIGLUE_DECLARE_COMMAND(onAbout)
-  UIGLUE_END_COMMAND_MAP()
-
-  UIGLUE_BEGIN_PROPERTY_MAP(MainViewModel)
     UIGLUE_DECLARE_PROPERTY(name)
     UIGLUE_DECLARE_PROPERTY(greeting)
     UIGLUE_DECLARE_PROPERTY(automatic)
-  UIGLUE_END_PROPERTY_MAP()
+  UIGLUE_END_MEMBER_MAP()
+
+  MainViewModel() : greeting{ "Default greeting" } {}
 
 private:
 

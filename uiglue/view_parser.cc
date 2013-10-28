@@ -66,7 +66,7 @@ namespace {
       return boost::trim_copy(s.substr(5));
 
     default:
-      assert(0);
+      BOOST_ASSERT(0);
       return {};
     }
   }

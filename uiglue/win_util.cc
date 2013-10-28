@@ -42,6 +42,9 @@ namespace uiglue { namespace util {
   }
 
   wstring utf8ToWide(string utf8) {
+    if (utf8.empty())
+      return {};
+
     if (utf8.size() > std::numeric_limits<int>::max())
       throw std::runtime_error("String too long to convert to wide chars");
 

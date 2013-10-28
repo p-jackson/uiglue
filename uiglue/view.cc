@@ -4,12 +4,78 @@
 #include "win_util.h"
 
 #include <array>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace uiglue;
 using std::string;
 using std::wstring;
 
 namespace {
+
+  enum class BindType {
+    Literal,
+    Bind,
+    Resource,
+    File
+  };
+
+  const string k_bind = "bind:";
+  const string k_resource = "resource:";
+  const string k_file = "file:";
+  const string k_literal = "literal:";
+
+  BindType getBindingType(string s) {
+    if (s.empty())
+      return BindType::Literal;
+
+    if (s.find(k_bind) == 0)
+      return BindType::Bind;
+    else if (s.find(k_resource) == 0)
+      return BindType::Resource;
+    else if (s.find(k_file) == 0)
+      return BindType::File;
+    else
+      return BindType::Literal;
+  }
+
+  string stripBindingPrefix(BindType type, string s) {
+    switch (type) {
+    case BindType::Literal:
+      if (s.find(k_literal) == 0)
+        return boost::trim_copy(s.substr(k_literal.size()));
+      return s;
+
+    case BindType::Bind:
+      return boost::trim_copy(s.substr(k_bind.size()));
+
+    case BindType::Resource:
+      return boost::trim_copy(s.substr(k_resource.size()));
+
+    case BindType::File:
+      return boost::trim_copy(s.substr(k_file.size()));
+
+    default:
+      BOOST_ASSERT(0);
+      return {};
+    }
+  }
+
+  UntypedObservable makeObservable(std::string binding, ViewModelRef& viewModel) {
+    auto type = getBindingType(binding);
+    auto value = stripBindingPrefix(type, binding);
+
+    switch (type) {
+    case BindType::Literal:
+      return Observable<string>{ value }.asUntyped();
+
+    case BindType::Bind:
+      return viewModel.getObservable(value);
+
+    default:
+      BOOST_ASSERT(0);
+      return Observable<string>().asUntyped();
+    }
+  }
 
   unsigned long typeToStyle(ViewType t) {
     switch (t) {
@@ -195,8 +261,8 @@ namespace uiglue {
         if (handler == end(m_bindingHandlers))
           continue;
 
-        auto observable = Observable<std::string>{ binding.second };
-        handler->second->init(controlHandle, observable.asUntyped());
+        auto observable = makeObservable(binding.second, *m_vm);
+        handler->second->init(controlHandle, observable);
       }
     }
   }

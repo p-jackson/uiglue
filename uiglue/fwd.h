@@ -3,6 +3,7 @@
 
 namespace uiglue {
   class View;
+  class UntypedObservable;
 }
 
 #endif
