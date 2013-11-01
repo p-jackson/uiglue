@@ -25,7 +25,7 @@
     "generateButton": {
       "type": "Button",
       "text": "Generate greeting",
-      "visible": "bind: !automatic"
+      "hidden": "bind: automatic"
     },
     "autoCheckbox": {
       "type": "Checkbox",

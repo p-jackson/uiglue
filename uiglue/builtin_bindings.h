@@ -24,7 +24,7 @@ namespace uiglue {
   namespace bindings {
 
     struct Text {
-      static std::string name() {
+      static string name() {
         return { "text" };
       }
 
@@ -37,8 +37,16 @@ namespace uiglue {
       }
     };
 
+
+    struct Title : public Text {
+      static string name() {
+        return { "title" };
+      }
+    };
+
+
     struct Value {
-      static std::string name() {
+      static string name() {
         return { "value" };
       }
 
@@ -56,6 +64,88 @@ namespace uiglue {
 
       static void update(HWND wnd, UntypedObservable observable, View&) {
         setWindowText(wnd, observable);
+      }
+    };
+
+
+    struct Visible {
+      static string name() {
+        return { "visible" };
+      }
+
+      static void init(HWND wnd, UntypedObservable observable, View&) {
+        ShowWindow(wnd, showWindowCmd(observable));
+      }
+
+      static void update(HWND wnd, UntypedObservable observable, View&) {
+        ShowWindow(wnd, showWindowCmd(observable));
+      }
+
+      static int showWindowCmd(UntypedObservable observable) {
+        auto boolObservable = observable.as<bool>();
+        return boolObservable() ? SW_SHOWNA : SW_HIDE;
+      }
+    };
+
+
+    struct Hidden {
+      static string name() {
+        return { "hidden" };
+      }
+
+      static void init(HWND wnd, UntypedObservable observable, View&) {
+        ShowWindow(wnd, showWindowCmd(observable));
+      }
+
+      static void update(HWND wnd, UntypedObservable observable, View&) {
+        ShowWindow(wnd, showWindowCmd(observable));
+      }
+
+      static int showWindowCmd(UntypedObservable observable) {
+        auto boolObservable = observable.as<bool>();
+        return boolObservable() ? SW_HIDE : SW_SHOWNA;
+      }
+    };
+
+
+    struct Checked {
+      static string name() {
+        return { "checked" };
+      }
+
+      static void init(HWND wnd, UntypedObservable observable, View& view) {
+        SendMessageW(wnd, BM_SETCHECK, buttonState(observable), 0);
+
+        view.addCommandHandler(BN_CLICKED, wnd, [observable](HWND control) mutable {
+          auto state = SendMessageW(control, BM_GETCHECK, 0, 0);
+          if (observable.is<int>()) {
+            auto intObservable = observable.as<int>();
+            intObservable(static_cast<int>(state));
+          }
+          else {
+            auto boolObservable = observable.as<bool>();
+            boolObservable(state == BST_CHECKED);
+          }
+        });
+      }
+
+      static void update(HWND wnd, UntypedObservable observable, View&) {
+        SendMessageW(wnd, BM_SETCHECK, buttonState(observable), 0);
+      }
+
+      static int buttonState(UntypedObservable observable) {
+        if (observable.is<int>()) {
+          auto intObservable = observable.as<int>();
+          switch (intObservable()) {
+          case 0: return BST_UNCHECKED;
+          case 1: return BST_CHECKED;
+          default: return BST_INDETERMINATE;
+          }
+        }
+        else {
+          auto boolObservable = observable.as<bool>();
+          return boolObservable() ? BST_CHECKED : BST_UNCHECKED;
+        }
       }
     };
 

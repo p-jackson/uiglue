@@ -110,7 +110,11 @@ namespace uiglue {
     registerBuiltinControl<controls::Checkbox>();
 
     registerBuiltinBinding<bindings::Text>();
+    registerBuiltinBinding<bindings::Title>();
     registerBuiltinBinding<bindings::Value>();
+    registerBuiltinBinding<bindings::Visible>();
+    registerBuiltinBinding<bindings::Hidden>();
+    registerBuiltinBinding<bindings::Checked>();
   }
 
   View ViewFactory::createView(string name) const {

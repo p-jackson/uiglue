@@ -243,7 +243,7 @@ namespace uiglue {
       return true;
     }
 
-    if (msg == WM_COMMAND && HIWORD(wParam) == 0 && m_vm) {
+    if (msg == WM_COMMAND && HIWORD(wParam) == 0 && !lParam && m_vm) {
       // Handle menu commands
       auto id = LOWORD(wParam);
       auto found = m_commands.find(id);
@@ -253,7 +253,7 @@ namespace uiglue {
       }
     }
 
-    if (msg == WM_COMMAND && HIWORD(wParam)) {
+    if (msg == WM_COMMAND && lParam) {
       // Fire command handlers
       auto found = m_commandHandlers.find(wParam);
       if (found != end(m_commandHandlers)) {

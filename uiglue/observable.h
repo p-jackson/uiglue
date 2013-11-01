@@ -111,11 +111,16 @@ namespace uiglue {
   public:
     template<class T>
     Observable<T> as() {
-      if (m_inner->type() != typeid(T))
+      if (!is<T>())
         throw std::bad_cast();
 
       auto asTyped = std::dynamic_pointer_cast<TypedObservable<T>>(m_inner);
       return Observable<T>{ asTyped };
+    }
+
+    template<class T>
+    bool is() {
+      return m_inner->type() == typeid(T);
     }
 
   private:
