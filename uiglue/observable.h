@@ -31,6 +31,7 @@ namespace uiglue {
     struct CallSubscriber : public boost::static_visitor<void> {
       TypedObservable& ref;
       CallSubscriber(TypedObservable& ref_) : ref{ ref_ } {}
+      CallSubscriber& operator=(CallSubscriber&) = delete;
 
       void operator()(std::function<void(T)>& f) {
         f(ref.m_value);
@@ -52,7 +53,7 @@ namespace uiglue {
         return;
 
       m_value = std::move(t);
-      auto visitor = CallSubscriber{ *this };
+      CallSubscriber visitor{ *this };
       for (auto& f : m_subscribers)
         boost::apply_visitor(visitor, f);
     }
@@ -157,7 +158,7 @@ namespace uiglue {
 
   private:
     template<class U> friend class Observable;
-    template<class U> friend class TypedObservable<U>::CallSubscriber;
+    template<class U> friend struct TypedObservable<U>::CallSubscriber;
 
     explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
       : m_inner{ std::move(i) }

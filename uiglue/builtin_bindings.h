@@ -10,27 +10,40 @@
 
 using std::string;
 
-namespace {
-
-  string getWindowText(HWND wnd) {
-    auto len = GetWindowTextLengthW(wnd);
-    auto wide = std::wstring(len + 1, 0);
-    GetWindowTextW(wnd, &wide[0], len + 1);
-    return uiglue::util::wideToUtf8(std::move(wide));
-  }
-
-  void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
-    auto stringObservable = observable.as<string>();
-    auto text = stringObservable();
-    if (checkFirst && text == getWindowText(wnd))
-      return;
-    SetWindowTextW(wnd, uiglue::util::utf8ToWide(text).c_str());
-  }
-
-}
-
 namespace uiglue {
+
+  template<class Traits>
+  class BuiltinBinding : public Binding {
+  public:
+    std::string name() const override {
+      return Traits::name();
+    }
+
+    void init(HWND wnd, UntypedObservable observable, View& view) const override {
+      Traits::init(wnd, std::move(observable), view);
+    }
+
+    void update(HWND wnd, UntypedObservable observable, View& view) const override {
+      Traits::update(wnd, std::move(observable), view);
+    }
+  };
+
   namespace bindings {
+
+    inline string getWindowText(HWND wnd) {
+      auto len = GetWindowTextLengthW(wnd);
+      auto wide = std::wstring(len + 1, 0);
+      GetWindowTextW(wnd, &wide[0], len + 1);
+      return uiglue::util::wideToUtf8(std::move(wide));
+    }
+
+    inline void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
+      auto stringObservable = observable.as<string>();
+      auto text = stringObservable();
+      if (checkFirst && text == getWindowText(wnd))
+        return;
+      SetWindowTextW(wnd, uiglue::util::utf8ToWide(text).c_str());
+    }
 
     struct Text {
       static string name() {

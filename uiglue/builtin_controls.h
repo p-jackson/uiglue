@@ -1,10 +1,36 @@
 #ifndef BUILTIN_CONTROLS_H
 #define BUILTIN_CONTROLS_H
 
+#include "view_factory.h"
+
 #include <string>
 #include <WinUser.h>
 
 namespace uiglue {
+
+  template<class Traits>
+  class BuiltinControlFactory : public ControlFactory {
+  public:
+    std::string name() const override {
+      return Traits::name();
+    }
+
+    HWND create(HWND parent, int ctrlId) const override {
+      auto style = Traits::style() | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
+      auto exStyle = Traits::exStyle();
+      auto cls = Traits::className();
+
+      auto y = (ctrlId - 1) * 50;
+
+      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, 0, y, 300, 50, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
+
+      if (!control)
+        throw std::runtime_error("Failed to create child control: " + name());
+
+      return control;
+    }
+  };
+
   namespace controls {
 
     struct Static {

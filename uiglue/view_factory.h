@@ -48,12 +48,6 @@ namespace uiglue {
     void registerControl(std::shared_ptr<const ControlFactory> factory);
     void registerBinding(std::shared_ptr<const Binding> factory);
     void applyViewDeclaration(View& view, const ViewParser& parser) const;
-
-    template<class Factory>
-    void registerBuiltinControl();
-
-    template<class T>
-    void registerBuiltinBinding();
   };
 
 }

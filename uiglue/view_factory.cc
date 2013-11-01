@@ -15,44 +15,21 @@ using std::pair;
 
 namespace {
 
-  template<class Traits>
-  class ControlFactoryT : public ControlFactory {
-  public:
-    std::string name() const override {
-      return Traits::name();
-    }
+  void registerBuiltinControls(ViewFactory& factory) {
+    factory.registerControl<BuiltinControlFactory<controls::Static>>();
+    factory.registerControl<BuiltinControlFactory<controls::Edit>>();
+    factory.registerControl<BuiltinControlFactory<controls::Button>>();
+    factory.registerControl<BuiltinControlFactory<controls::Checkbox>>();
+  }
 
-    HWND create(HWND parent, int ctrlId) const override {
-      auto style = Traits::style() | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
-      auto exStyle = Traits::exStyle();
-      auto cls = Traits::className();
-
-      auto y = (ctrlId - 1) * 50;
-
-      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, 0, y, 300, 50, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
-
-      if (!control)
-        throw std::runtime_error("Failed to create child control: " + name());
-
-      return control;
-    }
-  };
-
-  template<class Traits>
-  class BindingT : public Binding {
-  public:
-    std::string name() const override {
-      return Traits::name();
-    }
-
-    void init(HWND wnd, UntypedObservable observable, View& view) const override {
-      Traits::init(wnd, std::move(observable), view);
-    }
-
-    void update(HWND wnd, UntypedObservable observable, View& view) const override {
-      Traits::update(wnd, std::move(observable), view);
-    }
-  };
+  void registerBuiltinBindings(ViewFactory& factory) {
+    factory.registerBinding<BuiltinBinding<bindings::Text>>();
+    factory.registerBinding<BuiltinBinding<bindings::Title>>();
+    factory.registerBinding<BuiltinBinding<bindings::Value>>();
+    factory.registerBinding<BuiltinBinding<bindings::Visible>>();
+    factory.registerBinding<BuiltinBinding<bindings::Hidden>>();
+    factory.registerBinding<BuiltinBinding<bindings::Checked>>();
+  }
 
   bool isClassRegistered(string name) {
     auto asWide = util::utf8ToWide(name);
@@ -104,17 +81,9 @@ namespace uiglue {
     if (!filesystem::is_regular_file(m_resourceHeader))
       throw std::invalid_argument("resourceHeader doesn't exist: " + m_resourceHeader.string());
 
-    registerBuiltinControl<controls::Static>();
-    registerBuiltinControl<controls::Edit>();
-    registerBuiltinControl<controls::Button>();
-    registerBuiltinControl<controls::Checkbox>();
+    registerBuiltinControls(*this);
+    registerBuiltinBindings(*this);
 
-    registerBuiltinBinding<bindings::Text>();
-    registerBuiltinBinding<bindings::Title>();
-    registerBuiltinBinding<bindings::Value>();
-    registerBuiltinBinding<bindings::Visible>();
-    registerBuiltinBinding<bindings::Hidden>();
-    registerBuiltinBinding<bindings::Checked>();
   }
 
   View ViewFactory::createView(string name) const {
@@ -150,16 +119,6 @@ namespace uiglue {
   void ViewFactory::registerBinding(std::shared_ptr<const Binding> binding) {
     auto name = binding->name();
     m_bindingHandlers[name] = std::move(binding);
-  }
-
-  template<class Builtin>
-  void ViewFactory::registerBuiltinControl() {
-    registerControl<ControlFactoryT<Builtin>>();
-  }
-
-  template<class Builtin>
-  void ViewFactory::registerBuiltinBinding() {
-    registerBinding<BindingT<Builtin>>();
   }
 
   void ViewFactory::applyViewDeclaration(View& view, const ViewParser& parser) const {
