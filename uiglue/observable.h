@@ -24,6 +24,9 @@ namespace uiglue {
     }
 
     void set(T t) {
+      if (t == m_value)
+        return;
+
       m_value = std::move(t);
       for (auto& f : m_subscribers)
         f(m_value);

@@ -63,6 +63,7 @@ namespace uiglue {
     std::unordered_map<std::string, int> m_childIds;
     BindingDeclarations m_bindingDeclarations;
     BindingHandlers m_bindingHandlers;
+    std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
 
     static std::exception_ptr s_lastError;
 
@@ -80,6 +81,7 @@ namespace uiglue {
     HWND get() const;
 
     void addCommand(int id, std::string command);
+    void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
     void addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers);
     void addChildId(int id, std::string name);
     HFONT getFont() const;

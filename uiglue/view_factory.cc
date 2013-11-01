@@ -45,12 +45,12 @@ namespace {
       return Traits::name();
     }
 
-    void init(HWND wnd, UntypedObservable observable) const override {
-      Traits::init(wnd, std::move(observable));
+    void init(HWND wnd, UntypedObservable observable, View& view) const override {
+      Traits::init(wnd, std::move(observable), view);
     }
 
-    void update(HWND wnd, UntypedObservable observable) const override {
-      Traits::update(wnd, std::move(observable));
+    void update(HWND wnd, UntypedObservable observable, View& view) const override {
+      Traits::update(wnd, std::move(observable), view);
     }
   };
 
@@ -110,6 +110,7 @@ namespace uiglue {
     registerBuiltinControl<controls::Checkbox>();
 
     registerBuiltinBinding<bindings::Text>();
+    registerBuiltinBinding<bindings::Value>();
   }
 
   View ViewFactory::createView(string name) const {

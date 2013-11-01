@@ -211,6 +211,15 @@ namespace uiglue {
     m_commands[id] = command;
   }
 
+  void View::addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler) {
+    auto id = GetDlgCtrlID(control);
+    if (!id)
+      throw std::runtime_error("Couldn't find control id. Perhaps it wasn't created using uiglue.");
+
+    auto key = ((commandCode << 16) | (id & 0xffff));
+    m_commandHandlers[key].push_back(std::move(handler));
+  }
+
   void View::addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers) {
     m_bindingDeclarations = std::move(bindingDeclarations);
     m_bindingHandlers = std::move(bindingHandlers);
@@ -228,7 +237,7 @@ namespace uiglue {
     m_vm.reset();
   }
 
-  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM, LRESULT& result) {
+  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT& result) {
     if (msg == WM_DESTROY && m_type == ViewType::App) {
       PostQuitMessage(0);
       return true;
@@ -242,6 +251,17 @@ namespace uiglue {
         m_vm->runCommand(found->second, *this);
         return true;
       }
+    }
+
+    if (msg == WM_COMMAND && HIWORD(wParam)) {
+      // Fire command handlers
+      auto found = m_commandHandlers.find(wParam);
+      if (found != end(m_commandHandlers)) {
+        for (auto& handler : found->second)
+          handler(reinterpret_cast<HWND>(lParam));
+      }
+
+      return true;
     }
 
     if (msg == WM_CTLCOLORBTN || msg == WM_CTLCOLOREDIT || msg == WM_CTLCOLORSTATIC) {
@@ -262,7 +282,7 @@ namespace uiglue {
           continue;
 
         auto observable = makeObservable(binding.second, *m_vm);
-        handler->second->init(controlHandle, observable);
+        handler->second->init(controlHandle, observable, *this);
       }
     }
   }
