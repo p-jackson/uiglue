@@ -283,6 +283,10 @@ namespace uiglue {
 
         auto observable = makeObservable(binding.second, *m_vm);
         handler->second->init(controlHandle, observable, *this);
+
+        observable.subscribe([handler, controlHandle, this](UntypedObservable o) {
+          handler->second->update(controlHandle, o, *this);
+        });
       }
     }
   }

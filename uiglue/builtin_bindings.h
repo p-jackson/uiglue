@@ -12,9 +12,18 @@ using std::string;
 
 namespace {
 
-  void setWindowText(HWND wnd, uiglue::UntypedObservable observable) {
+  string getWindowText(HWND wnd) {
+    auto len = GetWindowTextLengthW(wnd);
+    auto wide = std::wstring(len + 1, 0);
+    GetWindowTextW(wnd, &wide[0], len + 1);
+    return uiglue::util::wideToUtf8(std::move(wide));
+  }
+
+  void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
     auto stringObservable = observable.as<string>();
     auto text = stringObservable();
+    if (checkFirst && text == getWindowText(wnd))
+      return;
     SetWindowTextW(wnd, uiglue::util::utf8ToWide(text).c_str());
   }
 
@@ -54,16 +63,14 @@ namespace uiglue {
         setWindowText(wnd, observable);
 
         view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
-          auto len = GetWindowTextLengthW(control);
-          auto wide = std::wstring(len, 0);
-          GetWindowTextW(control, &wide[0], len);
+          auto text = getWindowText(control);
           auto stringObservable = observable.as<string>();
-          stringObservable(util::wideToUtf8(wide));
+          stringObservable(text);
         });
       }
 
       static void update(HWND wnd, UntypedObservable observable, View&) {
-        setWindowText(wnd, observable);
+        setWindowText(wnd, observable, true);
       }
     };
 

@@ -1,6 +1,7 @@
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 
+#include <boost/variant.hpp>
 #include <functional>
 #include <vector>
 
@@ -11,12 +12,35 @@ namespace uiglue {
   struct IUntypedObservable {
     virtual ~IUntypedObservable() {}
     virtual const type_info& type() const = 0;
+    virtual void subscribe(std::function<void(UntypedObservable)> f) = 0;
   };
 
   template<class T>
-  class TypedObservable : public IUntypedObservable {
+  class TypedObservable : public IUntypedObservable, public std::enable_shared_from_this<TypedObservable<T>> {
+    friend UntypedObservable;
+
     T m_value;
-    std::vector<std::function<void(T)>> m_subscribers;
+
+    using Callback = boost::variant<
+      std::function<void(T)>,
+      std::function<void(UntypedObservable)>
+    >;
+
+    std::vector<Callback> m_subscribers;
+
+    struct CallSubscriber : public boost::static_visitor<void> {
+      TypedObservable& ref;
+      CallSubscriber(TypedObservable& ref_) : ref{ ref_ } {}
+
+      void operator()(std::function<void(T)>& f) {
+        f(ref.m_value);
+      }
+
+      void operator()(std::function<void(UntypedObservable)>& f) {
+        auto untyped = UntypedObservable{ ref.shared_from_this() };
+        f(untyped);
+      }
+    };
 
   public:
     T get() const {
@@ -28,8 +52,13 @@ namespace uiglue {
         return;
 
       m_value = std::move(t);
+      auto visitor = CallSubscriber{ *this };
       for (auto& f : m_subscribers)
-        f(m_value);
+        boost::apply_visitor(visitor, f);
+    }
+
+    void subscribe(std::function<void(UntypedObservable)> f) override {
+      m_subscribers.push_back(std::move(f));
     }
 
     void subscribe(std::function<void(T)> f) {
@@ -86,12 +115,11 @@ namespace uiglue {
       return m_inner->get();
     }
 
-    Self& operator()(T t) {
+    void operator()(T t) {
       m_inner->set(std::move(t));
-      return *this;
     }
 
-    Self& subscribe(std::function<void(T)> f) {
+    void subscribe(std::function<void(T)> f) {
       m_inner->subscribe(std::move(f));
     }
 
@@ -123,8 +151,13 @@ namespace uiglue {
       return m_inner->type() == typeid(T);
     }
 
+    void subscribe(std::function<void(UntypedObservable)> f) {
+      m_inner->subscribe(std::move(f));
+    }
+
   private:
     template<class U> friend class Observable;
+    template<class U> friend class TypedObservable<U>::CallSubscriber;
 
     explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
       : m_inner{ std::move(i) }
