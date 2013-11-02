@@ -59,11 +59,12 @@ namespace uiglue {
     Font m_font;
     ViewType m_type;
     std::unique_ptr<ViewModelRef> m_vm;
-    std::unordered_map<int, std::string> m_commands;
+    std::unordered_map<int, std::string> m_menuCommands;
     std::unordered_map<std::string, int> m_childIds;
     BindingDeclarations m_bindingDeclarations;
     BindingHandlers m_bindingHandlers;
     std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
+    std::unordered_map<WPARAM, std::vector<std::string>> m_viewModelCommandHandlers;
 
     static std::exception_ptr s_lastError;
 
@@ -80,8 +81,9 @@ namespace uiglue {
 
     HWND get() const;
 
-    void addCommand(int id, std::string command);
+    void addMenuCommand(int id, std::string command);
     void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
+    void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
     void addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers);
     void addChildId(int id, std::string name);
     HFONT getFont() const;
@@ -101,6 +103,7 @@ namespace uiglue {
     bool onMessage(unsigned int, WPARAM, LPARAM, LRESULT& result);
     void applyBindings();
     HWND getChildControl(std::string name) const;
+    WPARAM getCommandWParam(int commandCode, HWND control);
   };
 
 }

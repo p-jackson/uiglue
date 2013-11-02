@@ -35,12 +35,16 @@ class MainViewModel {
   UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
     UIGLUE_DECLARE_COMMAND(onExit)
     UIGLUE_DECLARE_COMMAND(onAbout)
+    UIGLUE_DECLARE_COMMAND(onGenerate)
     UIGLUE_DECLARE_PROPERTY(name)
     UIGLUE_DECLARE_PROPERTY(greeting)
     UIGLUE_DECLARE_PROPERTY(automatic)
   UIGLUE_END_MEMBER_MAP()
 
-  MainViewModel() : greeting{ "Default greeting" } {}
+  MainViewModel()
+    : greeting{ "Default greeting" }
+  {
+  }
 
 private:
 
@@ -54,6 +58,10 @@ private:
 
   void onAbout(View& view) {
     DialogBoxParamW(uiglue::util::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
+  }
+
+  void onGenerate(View&) {
+    greeting("Changed greeting");
   }
 
 };

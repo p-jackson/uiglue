@@ -175,10 +175,12 @@ namespace uiglue {
     std::swap(o.m_font, m_font);
     std::swap(o.m_type, m_type);
     std::swap(o.m_vm, m_vm);
-    std::swap(o.m_commands, m_commands);
+    std::swap(o.m_menuCommands, m_menuCommands);
     std::swap(o.m_childIds, m_childIds);
     std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
     std::swap(o.m_bindingHandlers, m_bindingHandlers);
+    std::swap(o.m_commandHandlers, m_commandHandlers);
+    std::swap(o.m_viewModelCommandHandlers, m_viewModelCommandHandlers);
 
     SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
   }
@@ -188,10 +190,12 @@ namespace uiglue {
     std::swap(o.m_font, m_font);
     std::swap(o.m_type, m_type);
     std::swap(o.m_vm, m_vm);
-    std::swap(o.m_commands, m_commands);
+    std::swap(o.m_menuCommands, m_menuCommands);
     std::swap(o.m_childIds, m_childIds);
     std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
     std::swap(o.m_bindingHandlers, m_bindingHandlers);
+    std::swap(o.m_commandHandlers, m_commandHandlers);
+    std::swap(o.m_viewModelCommandHandlers, m_viewModelCommandHandlers);
 
     SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
@@ -207,17 +211,26 @@ namespace uiglue {
     return m_wnd;
   }
 
-  void View::addCommand(int id, std::string command) {
-    m_commands[id] = command;
+  void View::addMenuCommand(int id, std::string command) {
+    m_menuCommands[id] = command;
   }
 
-  void View::addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler) {
+  WPARAM View::getCommandWParam(int commandCode, HWND control) {
     auto id = GetDlgCtrlID(control);
     if (!id)
       throw std::runtime_error("Couldn't find control id. Perhaps it wasn't created using uiglue.");
 
-    auto key = ((commandCode << 16) | (id & 0xffff));
+    return ((commandCode << 16) | (id & 0xffff));
+  }
+
+  void View::addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler) {
+    auto key = getCommandWParam(commandCode, control);
     m_commandHandlers[key].push_back(std::move(handler));
+  }
+
+  void View::addCommandHandler(int commandCode, HWND control, std::string viewModelCommand) {
+    auto key = getCommandWParam(commandCode, control);
+    m_viewModelCommandHandlers[key].push_back(std::move(viewModelCommand));
   }
 
   void View::addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers) {
@@ -246,8 +259,8 @@ namespace uiglue {
     if (msg == WM_COMMAND && HIWORD(wParam) == 0 && !lParam && m_vm) {
       // Handle menu commands
       auto id = LOWORD(wParam);
-      auto found = m_commands.find(id);
-      if (found != m_commands.end()) {
+      auto found = m_menuCommands.find(id);
+      if (found != m_menuCommands.end()) {
         m_vm->runCommand(found->second, *this);
         return true;
       }
@@ -255,10 +268,16 @@ namespace uiglue {
 
     if (msg == WM_COMMAND && lParam) {
       // Fire command handlers
-      auto found = m_commandHandlers.find(wParam);
-      if (found != end(m_commandHandlers)) {
-        for (auto& handler : found->second)
+      auto handlers = m_commandHandlers.find(wParam);
+      if (handlers != end(m_commandHandlers)) {
+        for (auto& handler : handlers->second)
           handler(reinterpret_cast<HWND>(lParam));
+      }
+
+      auto viewModelCommands = m_viewModelCommandHandlers.find(wParam);
+      if (viewModelCommands != end(m_viewModelCommandHandlers)) {
+        for (auto& vmCommand : viewModelCommands->second)
+          m_vm->runCommand(vmCommand, *this);
       }
 
       return true;

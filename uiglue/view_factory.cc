@@ -29,6 +29,7 @@ namespace {
     factory.registerBinding<BuiltinBinding<bindings::Visible>>();
     factory.registerBinding<BuiltinBinding<bindings::Hidden>>();
     factory.registerBinding<BuiltinBinding<bindings::Checked>>();
+    factory.registerBinding<BuiltinBinding<bindings::Click>>();
   }
 
   bool isClassRegistered(string name) {
@@ -129,7 +130,7 @@ namespace uiglue {
     auto menuCommands = parser.getMenuCommands();
     if (menuCommands) {
       for (auto& pair : menuCommands.get())
-        view.addCommand(pair.first, pair.second);
+        view.addMenuCommand(pair.first, pair.second);
     }
 
     auto children = parser.getChildControls();

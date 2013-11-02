@@ -169,6 +169,20 @@ namespace uiglue {
       }
     };
 
+    struct Click {
+      static string name() {
+        return { "click" };
+      }
+
+      static void init(HWND wnd, UntypedObservable observable, View& view) {
+        auto stringObservable = observable.as<string>();
+        view.addCommandHandler(BN_CLICKED, wnd, stringObservable());
+      }
+
+      static void update(HWND, UntypedObservable, View&) {
+      }
+    };
+
   }
 }
 
