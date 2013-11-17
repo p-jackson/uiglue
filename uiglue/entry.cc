@@ -1,14 +1,17 @@
 #include "resource.h"
 
+#include "computed.h"
 #include "member_map.h"
 #include "observable.h"
 #include "view.h"
 #include "view_factory.h"
 #include "win_util.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
 #include <functional>
 #include <unordered_map>
 
+using uiglue::Computed;
 using uiglue::Observable;
 using uiglue::View;
 using std::string;
@@ -35,22 +38,23 @@ class MainViewModel {
   UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
     UIGLUE_DECLARE_COMMAND(onExit)
     UIGLUE_DECLARE_COMMAND(onAbout)
-    UIGLUE_DECLARE_COMMAND(onGenerate)
+    UIGLUE_DECLARE_COMMAND(onModalGreeting)
     UIGLUE_DECLARE_PROPERTY(name)
     UIGLUE_DECLARE_PROPERTY(greeting)
-    UIGLUE_DECLARE_PROPERTY(automatic)
+    UIGLUE_DECLARE_PROPERTY(shout)
   UIGLUE_END_MEMBER_MAP()
 
   MainViewModel()
-    : greeting{ "Default greeting" }
+    : shout{ false },
+      greeting{ std::bind(&MainViewModel::calculateGreeting, this) }
   {
   }
 
 private:
 
   Observable<string> name;
-  Observable<string> greeting;
-  Observable<bool> automatic;
+  Observable<bool> shout;
+  Computed<string> greeting;
 
   void onExit(View& view) {
     DestroyWindow(view.get());
@@ -60,8 +64,23 @@ private:
     DialogBoxParamW(uiglue::util::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
   }
 
-  void onGenerate(View&) {
-    greeting("Changed greeting");
+  void onModalGreeting(View& view) {
+    auto wideGreeting = uiglue::util::utf8ToWide(greeting());
+    MessageBoxW(view.get(), wideGreeting.c_str(), L"Greeting", MB_OK);
+  }
+
+  string calculateGreeting() {
+    if (name().empty())
+      return {};
+
+    auto greeting = "Greetings " + name();
+
+    if (!shout())
+      return greeting;
+
+    boost::to_upper(greeting);
+    greeting += "!";
+    return greeting;
   }
 
 };

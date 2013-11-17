@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="binding.h" />
     <ClInclude Include="builtin_bindings.h" />
+    <ClInclude Include="computed.h" />
     <ClInclude Include="filesystem.h" />
     <ClInclude Include="fwd.h" />
     <ClInclude Include="fwd_windows.h" />
@@ -111,6 +112,7 @@
     <ClInclude Include="win_util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="observable.cc" />
     <ClCompile Include="pch.cc">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

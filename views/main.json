@@ -22,16 +22,15 @@
       "type": "Edit",
       "value": "bind: name"
     },
-    "generateButton": {
+    "modalButton": {
       "type": "Button",
-      "text": "Generate greeting",
-      "hidden": "bind: automatic",
-      "click": "onGenerate"
+      "text": "Show modal greeting",
+      "click": "onModalGreeting"
     },
-    "autoCheckbox": {
+    "shoutCheckbox": {
       "type": "Checkbox",
-      "text": "Automatically generate greeting",
-      "checked": "bind: automatic"
+      "text": "Shout",
+      "checked": "bind: shout"
     },
     "message": {
       "type": "Static",
@@ -48,10 +47,10 @@
         "grow": [1, 0],
         "contents": [
           "nameEdit",
-          "generateButton"
+          "modalButton"
         ]
       },
-      "autoCheckbox",
+      "shoutCheckbox",
       "message"
     ]
   }

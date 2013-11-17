@@ -1,9 +1,11 @@
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 
+#include <atomic>
 #include <boost/variant.hpp>
 #include <functional>
-#include <vector>
+#include <set>
+#include <unordered_map>
 
 namespace uiglue {
 
@@ -12,11 +14,35 @@ namespace uiglue {
   struct IUntypedObservable {
     virtual ~IUntypedObservable() {}
     virtual const type_info& type() const = 0;
-    virtual void subscribe(std::function<void(UntypedObservable)> f) = 0;
+    virtual int subscribe(std::function<void(UntypedObservable)> f) = 0;
+    virtual void unsubscribe(int id) = 0;
+  };
+
+
+  class DependencyTracker {
+    static DependencyTracker* current;
+
+    std::set<std::shared_ptr<IUntypedObservable>>& m_dependecies;
+
+  public:
+    DependencyTracker(std::set<std::shared_ptr<IUntypedObservable>>& dependencies);
+    ~DependencyTracker();
+
+    DependencyTracker& operator=(DependencyTracker&) = delete;
+
+    static bool isTracking();
+    static void track(std::shared_ptr<IUntypedObservable> observable);
+  };
+
+  class TypedObservableSubscriberId {
+  protected:
+    static std::atomic<int> s_nextId;
   };
 
   template<class T>
-  class TypedObservable : public IUntypedObservable, public std::enable_shared_from_this<TypedObservable<T>> {
+  class TypedObservable : public IUntypedObservable,
+                          private TypedObservableSubscriberId,
+                          public std::enable_shared_from_this<TypedObservable<T>> {
     friend UntypedObservable;
 
     T m_value;
@@ -26,12 +52,12 @@ namespace uiglue {
       std::function<void(UntypedObservable)>
     >;
 
-    std::vector<Callback> m_subscribers;
+    std::unordered_map<int, Callback> m_subscribers;
 
-    struct CallSubscriber : public boost::static_visitor<void> {
+    struct NotifySubscriber : public boost::static_visitor<void> {
       TypedObservable& ref;
-      CallSubscriber(TypedObservable& ref_) : ref{ ref_ } {}
-      CallSubscriber& operator=(CallSubscriber&) = delete;
+      NotifySubscriber(TypedObservable& ref_) : ref{ ref_ } {}
+      NotifySubscriber& operator=(NotifySubscriber&) = delete;
 
       void operator()(std::function<void(T)>& f) {
         f(ref.m_value);
@@ -44,7 +70,10 @@ namespace uiglue {
     };
 
   public:
-    T get() const {
+    T get() {
+      if (DependencyTracker::isTracking())
+        DependencyTracker::track(shared_from_this());
+
       return m_value;
     }
 
@@ -52,18 +81,31 @@ namespace uiglue {
       if (t == m_value)
         return;
 
+      // Notify the subscribers with a copy of the list, because one
+      // of them may choose to unsubscribe during the loop, which would
+      // invalidate the iterator. Computed observables do this.
+      auto subscribersCopy = m_subscribers;
+
       m_value = std::move(t);
-      CallSubscriber visitor{ *this };
-      for (auto& f : m_subscribers)
-        boost::apply_visitor(visitor, f);
+      NotifySubscriber visitor{ *this };
+      for (auto& f : subscribersCopy)
+        boost::apply_visitor(visitor, f.second);
     }
 
-    void subscribe(std::function<void(UntypedObservable)> f) override {
-      m_subscribers.push_back(std::move(f));
+    int subscribe(std::function<void(UntypedObservable)> f) override {
+      auto id = s_nextId++;
+      m_subscribers[id] = std::move(f);
+      return id;
     }
 
-    void subscribe(std::function<void(T)> f) {
-      m_subscribers.push_back(std::move(f));
+    void unsubscribe(int id) override {
+      m_subscribers.erase(id);
+    }
+
+    int subscribe(std::function<void(T)> f) {
+      auto id = s_nextId++;
+      m_subscribers[id] = std::move(f);
+      return id;
     }
 
     const type_info& type() const override {
@@ -112,7 +154,7 @@ namespace uiglue {
       return *this;
     }
 
-    T operator()() const {
+    T operator()() {
       return m_inner->get();
     }
 
@@ -120,8 +162,8 @@ namespace uiglue {
       m_inner->set(std::move(t));
     }
 
-    void subscribe(std::function<void(T)> f) {
-      m_inner->subscribe(std::move(f));
+    int subscribe(std::function<void(T)> f) {
+      return m_inner->subscribe(std::move(f));
     }
 
     UntypedObservable asUntyped();
@@ -149,16 +191,23 @@ namespace uiglue {
 
     template<class T>
     bool is() {
+      if (DependencyTracker::isTracking())
+        DependencyTracker::track(m_inner);
+
       return m_inner->type() == typeid(T);
     }
 
-    void subscribe(std::function<void(UntypedObservable)> f) {
-      m_inner->subscribe(std::move(f));
+    int subscribe(std::function<void(UntypedObservable)> f) {
+      return m_inner->subscribe(std::move(f));
+    }
+
+    void unsubscribe(int id) {
+      m_inner->unsubscribe(id);
     }
 
   private:
     template<class U> friend class Observable;
-    template<class U> friend struct TypedObservable<U>::CallSubscriber;
+    template<class U> friend struct TypedObservable<U>::NotifySubscriber;
 
     explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
       : m_inner{ std::move(i) }
