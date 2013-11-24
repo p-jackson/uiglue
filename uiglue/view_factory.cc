@@ -7,6 +7,7 @@
 #include "view_parser.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
+#include <CommCtrl.h>
 
 using namespace uiglue;
 using std::string;
@@ -15,10 +16,39 @@ using std::pair;
 
 namespace {
 
+  class ButtonFactory : public BuiltinControlFactory<controls::Button> {
+  public:
+    HWND create(HWND parent, int ctrlId) const override {
+      auto button = BuiltinControlFactory::create(parent, ctrlId);
+      SetWindowSubclass(button, &ButtonFactory::buttonProc, 0, 0);
+      return button;
+    }
+
+    static LRESULT CALLBACK buttonProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+      if (msg == WM_WINDOWPOSCHANGING) {
+        auto info = reinterpret_cast<WINDOWPOS*>(lParam);
+        info->x -= 1;
+        info->y -= 1;
+        info->cx += 2;
+        info->cy += 2;
+      }
+
+      return DefSubclassProc(wnd, msg, wParam, lParam);
+    }
+
+    void adjustInitialPosition(int& x, int& y, int& w, int& h) const override {
+      y -= 1;
+      x -= 1;
+      w += 2;
+      h += 2;
+    }
+
+  };
+
   void registerBuiltinControls(ViewFactory& factory) {
     factory.registerControl<BuiltinControlFactory<controls::Static>>();
     factory.registerControl<BuiltinControlFactory<controls::Edit>>();
-    factory.registerControl<BuiltinControlFactory<controls::Button>>();
+    factory.registerControl<ButtonFactory>();
     factory.registerControl<BuiltinControlFactory<controls::Checkbox>>();
   }
 
