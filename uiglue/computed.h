@@ -1,3 +1,10 @@
+//===-- Computed class template definition --------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef COMPUTED_H
 #define COMPUTED_H
 

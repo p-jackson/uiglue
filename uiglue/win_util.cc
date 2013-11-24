@@ -1,3 +1,10 @@
+//===-- Definition of Win32 wrapper functions -----------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #include "win_util.h"
 
 #include "include_windows.h"

@@ -1,3 +1,10 @@
+//===-- Functions used by Observable class template -----------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #include "observable.h"
 
 using std::set;

@@ -1,5 +1,10 @@
 //===-- Windows.h wrapper -------------------------------------------------===//
 //
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+//
 // The definitions defined in Windows.h can be controlled using pre-processor
 // macros. To ensure consistent definitions, uiglue code includes this header
 // instead of including Windows.h directly.

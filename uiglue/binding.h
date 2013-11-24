@@ -1,3 +1,10 @@
+//===-- Binding abstract base class ---------------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef BINDING_H
 #define BINDING_H
 
@@ -10,7 +17,7 @@
 #include <unordered_map>
 
 namespace uiglue {
-  
+
   struct Binding {
     virtual ~Binding() {}
 
