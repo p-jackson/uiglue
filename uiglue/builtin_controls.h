@@ -27,15 +27,23 @@ namespace uiglue {
       auto exStyle = Traits::exStyle();
       auto cls = Traits::className();
 
+      auto x = 0;
       auto y = (ctrlId - 1) * 50;
+      auto cx = 300;
+      auto cy = 50;
 
-      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, 0, y, 300, 50, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
+      adjustInitialPosition(x, y, cx, cy);
+
+      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, x, y, cx, cy, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
 
       if (!control)
         throw std::runtime_error("Failed to create child control: " + name());
 
       return control;
     }
+
+  protected:
+    virtual void adjustInitialPosition(int&, int&, int&, int&) const {}
   };
 
   namespace controls {
