@@ -1,8 +1,0 @@
-ipch
-x64
-Debug
-Release
-*.opensdf
-*.sdf
-*.v12.suo
-*.vcxproj.user
