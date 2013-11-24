@@ -1,3 +1,10 @@
+//===-- Forward declare Windows.h types -----------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef FWD_WINDOWS_H
 #define FWD_WINDOWS_H
 
