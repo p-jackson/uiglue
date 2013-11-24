@@ -1,3 +1,10 @@
+//===-- ViewParser class declaration --------------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #ifndef VIEW_PARSER_H
 #define VIEW_PARSER_H
 

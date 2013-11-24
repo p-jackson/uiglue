@@ -1,3 +1,10 @@
+//===-- ViewFactory class definition --------------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #include "view_factory.h"
 
 #include "builtin_bindings.h"
