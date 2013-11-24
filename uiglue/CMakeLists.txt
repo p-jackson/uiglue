@@ -18,6 +18,10 @@ source_group("Resource Files" FILES ${resources})
 # Link to static libraries
 target_link_libraries(uiglue ${Boost_LIBRARIES})
 
+# Create precompiled header with cotire (we don't need a unity build)
+set_target_properties(uiglue PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
+cotire(uiglue)
+
 # Run the mt tool as a post build to embed uiglue.exe.manifest
 get_property(uiglue_exe_location TARGET uiglue PROPERTY LOCATION)
 add_custom_command(
