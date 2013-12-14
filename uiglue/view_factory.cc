@@ -10,8 +10,9 @@
 #include "builtin_bindings.h"
 #include "builtin_controls.h"
 #include "view.h"
-#include "win_util.h"
 #include "view_parser.h"
+
+#include "curt/win_util.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <CommCtrl.h>

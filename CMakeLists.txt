@@ -20,3 +20,4 @@ if(build_tool MATCHES "(msdev|devenv|nmake|msbuild)")
 endif()
 
 add_subdirectory(uiglue)
+add_subdirectory(curt)

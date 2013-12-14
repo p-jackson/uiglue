@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef FWD_WINDOWS_H
-#define FWD_WINDOWS_H
+#ifndef CURT_FWD_WINDOWS_H
+#define CURT_FWD_WINDOWS_H
 
 typedef unsigned __int64 WPARAM;
 typedef __int64 LPARAM;

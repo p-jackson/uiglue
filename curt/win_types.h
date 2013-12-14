@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef WIN_TYPES_H
-#define WIN_TYPES_H
+#ifndef CURT_WIN_TYPES_H
+#define CURT_WIN_TYPES_H
 
 #include "include_windows.h"
 

@@ -9,12 +9,13 @@
 #define VIEW_H
 
 #include "binding.h"
-#include "fwd_windows.h"
 #include "member_map.h"
 #include "observable.h"
 #include "view_parser.h"
 #include "view_type.h"
-#include "win_types.h"
+
+#include "curt/fwd_windows.h"
+#include "curt/win_types.h"
 
 #include <string>
 #include <unordered_map>

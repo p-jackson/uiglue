@@ -8,10 +8,11 @@
 #ifndef BUILTIN_BINDINGS_H
 #define BUILTIN_BINDINGS_H
 
-#include "include_windows.h"
 #include "observable.h"
 #include "view.h"
-#include "win_util.h"
+
+#include "curt/include_windows.h"
+#include "curt/win_util.h"
 
 #include <string>
 

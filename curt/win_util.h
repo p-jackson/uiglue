@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef WIN_UTIL_H
-#define WIN_UTIL_H
+#ifndef CURT_WIN_UTIL_H
+#define CURT_WIN_UTIL_H
 
 #include "fwd_windows.h"
 #include <string>

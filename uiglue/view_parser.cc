@@ -7,7 +7,7 @@
 
 #include "view_parser.h"
 
-#include "win_util.h"
+#include "curt/win_util.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/fstream.hpp>

@@ -7,8 +7,8 @@
 
 #include "view.h"
 
-#include "include_windows.h"
-#include "win_util.h"
+#include "curt/include_windows.h"
+#include "curt/win_util.h"
 
 #include <array>
 #include <boost/algorithm/string/trim.hpp>

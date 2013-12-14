@@ -9,8 +9,9 @@
 #define BINDING_H
 
 #include "fwd.h"
-#include "fwd_windows.h"
 #include "observable.h"
+
+#include "curt/fwd_windows.h"
 
 #include <memory>
 #include <string>

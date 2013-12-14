@@ -12,7 +12,8 @@
 #include "observable.h"
 #include "view.h"
 #include "view_factory.h"
-#include "win_util.h"
+
+#include "curt/win_util.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>

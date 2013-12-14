@@ -9,8 +9,9 @@
 #define VIEW_PARSER_H
 
 #include "filesystem.h"
-#include "fwd_windows.h"
 #include "view_type.h"
+
+#include "curt/fwd_windows.h"
 
 #include <boost/optional.hpp>
 #include <memory>

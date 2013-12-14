@@ -16,7 +16,7 @@ source_group(Views FILES ${views})
 source_group("Resource Files" FILES ${resources})
 
 # Link to static libraries
-target_link_libraries(uiglue ${Boost_LIBRARIES} comctl32)
+target_link_libraries(uiglue ${Boost_LIBRARIES} curt comctl32)
 
 # Create precompiled header with cotire (we don't need a unity build)
 set_target_properties(uiglue PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
