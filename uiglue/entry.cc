@@ -13,7 +13,8 @@
 #include "view.h"
 #include "view_factory.h"
 
-#include "curt/win_util.h"
+#include "curt/include_windows.h"
+#include "curt/util.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>
@@ -69,11 +70,11 @@ private:
   }
 
   void onAbout(View& view) {
-    DialogBoxParamW(uiglue::util::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
+    DialogBoxParamW(curt::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
   }
 
   void onModalGreeting(View& view) {
-    auto wideGreeting = uiglue::util::utf8ToWide(greeting());
+    auto wideGreeting = curt::utf8ToWide(greeting());
     MessageBoxW(view.get(), wideGreeting.c_str(), L"Greeting", MB_OK);
   }
 

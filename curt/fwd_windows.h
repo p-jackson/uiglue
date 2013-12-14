@@ -22,4 +22,7 @@ typedef struct HWND__* HWND;
 struct HICON__;
 typedef struct HICON__* HICON;
 
+struct HFONT__;
+typedef struct HFONT__* HFONT;
+
 #endif

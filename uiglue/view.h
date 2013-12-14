@@ -15,7 +15,7 @@
 #include "view_type.h"
 
 #include "curt/fwd_windows.h"
-#include "curt/win_types.h"
+#include "curt/types.h"
 
 #include <string>
 #include <unordered_map>
@@ -64,7 +64,7 @@ namespace uiglue {
 
   class View {
     HWND m_wnd;
-    Font m_font;
+    curt::Font m_font;
     ViewType m_type;
     std::unique_ptr<ViewModelRef> m_vm;
     std::unordered_map<int, std::string> m_menuCommands;

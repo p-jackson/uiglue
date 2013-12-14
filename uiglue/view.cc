@@ -8,7 +8,7 @@
 #include "view.h"
 
 #include "curt/include_windows.h"
-#include "curt/win_util.h"
+#include "curt/util.h"
 
 #include <array>
 #include <boost/algorithm/string/trim.hpp>
@@ -107,15 +107,15 @@ namespace {
     const auto style = typeToStyle(type);
     const auto dim = CW_USEDEFAULT;
 
-    auto wnd = CreateWindowExW(stylex, className.c_str(), nullptr, style, dim, dim, dim, dim, nullptr, nullptr, uiglue::util::thisModule(), view);
+    auto wnd = CreateWindowExW(stylex, className.c_str(), nullptr, style, dim, dim, dim, dim, nullptr, nullptr, curt::thisModule(), view);
 
     if (!wnd)
-      throw std::runtime_error("Failed to create view: " + util::wideToUtf8(className));
+      throw std::runtime_error("Failed to create view: " + curt::wideToUtf8(className));
 
     return wnd;
   }
 
-  Font defaultFont() {
+  curt::Font defaultFont() {
     auto metrics = NONCLIENTMETRICSW{ sizeof(NONCLIENTMETRICSW) };
     SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
     return { CreateFontIndirectW(&metrics.lfMessageFont) };
@@ -168,7 +168,7 @@ namespace uiglue {
   }
 
   View::View(string className, ViewType type)
-    : m_wnd{ createWindow(util::utf8ToWide(className), type, this) },
+    : m_wnd{ createWindow(curt::utf8ToWide(className), type, this) },
       m_font{ defaultFont() },
       m_type{ type }
   {

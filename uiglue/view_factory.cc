@@ -12,7 +12,7 @@
 #include "view.h"
 #include "view_parser.h"
 
-#include "curt/win_util.h"
+#include "curt/util.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <CommCtrl.h>
@@ -71,18 +71,18 @@ namespace {
   }
 
   bool isClassRegistered(string name) {
-    auto asWide = util::utf8ToWide(name);
+    auto asWide = curt::utf8ToWide(name);
     WNDCLASSEXW wcex;
-    return GetClassInfoExW(util::thisModule(), asWide.c_str(), &wcex) != 0;
+    return GetClassInfoExW(curt::thisModule(), asWide.c_str(), &wcex) != 0;
   }
 
   void registerClass(string name, const ViewParser& parser) {
-    auto wideName = util::utf8ToWide(name);
+    auto wideName = curt::utf8ToWide(name);
 
     auto wcex = WNDCLASSEXW{ sizeof(WNDCLASSEXW) };
 
     wcex.lpfnWndProc = &View::WndProc;
-    wcex.hInstance = util::thisModule();
+    wcex.hInstance = curt::thisModule();
     wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
     wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
     wcex.lpszClassName = wideName.c_str();
@@ -163,7 +163,7 @@ namespace uiglue {
   void ViewFactory::applyViewDeclaration(View& view, const ViewParser& parser) const {
     auto title = parser.getText();
     if (title)
-      util::setWindowText(view.get(), title.get());
+      curt::setWindowText(view.get(), title.get());
 
     auto menuCommands = parser.getMenuCommands();
     if (menuCommands) {

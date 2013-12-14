@@ -34,7 +34,7 @@ namespace uiglue {
 
       adjustInitialPosition(x, y, cx, cy);
 
-      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, x, y, cx, cy, parent, reinterpret_cast<HMENU>(ctrlId), util::thisModule(), nullptr);
+      auto control = CreateWindowExW(exStyle, cls.c_str(), nullptr, style, x, y, cx, cy, parent, reinterpret_cast<HMENU>(ctrlId), curt::thisModule(), nullptr);
 
       if (!control)
         throw std::runtime_error("Failed to create child control: " + name());

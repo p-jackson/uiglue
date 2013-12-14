@@ -7,7 +7,7 @@
 
 #include "view_parser.h"
 
-#include "curt/win_util.h"
+#include "curt/util.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -100,7 +100,7 @@ namespace {
       {
       auto resourceIdStr = stripDeclPrefix(DeclType::Resource, s);
       auto resourceId = getResourceId(resourceIdStr, resHeader);
-      return util::loadString(boost::lexical_cast<unsigned int>(resourceId));
+      return curt::loadString(boost::lexical_cast<unsigned int>(resourceId));
       }
 
     default:
@@ -114,7 +114,7 @@ namespace {
 
     auto resourceIdStr = stripDeclPrefix(DeclType::Resource, s);
     auto resourceId = getResourceId(resourceIdStr, resHeader);
-    return LoadIconW(uiglue::util::thisModule(), MAKEINTRESOURCEW(resourceId));
+    return LoadIconW(curt::thisModule(), MAKEINTRESOURCEW(resourceId));
   }
 
 }

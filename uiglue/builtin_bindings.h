@@ -12,7 +12,7 @@
 #include "view.h"
 
 #include "curt/include_windows.h"
-#include "curt/win_util.h"
+#include "curt/util.h"
 
 #include <string>
 
@@ -42,7 +42,7 @@ namespace uiglue {
       auto len = GetWindowTextLengthW(wnd);
       auto wide = std::wstring(len + 1, 0);
       GetWindowTextW(wnd, &wide[0], len + 1);
-      return uiglue::util::wideToUtf8(std::move(wide));
+      return curt::wideToUtf8(std::move(wide));
     }
 
     inline void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
@@ -50,7 +50,7 @@ namespace uiglue {
       auto text = stringObservable();
       if (checkFirst && text == getWindowText(wnd))
         return;
-      SetWindowTextW(wnd, uiglue::util::utf8ToWide(text).c_str());
+      SetWindowTextW(wnd, curt::utf8ToWide(text).c_str());
     }
 
     struct Text {
