@@ -25,4 +25,7 @@ typedef struct HICON__* HICON;
 struct HFONT__;
 typedef struct HFONT__* HFONT;
 
+struct HACCEL__;
+typedef struct HACCEL__* HACCEL;
+
 #endif

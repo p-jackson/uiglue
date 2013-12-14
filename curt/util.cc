@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+#include "error.h"
 #include "include_windows.h"
 
 using std::string;
@@ -86,6 +87,32 @@ string loadString(unsigned int resId) {
 void setWindowText(HWND wnd, string text) {
   auto asWide = utf8ToWide(text);
   SetWindowTextW(wnd, asWide.c_str());
+}
+
+WPARAM pumpMessages() {
+  MSG msg;
+  while (GetMessageW(&msg, nullptr, 0, 0)) {
+    TranslateMessage(&msg);
+    DispatchMessageW(&msg);
+
+    throwSavedException();
+  }
+
+  return msg.wParam;
+}
+
+WPARAM pumpMessages(HWND translateWnd, HACCEL accelTable) {
+  MSG msg;
+  while (GetMessageW(&msg, nullptr, 0, 0)) {
+    if (!TranslateAcceleratorW(translateWnd, accelTable, &msg)) {
+      TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+        
+      throwSavedException();
+    }
+  }
+
+  return msg.wParam;
 }
 
 } // end namespace curt

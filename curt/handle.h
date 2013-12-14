@@ -42,6 +42,9 @@ public:
   Handle(Type h) : handle(h) {
   }
 
+  Handle(const Handle&) = delete;
+  Handle& operator=(const Handle&) = delete;
+
   Handle(Handle&& other) : Handle(nullptr) {
     using std::swap;
     swap(other.handle, handle);
@@ -58,17 +61,13 @@ public:
     return *this;
   }
 
-  auto get() const -> decltype(handle) {
+  Type get() const {
     return handle;
   }
 
   explicit operator bool() const {
     return Traits::valid(handle);
   }
-
-private:
-  Handle(Handle&) = delete;
-  Handle& operator=(Handle&) = delete;
 };
 
 } // end namespace curt

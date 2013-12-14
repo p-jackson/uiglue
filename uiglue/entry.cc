@@ -8,6 +8,7 @@
 #include "resource.h"
 
 #include "computed.h"
+#include "main_view.h"
 #include "member_map.h"
 #include "observable.h"
 #include "view.h"
@@ -94,33 +95,22 @@ private:
 
 };
 
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPTSTR, _In_ int show) {
   try {
-    auto viewFactory = uiglue::ViewFactory{ "../views", "resource.h" };
-
     auto vm = MainViewModel{};
-    auto mainView = viewFactory.createView("main");
-    mainView.attachViewModel(vm);
+    auto mainView = uiglue::makeMainView();
+
+    //uiglue::attachViewModel(vm, mainView.get());
 
     ShowWindow(mainView.get(), show);
     UpdateWindow(mainView.get());
 
     auto accelTable = LoadAcceleratorsW(hInst, MAKEINTRESOURCE(IDC_UIGLUE));
 
-    // Main message loop
-    MSG msg;
-    while (GetMessageW(&msg, nullptr, 0, 0)) {
-      if (!TranslateAcceleratorW(mainView.get(), accelTable, &msg)) {
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
-        
-        auto error = View::getLastError();
-        if (error != std::exception_ptr())
-          std::rethrow_exception(error);
-      }
-    }
+    auto result = curt::pumpMessages(mainView.get(), accelTable);
 
-    return static_cast<int>(msg.wParam);
+    return static_cast<int>(result);
   }
   catch (std::exception& e) {
     MessageBoxA(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);

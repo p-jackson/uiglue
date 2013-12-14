@@ -12,6 +12,17 @@
 #include "handle.h"
 
 namespace curt {
+  
+namespace detail {
+  struct WindowTraits {
+    using Type = HWND;
+    static bool valid(HWND h) { return h != nullptr; }
+    static void release(HWND h);
+  };
+}
+
+using Window = Handle<detail::WindowTraits>;
+
 
 namespace detail {
   struct FontTraits {

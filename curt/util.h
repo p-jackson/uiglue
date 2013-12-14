@@ -19,6 +19,8 @@ std::wstring utf8ToWide(std::string utf8);
 std::wstring loadStringW(unsigned int resId);
 std::string loadString(unsigned int resId);
 void setWindowText(HWND wnd, std::string text);
+WPARAM pumpMessages();
+WPARAM pumpMessages(HWND translateWnd, HACCEL accelTable);
 
 } // end namespace curt
 
