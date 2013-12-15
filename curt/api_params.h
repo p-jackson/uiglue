@@ -5,10 +5,10 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// These wrapper are used to make the Win32 API functions in curt.h more
-// convenient to call. They allow the caller to either use convenient C++ types
-// or to use the underlying Win32 types. In either case these wrapper's will
-// convert the parameters to the correct types.
+// These parameter wrappers are used to make the Win32 API functions in curt.h
+// more convenient to call. They allow the caller to specify arguments using
+// either convenient C++ types or the underlying Win32 types. In either case
+// the parameter wrappers convert the arguments to the correct types.
 //
 //===----------------------------------------------------------------------===//
 
