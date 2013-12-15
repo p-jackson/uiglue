@@ -27,21 +27,72 @@
 namespace curt {
 
 void destroyWindow(HandleOr<HWND> wnd);
-std::intptr_t dialogBoxParam(HINSTANCE hInst, StrOrId templateName, HandleOr<HWND> parent, DLGPROC proc, std::intptr_t param);
-LRESULT dispatchMessage(const MSG* msg);
-void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
-bool getMessage(MSG* msg, HandleOr<HWND> wnd, unsigned int msgFilterMin, unsigned int msgFilterMax);
-HACCEL loadAccelerators(HINSTANCE hInst, StrOrId tableName);
-int loadString(HINSTANCE hInst, unsigned int id, wchar_t* buffer, int bufferSize);
-int messageBox(HandleOr<HWND> parent, String text, String caption, unsigned int type);
-int multiByteToWideChar(unsigned int codePage, unsigned long flags, const char* multiByteStr, int multiByteSize, wchar_t* wideStr, int numChars);
-void setWindowText(HandleOr<HWND> wnd, String str);
-bool showWindow(HandleOr<HWND> wnd, int showCmd);
-int translateAccelerator(HandleOr<HWND> hWnd, HACCEL hAccTable, MSG* msg);
-bool translateMessage(const MSG* msg);
-void updateWindow(HandleOr<HWND> wnd);
-int wideCharToMultiByte(unsigned int codePage, unsigned long flags, const wchar_t* wideStr, int numChars, char* multiByteStr, int multiByteSize, const char* defaultChar, bool* usedDefaultChar);
 
-}
+std::intptr_t dialogBoxParam(
+  HINSTANCE hInst,
+  StrOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc,
+  std::intptr_t param
+);
+
+LRESULT dispatchMessage(const MSG* msg);
+
+void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
+
+bool getMessage(
+  MSG* msg,
+  HandleOr<HWND> wnd,
+  unsigned int msgFilterMin,
+  unsigned int msgFilterMax
+);
+
+HACCEL loadAccelerators(HINSTANCE hInst, StrOrId tableName);
+
+int loadString(
+  HINSTANCE hInst,
+  unsigned int id,
+  wchar_t* buffer,
+  int bufferSize
+);
+
+int messageBox(
+  HandleOr<HWND> parent,
+  String text,
+  String caption,
+  unsigned int type
+);
+
+int multiByteToWideChar(
+  unsigned int codePage,
+  unsigned long flags,
+  const char* multiByteStr,
+  int multiByteSize,
+  wchar_t* wideStr,
+  int numChars
+);
+
+void setWindowText(HandleOr<HWND> wnd, String str);
+
+bool showWindow(HandleOr<HWND> wnd, int showCmd);
+
+int translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg);
+
+bool translateMessage(const MSG* msg);
+
+void updateWindow(HandleOr<HWND> wnd);
+
+int wideCharToMultiByte(
+  unsigned int codePage,
+  unsigned long flags,
+  const wchar_t* wideStr,
+  int numChars,
+  char* multiByteStr,
+  int multiByteSize,
+  const char* defaultChar,
+  bool* usedDefaultChar
+);
+
+} // end namespace curt
 
 #endif
