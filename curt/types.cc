@@ -11,7 +11,7 @@
 
 namespace curt {
   namespace detail {
-    void WindowTraits::release(HWND h) { DestroyWindow(h); }
-    void FontTraits::release(HFONT h) { DeleteObject(h); }
+    void HandleTraits<HWND>::release(HWND h) { DestroyWindow(h); }
+    void HandleTraits<HFONT>::release(HFONT h) { DeleteObject(h); }
   }
 }

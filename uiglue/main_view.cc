@@ -1,3 +1,10 @@
+//===-- Main view ---------------------------------------------------------===//
+//
+// Copyright (c) 2013 Philip Jackson
+// This file may be freely distributed under the MIT license.
+//
+//===----------------------------------------------------------------------===//
+
 #include "main_view.h"
 
 #include "resource.h"
@@ -139,4 +146,4 @@ curt::Window makeMainView() {
   return CreateWindowExW(WS_EX_APPWINDOW, className, title.c_str(), WS_OVERLAPPEDWINDOW, x, x, x, x, HWND_DESKTOP, nullptr, curt::thisModule(), nullptr);
 }
 
-}
+} // end namespace uiglue

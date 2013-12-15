@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+#include "curt.h"
 #include "error.h"
 #include "include_windows.h"
 
@@ -14,15 +15,6 @@ using std::string;
 using std::wstring;
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
-
-static void throwConversionError() {
-  switch (GetLastError()) {
-  case ERROR_NO_UNICODE_TRANSLATION:
-    throw std::invalid_argument("Invalid input character");
-  default:
-    throw std::runtime_error("Failed to convert to UTF-8");
-  }
-}
 
 namespace curt {
 
@@ -40,14 +32,10 @@ string wideToUtf8(wstring wide) {
   const auto nChar = static_cast<int>(wide.size());
   const auto flags = WC_ERR_INVALID_CHARS;
 
-  const auto nBytes = WideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, nullptr, 0, nullptr, nullptr);
-
-  if (!nBytes)
-    throwConversionError();
+  const auto nBytes = wideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, nullptr, 0, nullptr, nullptr);
 
   auto narrow = string(nBytes, '\0');
-  if (!WideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, &narrow[0], nBytes, nullptr, nullptr))
-    throwConversionError();
+  wideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, &narrow[0], nBytes, nullptr, nullptr);
 
   return narrow;
 }
@@ -62,21 +50,17 @@ wstring utf8ToWide(string utf8) {
   const auto nBytes = static_cast<int>(utf8.size());
   const auto flags = MB_ERR_INVALID_CHARS;
 
-  const auto nChar = MultiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, nullptr, 0);
-
-  if (!nChar)
-    throwConversionError();
+  const auto nChar = multiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, nullptr, 0);
 
   auto wide = std::wstring(nChar, '\0');
-  if (!MultiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, &wide[0], nChar))
-    throwConversionError();
+  multiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, &wide[0], nChar);
 
   return wide;
 }
 
 wstring loadStringW(unsigned int resId) {
   wchar_t* buff;
-  auto len = LoadStringW(thisModule(), resId, reinterpret_cast<wchar_t*>(&buff), 0);
+  auto len = curt::loadString(thisModule(), resId, reinterpret_cast<wchar_t*>(&buff), 0);
   return wstring(buff, len);
 }
 
@@ -84,16 +68,11 @@ string loadString(unsigned int resId) {
   return wideToUtf8(loadStringW(resId));
 }
 
-void setWindowText(HWND wnd, string text) {
-  auto asWide = utf8ToWide(text);
-  SetWindowTextW(wnd, asWide.c_str());
-}
-
 WPARAM pumpMessages() {
   MSG msg;
-  while (GetMessageW(&msg, nullptr, 0, 0)) {
-    TranslateMessage(&msg);
-    DispatchMessageW(&msg);
+  while (getMessage(&msg, nullptr, 0, 0)) {
+    translateMessage(&msg);
+    dispatchMessage(&msg);
 
     throwSavedException();
   }
@@ -101,12 +80,12 @@ WPARAM pumpMessages() {
   return msg.wParam;
 }
 
-WPARAM pumpMessages(HWND translateWnd, HACCEL accelTable) {
+WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable) {
   MSG msg;
-  while (GetMessageW(&msg, nullptr, 0, 0)) {
+  while (getMessage(&msg, nullptr, 0, 0)) {
     if (!TranslateAcceleratorW(translateWnd, accelTable, &msg)) {
-      TranslateMessage(&msg);
-      DispatchMessageW(&msg);
+      translateMessage(&msg);
+      dispatchMessage(&msg);
         
       throwSavedException();
     }

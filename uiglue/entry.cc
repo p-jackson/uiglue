@@ -14,6 +14,7 @@
 #include "view.h"
 #include "view_factory.h"
 
+#include "curt/curt.h"
 #include "curt/include_windows.h"
 #include "curt/util.h"
 
@@ -34,8 +35,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM) {
 
   case WM_COMMAND:
     if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-      EndDialog(hDlg, LOWORD(wParam));
-      return (INT_PTR)TRUE;
+      curt::endDialog(hDlg, LOWORD(wParam));
+      return TRUE;
     }
     break;
   }
@@ -67,16 +68,15 @@ private:
   Computed<string> greeting;
 
   void onExit(View& view) {
-    DestroyWindow(view.get());
+    curt::destroyWindow(view.get());
   }
 
   void onAbout(View& view) {
-    DialogBoxParamW(curt::thisModule(), MAKEINTRESOURCE(IDD_ABOUTBOX), view.get(), About, 0);
+    curt::dialogBoxParam(curt::thisModule(), IDD_ABOUTBOX, view.get(), About, 0);
   }
 
   void onModalGreeting(View& view) {
-    auto wideGreeting = curt::utf8ToWide(greeting());
-    MessageBoxW(view.get(), wideGreeting.c_str(), L"Greeting", MB_OK);
+    curt::messageBox(view.get(), greeting(), L"Greeting", MB_OK);
   }
 
   string calculateGreeting() {
@@ -103,21 +103,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPTSTR, _In
 
     //uiglue::attachViewModel(vm, mainView.get());
 
-    ShowWindow(mainView.get(), show);
-    UpdateWindow(mainView.get());
+    curt::showWindow(mainView, show);
+    curt::updateWindow(mainView);
 
-    auto accelTable = LoadAcceleratorsW(hInst, MAKEINTRESOURCE(IDC_UIGLUE));
+    auto accelTable = curt::loadAccelerators(hInst, IDC_UIGLUE);
 
-    auto result = curt::pumpMessages(mainView.get(), accelTable);
+    auto result = curt::pumpMessages(mainView, accelTable);
 
     return static_cast<int>(result);
   }
   catch (std::exception& e) {
-    MessageBoxA(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);
+    curt::messageBox(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);
     return 0;
   }
   catch (...) {
-    MessageBoxA(nullptr, "Unknown exception", "Exception", MB_OK | MB_ICONERROR);
+    curt::messageBox(nullptr, "Unknown exception", "Exception", MB_OK | MB_ICONERROR);
     return 0;
   }
 }

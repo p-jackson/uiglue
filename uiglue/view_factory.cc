@@ -12,7 +12,7 @@
 #include "view.h"
 #include "view_parser.h"
 
-#include "curt/util.h"
+#include "curt/curt.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <CommCtrl.h>

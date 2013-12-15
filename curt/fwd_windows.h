@@ -8,9 +8,17 @@
 #ifndef CURT_FWD_WINDOWS_H
 #define CURT_FWD_WINDOWS_H
 
-typedef unsigned __int64 WPARAM;
-typedef __int64 LPARAM;
-typedef __int64 LRESULT;
+#if defined(_WIN64)
+  typedef __int64 INT_PTR;
+  typedef unsigned __int64 WPARAM;
+  typedef __int64 LPARAM;
+  typedef __int64 LRESULT;
+#else
+  typedef _W64 int INT_PTR;
+  typedef _W64 unsigned int WPARAM;
+  typedef _W64 long LPARAM;
+  typedef _W64 long LRESULT;
+#endif
 
 
 struct HINSTANCE__;
@@ -27,5 +35,8 @@ typedef struct HFONT__* HFONT;
 
 struct HACCEL__;
 typedef struct HACCEL__* HACCEL;
+
+
+typedef INT_PTR (__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);
 
 #endif

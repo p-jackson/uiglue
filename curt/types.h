@@ -14,25 +14,33 @@
 namespace curt {
   
 namespace detail {
-  struct WindowTraits {
+  template<typename T>
+  struct HandleTraits {};
+}
+
+
+namespace detail {
+  template<>
+  struct HandleTraits<HWND> {
     using Type = HWND;
     static bool valid(HWND h) { return h != nullptr; }
     static void release(HWND h);
   };
 }
 
-using Window = Handle<detail::WindowTraits>;
+using Window = Handle<HWND, detail::HandleTraits>;
 
 
 namespace detail {
-  struct FontTraits {
+  template<>
+  struct HandleTraits<HFONT> {
     using Type = HFONT;
     static bool valid(HFONT h) { return h != nullptr; }
     static void release(HFONT h);
   };
 }
 
-using Font = Handle<detail::FontTraits>;
+using Font = Handle<HFONT, detail::HandleTraits>;
 
 } // end namespace curt
 

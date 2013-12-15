@@ -8,6 +8,7 @@
 #ifndef CURT_WIN_UTIL_H
 #define CURT_WIN_UTIL_H
 
+#include "api_params.h"
 #include "fwd_windows.h"
 #include <string>
 
@@ -18,9 +19,8 @@ std::string wideToUtf8(std::wstring wide);
 std::wstring utf8ToWide(std::string utf8);
 std::wstring loadStringW(unsigned int resId);
 std::string loadString(unsigned int resId);
-void setWindowText(HWND wnd, std::string text);
 WPARAM pumpMessages();
-WPARAM pumpMessages(HWND translateWnd, HACCEL accelTable);
+WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable);
 
 } // end namespace curt
 
