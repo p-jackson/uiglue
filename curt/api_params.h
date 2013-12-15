@@ -23,7 +23,7 @@ namespace curt {
 
 template<typename WindowsHandle>
 class HandleOr {
-  using HandleType = Handle<WindowsHandle, detail::HandleTraits>;
+  using HandleType = Handle<detail::HandleTraits<WindowsHandle>>;
 
   WindowsHandle handle;
 

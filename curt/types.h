@@ -15,7 +15,11 @@ namespace curt {
   
 namespace detail {
   template<typename T>
-  struct HandleTraits {};
+  struct HandleTraits {
+    using Type = void;
+    static bool valid();
+    static void release();
+  };
 }
 
 
@@ -28,7 +32,7 @@ namespace detail {
   };
 }
 
-using Window = Handle<HWND, detail::HandleTraits>;
+using Window = Handle<detail::HandleTraits<HWND>>;
 
 
 namespace detail {
@@ -40,7 +44,7 @@ namespace detail {
   };
 }
 
-using Font = Handle<HFONT, detail::HandleTraits>;
+using Font = Handle<detail::HandleTraits<HFONT>>;
 
 } // end namespace curt
 

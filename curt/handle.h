@@ -30,9 +30,9 @@
 
 namespace curt {
 
-template<class Type, template<class> class TraitsAccessor>
+template<class Traits>
 class Handle {
-  using Traits = TraitsAccessor<Type>;
+  using Type = typename Traits::Type;
   Type handle;
 
 public:
