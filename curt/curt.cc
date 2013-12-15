@@ -15,14 +15,6 @@ using namespace std;
 
 namespace curt {
 
-StrOrId::StrOrId(int i) : str{ MAKEINTRESOURCEW(i) } {}
-
-String::String(const char* s) : str{ curt::utf8ToWide(s) } {}
-
-String::String(const string& s) : str { curt::utf8ToWide(s) } {}
-
-
-
 void destroyWindow(HandleOr<HWND> wnd) {
   if (!DestroyWindow(wnd))
     throwLastWin32Error();

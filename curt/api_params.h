@@ -1,4 +1,4 @@
-//===-- Wrappers for Win32 API parameters ---------------------------------===//
+//===-- Win32 parameter wrappers ------------------------------------------===//
 //
 // Copyright (c) 2013 Philip Jackson
 // This file may be freely distributed under the MIT license.
