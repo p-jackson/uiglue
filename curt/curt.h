@@ -26,6 +26,8 @@
 
 namespace curt {
 
+LRESULT defSubclassProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
+
 void destroyWindow(HandleOr<HWND> wnd);
 
 std::intptr_t dialogBoxParam(
@@ -39,6 +41,10 @@ std::intptr_t dialogBoxParam(
 LRESULT dispatchMessage(const MSG* msg);
 
 void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
+
+int getDlgCtrlID(HandleOr<HWND> hwndCtl);
+
+HWND getDlgItem(HandleOr<HWND> wnd, int childId);
 
 bool getMessage(
   MSG* msg,
@@ -70,6 +76,13 @@ int multiByteToWideChar(
   int multiByteSize,
   wchar_t* wideStr,
   int numChars
+);
+
+void setWindowSubclass(
+  HandleOr<HWND> wnd,
+  SUBCLASSPROC subclassProc,
+  std::uintptr_t subclassId,
+  std::uintptr_t refData
 );
 
 void setWindowText(HandleOr<HWND> wnd, String str);

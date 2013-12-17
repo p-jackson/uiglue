@@ -11,7 +11,6 @@
 #include "resource.h"
 #include "observable.h"
 #include "view.h"
-#include "view_factory.h"
 
 #include "curt/curt.h"
 #include "curt/util.h"
@@ -64,16 +63,16 @@ private:
   Observable<bool> shout;
   Computed<string> greeting;
 
-  void onExit(View& view) {
-    destroyWindow(view.get());
+  void onExit(HWND view) {
+    destroyWindow(view);
   }
 
-  void onAbout(View& view) {
-    dialogBoxParam(thisModule(), IDD_ABOUTBOX, view.get(), aboutProc, 0);
+  void onAbout(HWND view) {
+    dialogBoxParam(thisModule(), IDD_ABOUTBOX, view, aboutProc, 0);
   }
 
-  void onModalGreeting(View& view) {
-    messageBox(view.get(), greeting(), L"Greeting", MB_OK);
+  void onModalGreeting(HWND view) {
+    messageBox(view, greeting(), L"Greeting", MB_OK);
   }
 
   string calculateGreeting() {
@@ -103,7 +102,14 @@ int APIENTRY wWinMain(
     auto vm = MainViewModel{};
     auto mainView = makeMainView();
 
-    //uiglue::attachViewModel(vm, mainView.get());
+    auto view = std::make_unique<View>();
+    setWindowSubclass(
+      mainView,
+      &View::WndProc,
+      0,
+      reinterpret_cast<std::uintptr_t>(view.get())
+    );
+    view.release();
 
     showWindow(mainView, show);
     updateWindow(mainView);

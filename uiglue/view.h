@@ -64,8 +64,6 @@ namespace uiglue {
 
   class View {
     HWND m_wnd;
-    curt::Font m_font;
-    ViewType m_type;
     std::unique_ptr<ViewModelRef> m_vm;
     std::unordered_map<int, std::string> m_menuCommands;
     std::unordered_map<std::string, int> m_childIds;
@@ -74,27 +72,14 @@ namespace uiglue {
     std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
     std::unordered_map<WPARAM, std::vector<std::string>> m_viewModelCommandHandlers;
 
-    static std::exception_ptr s_lastError;
-
   public:
     View();
-    View(std::string className, ViewType type);
-    View(View&& o);
-    View(View&) = delete;
-
-    ~View();
-
-    View& operator=(View&& o);
-    View& operator=(View&) = delete;
-
-    HWND get() const;
 
     void addMenuCommand(int id, std::string command);
     void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
     void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
     void addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers);
     void addChildId(int id, std::string name);
-    HFONT getFont() const;
 
     template<class ViewModel>
     void attachViewModel(ViewModel& vm) {
@@ -104,8 +89,7 @@ namespace uiglue {
 
     void detachViewModel();
 
-    static std::exception_ptr getLastError();
-    static LRESULT __stdcall WndProc(HWND, unsigned int, WPARAM, LPARAM);
+    static LRESULT __stdcall WndProc(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
   private:
     bool onMessage(unsigned int, WPARAM, LPARAM, LRESULT& result);

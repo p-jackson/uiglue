@@ -21,7 +21,7 @@ using namespace uiglue;
 using std::string;
 using std::vector;
 using std::pair;
-
+#if 0
 namespace {
 
   class ButtonFactory : public BuiltinControlFactory<controls::Button> {
@@ -192,3 +192,4 @@ namespace uiglue {
   }
 
 }
+#endif

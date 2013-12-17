@@ -11,9 +11,15 @@
 #include "include_windows.h"
 #include "util.h"
 
+#include <CommCtrl.h>
+
 using namespace std;
 
 namespace curt {
+
+LRESULT defSubclassProc(HandleOr<HWND> wd, unsigned int m, WPARAM w, LPARAM l) {
+  return DefSubclassProc(wd, m, w, l);
+}
 
 void destroyWindow(HandleOr<HWND> wnd) {
   if (!DestroyWindow(wnd))
@@ -39,6 +45,20 @@ LRESULT dispatchMessage(const MSG* msg) {
 void endDialog(HandleOr<HWND> dlg, intptr_t result) {
   if (!EndDialog(dlg, result))
     throwLastWin32Error();
+}
+
+int getDlgCtrlID(HandleOr<HWND> hwndCtl) {
+  auto result = GetDlgCtrlID(hwndCtl);
+  if (!result)
+    throwLastWin32Error();
+  return result;
+}
+
+HWND getDlgItem(HandleOr<HWND> wnd, int childId) {
+  auto result = GetDlgItem(wnd, childId);
+  if (!result)
+    throwLastWin32Error();
+  return result;
 }
 
 int messageBox(
@@ -77,6 +97,16 @@ int multiByteToWideChar(
   if (!res)
     throwLastWin32Error();
   return res;
+}
+
+void setWindowSubclass(
+  HandleOr<HWND> wnd,
+  SUBCLASSPROC subclassProc,
+  std::uintptr_t subclassId,
+  std::uintptr_t refData
+) {
+  if (!SetWindowSubclass(wnd, subclassProc, subclassId, refData))
+    throwLastWin32Error();
 }
 
 void setWindowText(HandleOr<HWND> wnd, String str) {
