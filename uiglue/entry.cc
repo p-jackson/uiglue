@@ -10,7 +10,6 @@
 #include "member_map.h"
 #include "resource.h"
 #include "observable.h"
-#include "view.h"
 
 #include "curt/curt.h"
 #include "curt/util.h"
@@ -102,14 +101,7 @@ int APIENTRY wWinMain(
     auto vm = MainViewModel{};
     auto mainView = makeMainView();
 
-    auto view = std::make_unique<View>();
-    setWindowSubclass(
-      mainView,
-      &View::WndProc,
-      0,
-      reinterpret_cast<std::uintptr_t>(view.get())
-    );
-    view.release();
+    // uiglue::applyBindings(vm, mainView);
 
     showWindow(mainView, show);
     updateWindow(mainView);

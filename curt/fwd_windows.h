@@ -40,6 +40,9 @@ typedef struct HFONT__* HFONT;
 struct HACCEL__;
 typedef struct HACCEL__* HACCEL;
 
+struct tagMSG;
+typedef struct tagMSG MSG;
+
 
 typedef INT_PTR (__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);
 typedef LRESULT (__stdcall *SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);

@@ -153,7 +153,7 @@ namespace uiglue {
     m_vm.reset();
   }
 
-  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT& result) {
+  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
     if (msg == WM_COMMAND && HIWORD(wParam) == 0 && !lParam && m_vm) {
       // Handle menu commands
       auto id = LOWORD(wParam);
