@@ -26,6 +26,24 @@
 
 namespace curt {
 
+Font createFontIndirect(const LOGFONTA* logfont);
+Font createFontIndirect(const LOGFONTW* logfont);
+
+Window createWindowEx(
+  unsigned long exStyle,
+  OptString className,
+  OptString windowName,
+  unsigned long style,
+  int x,
+  int y,
+  int width,
+  int height,
+  HandleOr<HWND> parent,
+  HMENU menu,
+  HINSTANCE instance,
+  void *createParam
+);
+
 LRESULT defSubclassProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
 
 void destroyWindow(HandleOr<HWND> wnd);
@@ -52,6 +70,8 @@ bool getMessage(
   unsigned int msgFilterMin,
   unsigned int msgFilterMax
 );
+
+HGDIOBJ getStockObject(int object);
 
 HACCEL loadAccelerators(HINSTANCE hInst, StrOrId tableName);
 
@@ -80,7 +100,17 @@ int multiByteToWideChar(
 
 unsigned int registerWindowMessage(String str);
 
+LRESULT sendDlgItemMessage(
+  HandleOr<HWND> dlg,
+  int dlgItemId,
+  unsigned int msg,
+  WPARAM wParam,
+  LPARAM lParam
+);
+
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int, WPARAM, LPARAM);
+
+COLORREF setDCBrushColor(HDC hdc, COLORREF color);
 
 void setWindowSubclass(
   HandleOr<HWND> wnd,
@@ -93,7 +123,14 @@ void setWindowText(HandleOr<HWND> wnd, String str);
 
 bool showWindow(HandleOr<HWND> wnd, int showCmd);
 
-int translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg);
+void systemParametersInfo(
+  unsigned int action,
+  unsigned int uiParam,
+  void* pvParam,
+  unsigned int winIni
+);
+
+bool translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg);
 
 bool translateMessage(const MSG* msg);
 

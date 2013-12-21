@@ -26,61 +26,23 @@ enum {
   MessageLabel
 };
 
-namespace {
-
-  HWND createCtrl(LPCWSTR className, DWORD style, HWND parent, int id) {
-    auto x = CW_USEDEFAULT; // All dimensions are default
-    auto menuOrId = reinterpret_cast<HMENU>(id);
-    return CreateWindowExW(
-      0,
-      className,
-      nullptr,
-      style,
-      x, x, x, x,
-      parent,
-      menuOrId,
-      curt::thisModule(),
-      nullptr
-    );
-  }
-
-  HDWP moveCtrl(HDWP dwp, HWND wnd, int id, int x, int y, int w, int h) {
-    auto ctrl = curt::getDlgItem(wnd, id);
-    return DeferWindowPos(dwp, ctrl, nullptr, x, y, w, h, SWP_NOZORDER);
-  }
-
-  void setCtrlFont(HWND wnd, int id, curt::Font& font) {
-    auto asWParam = reinterpret_cast<WPARAM>(font.get());
-    SendDlgItemMessageW(wnd, id, WM_SETFONT, asWParam, 1);
-  }
-
-  curt::Font defaultFont() {
-    auto metrics = NONCLIENTMETRICSW{ sizeof(NONCLIENTMETRICSW) };
-    SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
-    return { CreateFontIndirectW(&metrics.lfMessageFont) };
-  }
-
+static HDWP moveCtrl(HDWP dwp, HWND wnd, int id, int x, int y, int w, int h) {
+  auto ctrl = curt::getDlgItem(wnd, id);
+  return DeferWindowPos(dwp, ctrl, nullptr, x, y, w, h, SWP_NOZORDER);
 }
 
 static void createControls(HWND wnd) {
-  auto style = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
-  auto editStyle = style | ES_LEFT | ES_AUTOHSCROLL | WS_BORDER;
-  auto buttonStyle = style | BS_PUSHBUTTON;
-  auto checkboxStyle = style | BS_AUTOCHECKBOX;
+  curt::createStatic(wnd, NameLabel);
+  curt::createEdit(wnd, NameEdit);
+  curt::createButton(wnd, ModalButton);
+  curt::createCheckbox(wnd, ShoutCheckbox);
+  curt::createStatic(wnd, MessageLabel);
 
-  createCtrl(L"STATIC", style, wnd, NameLabel);
-  createCtrl(L"EDIT", editStyle, wnd, NameEdit);
-  createCtrl(L"BUTTON", buttonStyle, wnd, ModalButton);
-  createCtrl(L"BUTTON", checkboxStyle, wnd, ShoutCheckbox);
-  createCtrl(L"STATIC", style, wnd, MessageLabel);
-
-  static auto font = defaultFont();
-
-  setCtrlFont(wnd, NameLabel, font);
-  setCtrlFont(wnd, NameEdit, font);
-  setCtrlFont(wnd, ModalButton, font);
-  setCtrlFont(wnd, ShoutCheckbox, font);
-  setCtrlFont(wnd, MessageLabel, font);
+  curt::setControlToDefaultFont(wnd, NameLabel);
+  curt::setControlToDefaultFont(wnd, NameEdit);
+  curt::setControlToDefaultFont(wnd, ModalButton);
+  curt::setControlToDefaultFont(wnd, ShoutCheckbox);
+  curt::setControlToDefaultFont(wnd, MessageLabel);
 }
 
 static void resizeWindow(HWND wnd, int w, int h) {
@@ -125,9 +87,6 @@ static LRESULT CALLBACK MainViewProc(
     case WM_SIZE:
       resizeWindow(wnd, LOWORD(lParam), HIWORD(lParam));
       break;
-    case WM_CTLCOLORBTN:
-    case WM_CTLCOLORSTATIC:
-      return reinterpret_cast<LRESULT>(GetStockObject(WHITE_BRUSH));
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
@@ -168,13 +127,12 @@ curt::Window makeMainView() {
   if (!isRegistered())
     registerMainView();
 
-  auto title = curt::loadStringW(IDS_APP_TITLE);
-  auto x = CW_USEDEFAULT; // All dimensions are default
+  const auto x = CW_USEDEFAULT; // All dimensions are default
 
-  auto mainView = CreateWindowExW(
+  auto mainView = curt::createWindowEx(
     WS_EX_APPWINDOW,
     className,
-    title.c_str(),
+    curt::loadStringW(IDS_APP_TITLE),
     WS_OVERLAPPEDWINDOW,
     x, x, x, x,
     HWND_DESKTOP,
@@ -182,6 +140,8 @@ curt::Window makeMainView() {
     curt::thisModule(),
     nullptr
   );
+
+  curt::setControlBackground(mainView, RGB(255, 255, 255));
 
   auto bindingHandlers = defaultBindingHandlers();
 

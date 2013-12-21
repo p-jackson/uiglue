@@ -68,6 +68,12 @@ public:
   explicit operator bool() const {
     return Traits::valid(handle);
   }
+
+  Type release() {
+    auto h = handle;
+    handle = nullptr;
+    return h;
+  }
 };
 
 } // end namespace curt

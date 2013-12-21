@@ -30,9 +30,6 @@ class HandleOr {
 public:
   HandleOr(WindowsHandle h) : handle{ h } {}
   HandleOr(const HandleType& h) : handle{ h.get() } {}
-  
-  HandleOr(const HandleOr&) = delete;
-  HandleOr& operator=(const HandleOr&) = delete;
 
   operator WindowsHandle() const { return handle; }
 };
@@ -63,6 +60,15 @@ public:
   String& operator=(const String) = delete;
 
   operator const wchar_t*() const { return str.c_str(); }
+};
+
+class OptString : public String {
+public:
+  OptString(nullptr_t) : String(std::wstring{}) {}
+  OptString(const wchar_t* s) : String(s) {}
+  OptString(std::wstring s) : String(std::move(s)) {}
+  OptString(const char* s) : String(s) {}
+  OptString(const std::string& s) : String(std::move(s)) {}
 };
 
 }

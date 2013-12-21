@@ -25,23 +25,29 @@
 #endif
 
 
-struct HINSTANCE__;
-typedef struct HINSTANCE__* HINSTANCE;
+#define CURT_DECLARE_HANDLE(name) \
+  struct name##__; \
+  typedef struct name##__* name;
 
-struct HWND__;
-typedef struct HWND__* HWND;
+CURT_DECLARE_HANDLE(HINSTANCE);
+CURT_DECLARE_HANDLE(HWND);
+CURT_DECLARE_HANDLE(HICON);
+CURT_DECLARE_HANDLE(HFONT);
+CURT_DECLARE_HANDLE(HACCEL);
+CURT_DECLARE_HANDLE(HDC);
+CURT_DECLARE_HANDLE(HMENU);
 
-struct HICON__;
-typedef struct HICON__* HICON;
+#define CURT_DECLARE_STRUCT(name) \
+  struct tag##name; \
+  typedef struct tag##name name;
 
-struct HFONT__;
-typedef struct HFONT__* HFONT;
+CURT_DECLARE_STRUCT(MSG);
+CURT_DECLARE_STRUCT(LOGFONTW);
+CURT_DECLARE_STRUCT(LOGFONTA);
 
-struct HACCEL__;
-typedef struct HACCEL__* HACCEL;
 
-struct tagMSG;
-typedef struct tagMSG MSG;
+typedef unsigned long COLORREF;
+typedef void* HGDIOBJ;
 
 
 typedef INT_PTR (__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);

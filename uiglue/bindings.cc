@@ -44,7 +44,7 @@ BindingDecl declareBindings(HandleOr<HWND> view, BindingHandlerCache cache) {
 
 void detachViewModel(HandleOr<HWND> view) {
   static auto msg = curt::registerWindowMessage(detachVMMsg);
-  curt::sendMessage(static_cast<HWND>(view), msg, 0, 0);
+  curt::sendMessage(view, msg, 0, 0);
 }
 
 void applyBindingsInner(unique_ptr<ViewModelRef> vmRef, HWND view) {

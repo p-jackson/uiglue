@@ -17,6 +17,43 @@ using namespace std;
 
 namespace curt {
 
+Font createFontIndirect(const LOGFONTA* logfont) {
+  return { CreateFontIndirectA(logfont) };
+}
+
+Font createFontIndirect(const LOGFONTW* logfont) {
+  return { CreateFontIndirectW(logfont) };
+}
+
+Window createWindowEx(
+  unsigned long exStyle,
+  OptString className,
+  OptString windowName,
+  unsigned long style,
+  int x, int y, int w, int h,
+  HandleOr<HWND> parent,
+  HMENU menu,
+  HINSTANCE hInst,
+  void *createParam
+) {
+  auto newWindow = CreateWindowExW(
+    exStyle,
+    className,
+    windowName,
+    style,
+    x, y, w, h,
+    parent,
+    menu,
+    hInst,
+    createParam
+  );
+
+  if (!newWindow)
+    throwLastWin32Error();
+
+  return { newWindow };
+}
+
 LRESULT defSubclassProc(HandleOr<HWND> wd, unsigned int m, WPARAM w, LPARAM l) {
   return DefSubclassProc(wd, m, w, l);
 }
@@ -106,12 +143,29 @@ unsigned int registerWindowMessage(String str) {
   return msg;
 }
 
+LRESULT sendDlgItemMessage(
+  HandleOr<HWND> dlg,
+  int dlgItemId,
+  unsigned int msg,
+  WPARAM wParam,
+  LPARAM lParam
+) {
+  return SendDlgItemMessageW(dlg, dlgItemId, msg, wParam, lParam);
+}
+
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
   auto result = SendMessageW(wnd, m, w, l);
   auto error = GetLastError();
   if (error)
     throwWin32Error(error);
   return result;
+}
+
+COLORREF setDCBrushColor(HDC hdc, COLORREF color) {
+  auto prev = SetDCBrushColor(hdc, color);
+  if (prev == CLR_INVALID)
+    throw std::invalid_argument("Invalid color argument for SetDCBrushColor");
+  return prev;
 }
 
 void setWindowSubclass(
@@ -133,6 +187,20 @@ bool showWindow(HandleOr<HWND> wnd, int showCmd) {
   return ShowWindow(wnd, showCmd) != 0;
 }
 
+void systemParametersInfo(
+  unsigned int action,
+  unsigned int uiParam,
+  void* pvParam,
+  unsigned int winIni
+) {
+  if (!SystemParametersInfoW(action, uiParam, pvParam, winIni))
+    throwLastWin32Error();
+}
+
+bool translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg) {
+  return TranslateAcceleratorW(wnd, accelTable, msg) != 0;
+}
+
 bool translateMessage(const MSG* msg) {
   return TranslateMessage(msg) != 0;
 }
@@ -140,6 +208,13 @@ bool translateMessage(const MSG* msg) {
 void updateWindow(HandleOr<HWND> wnd) {
   if (!UpdateWindow(wnd))
     throwLastWin32Error();
+}
+
+HGDIOBJ getStockObject(int object) {
+  auto result = GetStockObject(object);
+  if (!result)
+    throwLastWin32Error();
+  return result;
 }
 
 HACCEL loadAccelerators(HINSTANCE hInst, StrOrId tableName) {
