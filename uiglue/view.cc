@@ -7,14 +7,14 @@
 
 #include "view.h"
 
+#include "binding_handler.h"
 #include "view_messages.h"
+#include "view_model_ref.h"
 
 #include "curt/curt.h"
 #include "curt/error.h"
 #include "curt/include_windows.h"
-#include "curt/util.h"
 
-#include <array>
 #include <boost/algorithm/string/trim.hpp>
 
 using namespace uiglue;
@@ -71,7 +71,7 @@ namespace {
     }
   }
 
-  UntypedObservable makeObservable(std::string binding, ViewModelRef& viewModel) {
+  UntypedObservable makeObservable(string binding, ViewModelRef& viewModel) {
     auto type = getBindingType(binding);
     auto value = stripBindingPrefix(type, binding);
 
@@ -123,7 +123,9 @@ namespace uiglue {
   {
   }
 
-  void View::addMenuCommand(int id, std::string command) {
+  View::~View() = default;
+
+  void View::addMenuCommand(int id, string command) {
     m_menuCommands[id] = command;
   }
 
@@ -137,14 +139,9 @@ namespace uiglue {
     m_commandHandlers[key].push_back(std::move(handler));
   }
 
-  void View::addCommandHandler(int commandCode, HWND control, std::string viewModelCommand) {
+  void View::addCommandHandler(int commandCode, HWND control, string viewModelCommand) {
     auto key = getCommandWParam(commandCode, control);
     m_viewModelCommandHandlers[key].push_back(std::move(viewModelCommand));
-  }
-
-  void View::addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers) {
-    m_bindingDeclarations = std::move(bindingDeclarations);
-    m_bindingHandlers = std::move(bindingHandlers);
   }
 
   void View::addBindingHandlerCache(BindingHandlerCache cache) {

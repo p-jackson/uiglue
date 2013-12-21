@@ -7,7 +7,6 @@
 
 #include "bindings.h"
 
-#include "binding_handler_cache.h"
 #include "builtin_bindings.h"
 #include "view.h"
 #include "view_messages.h"
@@ -19,32 +18,28 @@ using curt::HandleOr;
 
 namespace uiglue {
 
-BindingDeclaration::BindingDeclaration(HWND h, BindingHandlerCache cache)
-  : viewData{ std::make_unique<View>(h) },
-    handle{ h }
+BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
+  : m_viewData{ make_unique<View>(handle) },
+    m_handle{ handle }
 {
-  viewData->addBindingHandlerCache(std::move(cache));
+  m_viewData->addBindingHandlerCache(move(cache));
 }
 
-BindingDeclaration::~BindingDeclaration() {
-  auto viewDataAsInt = reinterpret_cast<uintptr_t>(viewData.get());
-  curt::setWindowSubclass(handle, &View::WndProc, 0, viewDataAsInt);
+BindingDecl::~BindingDecl() {
+  auto asInt = reinterpret_cast<uintptr_t>(m_viewData.get());
+  curt::setWindowSubclass(m_handle, &View::WndProc, 0, asInt);
 
-  // Ownership of viewData has now passed to the view
-  viewData.release();
+  // Ownership of m_viewData has been passed to the view
+  m_viewData.release();
 }
 
-BindingDeclaration& BindingDeclaration::operator()(
-  int controlId,
-  std::string binding,
-  std::string value
-) {
-  viewData->addBinding(controlId, binding, value);
+BindingDecl& BindingDecl::operator()(int ctrlId, string binding, string value) {
+  m_viewData->addBinding(ctrlId, binding, value);
   return *this;
 }
 
-BindingDeclaration declareBindings(HandleOr<HWND> view, BindingHandlerCache cache) {
-  return { view, std::move(cache) };
+BindingDecl declareBindings(HandleOr<HWND> view, BindingHandlerCache cache) {
+  return { view, move(cache) };
 }
 
 void detachViewModel(HandleOr<HWND> view) {
@@ -56,6 +51,8 @@ void applyBindingsInner(unique_ptr<ViewModelRef> vmRef, HWND view) {
   static auto msg = curt::registerWindowMessage(applyBindingsMsg);
   auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
   curt::sendMessage(view, msg, 0, asLParam);
+
+  // Ownership of vmRef has been passed to the view
   vmRef.release();
 }
 

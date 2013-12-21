@@ -13,11 +13,11 @@
 #include "observable.h"
 
 #include "curt/curt.h"
+#include "curt/include_windows.h"
 #include "curt/util.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>
-#include <unordered_map>
 
 using std::string;
 using namespace curt;

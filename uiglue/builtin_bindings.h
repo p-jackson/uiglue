@@ -8,6 +8,7 @@
 #ifndef BUILTIN_BINDINGS_H
 #define BUILTIN_BINDINGS_H
 
+#include "binding_handler.h"
 #include "observable.h"
 #include "view.h"
 
@@ -21,7 +22,7 @@ using std::string;
 namespace uiglue {
 
   template<class Traits>
-  class BuiltinBinding : public Binding {
+  class BuiltinBinding : public BindingHandler {
   public:
     std::string name() const override {
       return Traits::name();

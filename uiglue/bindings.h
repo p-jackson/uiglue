@@ -23,23 +23,19 @@ class BindingHandlerCache;
 
 void applyBindingsInner(std::unique_ptr<ViewModelRef> vmRef, HWND view);
 
-class BindingDeclaration {
-  std::unique_ptr<View> viewData;
-  HWND handle;
+class BindingDecl {
+  std::unique_ptr<View> m_viewData;
+  HWND m_handle;
 
 public:
-  BindingDeclaration(HWND handle, BindingHandlerCache cache);
-  ~BindingDeclaration();
+  BindingDecl(HWND handle, BindingHandlerCache cache);
+  ~BindingDecl();
 
-  BindingDeclaration& operator()(
-    int controlId,
-    std::string binding,
-    std::string value
-  );
+  BindingDecl& operator()(int ctrlId, std::string binding, std::string value);
 };
 
 
-BindingDeclaration declareBindings(curt::HandleOr<HWND> view, BindingHandlerCache);
+BindingDecl declareBindings(curt::HandleOr<HWND> view, BindingHandlerCache);
 
 BindingHandlerCache defaultBindingHandlers();
 

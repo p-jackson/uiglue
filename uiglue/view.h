@@ -8,12 +8,9 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "binding.h"
 #include "binding_handler_cache.h"
 #include "member_map.h"
 #include "observable.h"
-#include "view_parser.h"
-#include "view_model_ref.h"
 
 #include "curt/fwd_windows.h"
 #include "curt/types.h"
@@ -22,6 +19,8 @@
 #include <unordered_map>
 
 namespace uiglue {
+
+  struct ViewModelRef;
 
   class View {
     using KeyValues = std::vector<std::pair<std::string, std::string>>;
@@ -34,17 +33,16 @@ namespace uiglue {
     BindingDeclarations m_bindingDeclarations;
     BindingHandlerCache m_handlerCache;
 
-    BindingHandlers m_bindingHandlers;
     std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
     std::unordered_map<WPARAM, std::vector<std::string>> m_viewModelCommandHandlers;
 
   public:
     explicit View(HWND wnd);
+    ~View();
 
     void addMenuCommand(int id, std::string command);
     void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
     void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
-    void addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers);
 
     void addBindingHandlerCache(BindingHandlerCache cache);
     void addBinding(int id, std::string bindingHandler, std::string bindingText);

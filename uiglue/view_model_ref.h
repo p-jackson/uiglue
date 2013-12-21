@@ -8,7 +8,6 @@
 #ifndef VIEW_MODEL_REF_H
 #define VIEW_MODEL_REF_H
 
-#include "fwd.h"
 #include "member_map.h"
 #include "observable.h"
 
@@ -16,6 +15,8 @@
 #include <string>
 
 namespace uiglue {
+
+class UntypedObservable;
 
 struct ViewModelRef {
   virtual ~ViewModelRef() {};
