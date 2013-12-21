@@ -5,16 +5,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "bindings.h"
-#include "computed.h"
 #include "main_view.h"
-#include "member_map.h"
 #include "resource.h"
-#include "observable.h"
 
 #include "curt/curt.h"
 #include "curt/include_windows.h"
 #include "curt/util.h"
+#include "uiglue/bindings.h"
+#include "uiglue/computed.h"
+#include "uiglue/member_map.h"
+#include "uiglue/observable.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>

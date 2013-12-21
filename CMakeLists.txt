@@ -18,5 +18,6 @@ if(build_tool MATCHES "(msdev|devenv|nmake|msbuild)")
   add_definitions(/W4)
 endif()
 
-add_subdirectory(uiglue)
 add_subdirectory(curt)
+add_subdirectory(test)
+add_subdirectory(uiglue)

@@ -7,14 +7,14 @@
 
 #include "main_view.h"
 
-#include "bindings.h"
-#include "binding_handler_cache.h"
 #include "resource.h"
 
 #include "curt/curt.h"
 #include "curt/error.h"
 #include "curt/include_windows.h"
 #include "curt/util.h"
+#include "uiglue/bindings.h"
+#include "uiglue/binding_handler_cache.h"
 
 static const wchar_t* className = L"uiglue main view";
 
