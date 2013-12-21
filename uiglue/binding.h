@@ -21,6 +21,9 @@ namespace uiglue {
 
   struct Binding {
     virtual ~Binding() {}
+    Binding() = default;
+    Binding(const Binding&) = delete;
+    Binding& operator=(const Binding&) = delete;
 
     virtual std::string name() const = 0;
     virtual void init(HWND control, UntypedObservable observable, View& view) const = 0;

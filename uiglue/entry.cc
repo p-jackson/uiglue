@@ -5,6 +5,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "bindings.h"
 #include "computed.h"
 #include "main_view.h"
 #include "member_map.h"
@@ -101,7 +102,7 @@ int APIENTRY wWinMain(
     auto vm = MainViewModel{};
     auto mainView = makeMainView();
 
-    // uiglue::applyBindings(vm, mainView);
+    uiglue::applyBindings(vm, mainView);
 
     showWindow(mainView, show);
     updateWindow(mainView);

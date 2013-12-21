@@ -99,6 +99,21 @@ int multiByteToWideChar(
   return res;
 }
 
+unsigned int registerWindowMessage(String str) {
+  auto msg = RegisterWindowMessageW(str);
+  if (!msg)
+    throwLastWin32Error();
+  return msg;
+}
+
+LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
+  auto result = SendMessageW(wnd, m, w, l);
+  auto error = GetLastError();
+  if (error)
+    throwWin32Error(error);
+  return result;
+}
+
 void setWindowSubclass(
   HandleOr<HWND> wnd,
   SUBCLASSPROC subclassProc,

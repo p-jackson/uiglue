@@ -8,6 +8,7 @@
 #include "main_view.h"
 
 #include "bindings.h"
+#include "binding_handler_cache.h"
 #include "resource.h"
 
 #include "curt/error.h"
@@ -146,15 +147,17 @@ curt::Window makeMainView() {
 
   auto mainView = CreateWindowExW(WS_EX_APPWINDOW, className, title.c_str(), WS_OVERLAPPEDWINDOW, x, x, x, x, HWND_DESKTOP, nullptr, curt::thisModule(), nullptr);
 
-  declareBindings(mainView);
-  //  (NameLabel, "text", "Name:")
-  //  (NameEdit, "value", "bind: name")
-  //  (ModalButton, "text", "Show modal greeting")
-  //  (ModalButton, "click", "onModalGreeting")
-  //  (ShoutCheckbox, "text", "Shout")
-  //  (ShoutCheckbox, "checked", "bind: shout")
-  //  (MessageLabel, "text", "bind: greeting")
-  //;
+  auto bindingHandlers = defaultBindingHandlers();
+
+  declareBindings(mainView, bindingHandlers)
+    (NameLabel, "text", "Name:")
+    (NameEdit, "value", "bind: name")
+    (ModalButton, "text", "Modal")
+    (ModalButton, "click", "onModalGreeting")
+    (ShoutCheckbox, "text", "Shout")
+    (ShoutCheckbox, "checked", "bind: shout")
+    (MessageLabel, "text", "bind: greeting")
+  ;
 
   return mainView;
 }

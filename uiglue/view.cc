@@ -7,6 +7,8 @@
 
 #include "view.h"
 
+#include "view_messages.h"
+
 #include "curt/curt.h"
 #include "curt/error.h"
 #include "curt/include_windows.h"
@@ -90,14 +92,14 @@ namespace {
 
 namespace uiglue {
 
+  const char* applyBindingsMsg = "UIGLUE_WM_APPLYBINDINGS";
+  const char* detachVMMsg = "UIGLUE_WM_DETACHVM";
+
   LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR refData) {
     try {
       curt::clearCurrentException();
 
       auto viewPtr = reinterpret_cast<View*>(refData);
-
-      if (msg == WM_NCCREATE)
-        viewPtr->m_wnd = wnd;
 
       auto result = LRESULT{ 0 };
       if (!viewPtr->onMessage(msg, w, l, result))
@@ -116,8 +118,8 @@ namespace uiglue {
     }
   }
 
-  View::View()
-    : m_wnd{ nullptr }
+  View::View(HWND wnd)
+    : m_wnd{ wnd }
   {
   }
 
@@ -145,21 +147,35 @@ namespace uiglue {
     m_bindingHandlers = std::move(bindingHandlers);
   }
 
-  void View::addChildId(int id, std::string name) {
-    m_childIds[std::move(name)] = id;
+  void View::addBindingHandlerCache(BindingHandlerCache cache) {
+    m_handlerCache = std::move(cache);
   }
 
-  void View::detachViewModel() {
-    m_vm.reset();
+  void View::addBinding(int id, string bindingHandler, string bindingText) {
+    m_bindingDeclarations[id].emplace_back(bindingHandler, bindingText);
   }
 
   bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
+    static auto kApplyBindings = curt::registerWindowMessage(applyBindingsMsg);
+    static auto kDetachVM = curt::registerWindowMessage(detachVMMsg);
+
+    if (msg == kApplyBindings) {
+      m_vm.reset(reinterpret_cast<ViewModelRef*>(lParam));
+      applyBindings();
+      return true;
+    }
+
+    if (msg == kDetachVM) {
+      m_vm.reset();
+      return true;
+    }
+
     if (msg == WM_COMMAND && HIWORD(wParam) == 0 && !lParam && m_vm) {
       // Handle menu commands
       auto id = LOWORD(wParam);
       auto found = m_menuCommands.find(id);
       if (found != m_menuCommands.end()) {
-        m_vm->runCommand(found->second, *this);
+        m_vm->runCommand(found->second, m_wnd);
         return true;
       }
     }
@@ -175,7 +191,7 @@ namespace uiglue {
       auto viewModelCommands = m_viewModelCommandHandlers.find(wParam);
       if (viewModelCommands != end(m_viewModelCommandHandlers)) {
         for (auto& vmCommand : viewModelCommands->second)
-          m_vm->runCommand(vmCommand, *this);
+          m_vm->runCommand(vmCommand, m_wnd);
       }
 
       return true;
@@ -186,34 +202,21 @@ namespace uiglue {
 
   void View::applyBindings() {
     for (auto& control : m_bindingDeclarations) {
-      auto controlHandle = getChildControl(control.first);
+      auto controlHandle = curt::getDlgItem(m_wnd, control.first);
 
       for (auto& binding : control.second) {
-        auto handler = m_bindingHandlers.find(binding.first);
-        if (handler == end(m_bindingHandlers))
+        auto handler = m_handlerCache.getBindingHandler(binding.first);
+        if (!handler)
           continue;
 
         auto observable = makeObservable(binding.second, *m_vm);
-        handler->second->init(controlHandle, observable, *this);
+        handler->init(controlHandle, observable, *this);
 
         observable.subscribe([handler, controlHandle, this](UntypedObservable o) {
-          handler->second->update(controlHandle, o, *this);
+          handler->update(controlHandle, o, *this);
         });
       }
     }
-  }
-
-  HWND View::getChildControl(std::string name) const {
-    auto found = m_childIds.find(name);
-    if (found == end(m_childIds))
-      throw std::runtime_error("Child control doesn't exist: " + name);
-
-    auto handle = curt::getDlgItem(m_wnd, found->second);
-
-    if (!handle)
-      throw std::runtime_error("Child control doesn't exist: " + name);
-
-    return handle;
   }
 
 }

@@ -78,6 +78,10 @@ int multiByteToWideChar(
   int numChars
 );
 
+unsigned int registerWindowMessage(String str);
+
+LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int, WPARAM, LPARAM);
+
 void setWindowSubclass(
   HandleOr<HWND> wnd,
   SUBCLASSPROC subclassProc,
