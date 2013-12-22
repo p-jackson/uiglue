@@ -25,20 +25,16 @@ bool onCreate(HWND wnd, LPCREATESTRUCT) {
 }
 
 void onSize(HWND wnd, UINT, int w, int h) {
-  SetWindowPos(curt::getDlgItem(wnd, Message), nullptr, 0, 0, w, h, SWP_NOZORDER);
-}
-
-void onDestroy(HWND) {
-  PostQuitMessage(0);
+  auto ctrl = curt::getDlgItem(wnd, Message);
+  curt::setWindowPos(ctrl, nullptr, 0, 0, w, h, SWP_NOZORDER);
 }
 
 LRESULT CALLBACK viewProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
     HANDLE_MSG(wnd, WM_CREATE, onCreate);
     HANDLE_MSG(wnd, WM_SIZE, onSize);
-    HANDLE_MSG(wnd, WM_DESTROY, onDestroy);
     default:
-      return DefWindowProc(wnd, msg, wParam, lParam);
+      return DefWindowProcW(wnd, msg, wParam, lParam);
   }
 }
 
@@ -48,7 +44,7 @@ ATOM registerWindowClass() {
   wc.lpfnWndProc = viewProc;
   wc.lpszClassName = L"mainview";
   wc.style = CS_VREDRAW | CS_HREDRAW;
-  return RegisterClassEx(&wc);
+  return curt::registerClassEx(&wc);
 }
 
 curt::Window createView() {

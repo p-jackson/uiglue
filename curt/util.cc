@@ -115,7 +115,7 @@ static LRESULT CALLBACK ctrlBgProc(
         return reinterpret_cast<LRESULT>(getStockObject(DC_BRUSH));
       }
       default:
-        return defSubclassProc(wnd, msg, w, l);
+        return DefSubclassProc(wnd, msg, w, l);
     }
   }
   catch (...) {
@@ -142,7 +142,7 @@ static LRESULT CALLBACK appViewProc(
     if (msg == WM_DESTROY)
       PostQuitMessage(0);
 
-    return defSubclassProc(wnd, msg, w, l);
+    return DefSubclassProc(wnd, msg, w, l);
   }
   catch (...) {
     saveCurrentException();

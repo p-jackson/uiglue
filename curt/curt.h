@@ -44,8 +44,6 @@ Window createWindowEx(
   void *createParam
 );
 
-LRESULT defSubclassProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
-
 void destroyWindow(HandleOr<HWND> wnd);
 
 std::intptr_t dialogBoxParam(
@@ -98,6 +96,9 @@ int multiByteToWideChar(
   int numChars
 );
 
+ATOM registerClassEx(const WNDCLASSEXA* wc);
+ATOM registerClassEx(const WNDCLASSEXW* wc);
+
 unsigned int registerWindowMessage(String str);
 
 LRESULT sendDlgItemMessage(
@@ -111,6 +112,13 @@ LRESULT sendDlgItemMessage(
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int, WPARAM, LPARAM);
 
 COLORREF setDCBrushColor(HDC hdc, COLORREF color);
+
+void setWindowPos(
+  HandleOr<HWND> wnd,
+  HandleOr<HWND> insertAfter,
+  int x, int y, int w, int h,
+  unsigned int flags
+);
 
 void setWindowSubclass(
   HandleOr<HWND> wnd,

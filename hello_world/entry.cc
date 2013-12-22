@@ -32,7 +32,7 @@ public:
 int APIENTRY wWinMain(
   _In_ HINSTANCE,
   _In_opt_ HINSTANCE,
-  _In_ LPTSTR,
+  _In_ wchar_t*,
   _In_ int show
 ) {
   try {

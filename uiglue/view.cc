@@ -16,6 +16,7 @@
 #include "curt/include_windows.h"
 
 #include <boost/algorithm/string/trim.hpp>
+#include <CommCtrl.h>
 
 using namespace uiglue;
 using std::string;
@@ -103,7 +104,7 @@ namespace uiglue {
 
       auto result = LRESULT{ 0 };
       if (!viewPtr->onMessage(msg, w, l, result))
-        result = curt::defSubclassProc(wnd, msg, w, l);
+        result = DefSubclassProc(wnd, msg, w, l);
 
       if (msg == WM_NCDESTROY) {
         viewPtr->m_wnd = nullptr;

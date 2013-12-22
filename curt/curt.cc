@@ -54,10 +54,6 @@ Window createWindowEx(
   return { newWindow };
 }
 
-LRESULT defSubclassProc(HandleOr<HWND> wd, unsigned int m, WPARAM w, LPARAM l) {
-  return DefSubclassProc(wd, m, w, l);
-}
-
 void destroyWindow(HandleOr<HWND> wnd) {
   if (!DestroyWindow(wnd))
     throwLastWin32Error();
@@ -136,6 +132,20 @@ int multiByteToWideChar(
   return res;
 }
 
+ATOM registerClassEx(const WNDCLASSEXA* wc) {
+  auto atom = RegisterClassExA(wc);
+  if (!atom)
+    throwLastWin32Error();
+  return atom;
+}
+
+ATOM registerClassEx(const WNDCLASSEXW* wc) {
+  auto atom = RegisterClassExW(wc);
+  if (!atom)
+    throwLastWin32Error();
+  return atom;
+}
+
 unsigned int registerWindowMessage(String str) {
   auto msg = RegisterWindowMessageW(str);
   if (!msg)
@@ -167,6 +177,17 @@ COLORREF setDCBrushColor(HDC hdc, COLORREF color) {
     throw std::invalid_argument("Invalid color argument for SetDCBrushColor");
   return prev;
 }
+
+void setWindowPos(
+  HandleOr<HWND> wnd,
+  HandleOr<HWND> insertAfter,
+  int x, int y, int w, int h,
+  unsigned int flags
+) {
+  if (!SetWindowPos(wnd, insertAfter, x, y, w, h, flags))
+    throwLastWin32Error();
+}
+
 
 void setWindowSubclass(
   HandleOr<HWND> wnd,
