@@ -10,6 +10,8 @@
 
 #include "fwd.h"
 
+#include "curt/fwd_windows.h"
+
 #include <string>
 
 #define UIGLUE_BEGIN_MEMBER_MAP(VM) \
@@ -19,7 +21,7 @@ public: \
     static uiglue::ViewModelMember<VM> memberMap[] = {
 
 #define UIGLUE_DECLARE_COMMAND(command) \
-      { #command, [] (ThisVM& vm, uiglue::View& view) { vm.command(view); }, nullptr },
+      { #command, [] (ThisVM& vm, HWND view) { vm.command(view); }, nullptr },
 
 #define UIGLUE_DECLARE_PROPERTY(property) \
       { #property, nullptr, [](ThisVM& vm) { return vm.property.asUntyped(); } },
@@ -34,7 +36,7 @@ namespace uiglue {
 
   template<class VM>
   struct ViewModelMember {
-    using HandlerSig = void (*) (VM&, uiglue::View&);
+    using HandlerSig = void (*) (VM&, HWND);
     using AccessorSig = UntypedObservable (*) (VM&);
 
     const char* name;

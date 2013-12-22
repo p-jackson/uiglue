@@ -7,10 +7,14 @@
 
 #include "view.h"
 
-#include "include_windows.h"
-#include "win_util.h"
+#include "binding_handler.h"
+#include "view_messages.h"
+#include "view_model_ref.h"
 
-#include <array>
+#include "curt/curt.h"
+#include "curt/error.h"
+#include "curt/include_windows.h"
+
 #include <boost/algorithm/string/trim.hpp>
 
 using namespace uiglue;
@@ -67,7 +71,7 @@ namespace {
     }
   }
 
-  UntypedObservable makeObservable(std::string binding, ViewModelRef& viewModel) {
+  UntypedObservable makeObservable(string binding, ViewModelRef& viewModel) {
     auto type = getBindingType(binding);
     auto value = stripBindingPrefix(type, binding);
 
@@ -84,149 +88,49 @@ namespace {
     }
   }
 
-  unsigned long typeToStyle(ViewType t) {
-    switch (t) {
-    case ViewType::App:
-      return WS_OVERLAPPEDWINDOW;
-    default:
-      throw std::runtime_error("Invalid view type");
-    }
-  }
-
-  unsigned long typeToStyleEx(ViewType t) {
-    switch (t) {
-    case ViewType::App:
-      return WS_EX_APPWINDOW;
-    default:
-      return 0;
-    }
-  }
-
-  HWND createWindow(wstring className, ViewType type, View* view) {
-    const auto stylex = typeToStyleEx(type);
-    const auto style = typeToStyle(type);
-    const auto dim = CW_USEDEFAULT;
-
-    auto wnd = CreateWindowExW(stylex, className.c_str(), nullptr, style, dim, dim, dim, dim, nullptr, nullptr, uiglue::util::thisModule(), view);
-
-    if (!wnd)
-      throw std::runtime_error("Failed to create view: " + util::wideToUtf8(className));
-
-    return wnd;
-  }
-
-  Font defaultFont() {
-    auto metrics = NONCLIENTMETRICSW{ sizeof(NONCLIENTMETRICSW) };
-    SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, metrics.cbSize, &metrics, 0);
-    return { CreateFontIndirectW(&metrics.lfMessageFont) };
-  }
-
-
 }
 
 namespace uiglue {
 
-  std::exception_ptr View::s_lastError;
+  const char* applyBindingsMsg = "UIGLUE_WM_APPLYBINDINGS";
+  const char* detachVMMsg = "UIGLUE_WM_DETACHVM";
 
-  std::exception_ptr View::getLastError() {
-    return s_lastError;
-  }
-
-  LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l) {
+  LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR refData) {
     try {
-      s_lastError = {};
+      curt::clearCurrentException();
 
-      if (msg == WM_NCCREATE) {
-        auto create = reinterpret_cast<CREATESTRUCTW*>(l);
-        auto viewPtr = reinterpret_cast<View*>(create->lpCreateParams);
-        SetWindowLongPtrW(wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(viewPtr));
-        viewPtr->m_wnd = wnd;
-      }
-
-      auto t = reinterpret_cast<View*>(GetWindowLongPtrW(wnd, GWLP_USERDATA));
-      if (!t)
-        return DefWindowProcW(wnd, msg, w, l);
+      auto viewPtr = reinterpret_cast<View*>(refData);
 
       auto result = LRESULT{ 0 };
-      if (!t->onMessage(msg, w, l, result))
-        result = DefWindowProcW(wnd, msg, w, l);
+      if (!viewPtr->onMessage(msg, w, l, result))
+        result = curt::defSubclassProc(wnd, msg, w, l);
 
-      if (msg == WM_NCCREATE)
-        t->m_wnd = nullptr;
+      if (msg == WM_NCDESTROY) {
+        viewPtr->m_wnd = nullptr;
+        delete viewPtr;
+      }
 
       return result;
     }
     catch (...) {
-      s_lastError = std::current_exception();
+      curt::saveCurrentException();
       return 0;
     }
   }
 
-  View::View()
-    : m_wnd{ nullptr }
+  View::View(HWND wnd)
+    : m_wnd{ wnd }
   {
   }
 
-  View::View(string className, ViewType type)
-    : m_wnd{ createWindow(util::utf8ToWide(className), type, this) },
-      m_font{ defaultFont() },
-      m_type{ type }
-  {
-  }
+  View::~View() = default;
 
-  View::View(View&& o)
-    : m_wnd{ nullptr },
-      m_type{ ViewType::App }
-  {
-    std::swap(o.m_wnd, m_wnd);
-    std::swap(o.m_font, m_font);
-    std::swap(o.m_type, m_type);
-    std::swap(o.m_vm, m_vm);
-    std::swap(o.m_menuCommands, m_menuCommands);
-    std::swap(o.m_childIds, m_childIds);
-    std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
-    std::swap(o.m_bindingHandlers, m_bindingHandlers);
-    std::swap(o.m_commandHandlers, m_commandHandlers);
-    std::swap(o.m_viewModelCommandHandlers, m_viewModelCommandHandlers);
-
-    SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-  }
-
-  View& View::operator=(View&& o) {
-    std::swap(o.m_wnd, m_wnd);
-    std::swap(o.m_font, m_font);
-    std::swap(o.m_type, m_type);
-    std::swap(o.m_vm, m_vm);
-    std::swap(o.m_menuCommands, m_menuCommands);
-    std::swap(o.m_childIds, m_childIds);
-    std::swap(o.m_bindingDeclarations, m_bindingDeclarations);
-    std::swap(o.m_bindingHandlers, m_bindingHandlers);
-    std::swap(o.m_commandHandlers, m_commandHandlers);
-    std::swap(o.m_viewModelCommandHandlers, m_viewModelCommandHandlers);
-
-    SetWindowLongPtrW(m_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-    return *this;
-  }
-
-  View::~View() {
-    if (m_wnd)
-      DestroyWindow(m_wnd);
-  }
-
-  HWND View::get() const {
-    return m_wnd;
-  }
-
-  void View::addMenuCommand(int id, std::string command) {
+  void View::addMenuCommand(int id, string command) {
     m_menuCommands[id] = command;
   }
 
   WPARAM View::getCommandWParam(int commandCode, HWND control) {
-    auto id = GetDlgCtrlID(control);
-    if (!id)
-      throw std::runtime_error("Couldn't find control id. Perhaps it wasn't created using uiglue.");
-
+    auto id = curt::getDlgCtrlID(control);
     return ((commandCode << 16) | (id & 0xffff));
   }
 
@@ -235,31 +139,31 @@ namespace uiglue {
     m_commandHandlers[key].push_back(std::move(handler));
   }
 
-  void View::addCommandHandler(int commandCode, HWND control, std::string viewModelCommand) {
+  void View::addCommandHandler(int commandCode, HWND control, string viewModelCommand) {
     auto key = getCommandWParam(commandCode, control);
     m_viewModelCommandHandlers[key].push_back(std::move(viewModelCommand));
   }
 
-  void View::addBindings(BindingDeclarations bindingDeclarations, BindingHandlers bindingHandlers) {
-    m_bindingDeclarations = std::move(bindingDeclarations);
-    m_bindingHandlers = std::move(bindingHandlers);
+  void View::addBindingHandlerCache(BindingHandlerCache cache) {
+    m_handlerCache = std::move(cache);
   }
 
-  void View::addChildId(int id, std::string name) {
-    m_childIds[std::move(name)] = id;
+  void View::addBinding(int id, string bindingHandler, string bindingText) {
+    m_bindingDeclarations[id].emplace_back(bindingHandler, bindingText);
   }
 
-  HFONT View::getFont() const {
-    return m_font.get();
-  }
+  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
+    static auto kApplyBindings = curt::registerWindowMessage(applyBindingsMsg);
+    static auto kDetachVM = curt::registerWindowMessage(detachVMMsg);
 
-  void View::detachViewModel() {
-    m_vm.reset();
-  }
+    if (msg == kApplyBindings) {
+      m_vm.reset(reinterpret_cast<ViewModelRef*>(lParam));
+      applyBindings();
+      return true;
+    }
 
-  bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT& result) {
-    if (msg == WM_DESTROY && m_type == ViewType::App) {
-      PostQuitMessage(0);
+    if (msg == kDetachVM) {
+      m_vm.reset();
       return true;
     }
 
@@ -268,7 +172,7 @@ namespace uiglue {
       auto id = LOWORD(wParam);
       auto found = m_menuCommands.find(id);
       if (found != m_menuCommands.end()) {
-        m_vm->runCommand(found->second, *this);
+        m_vm->runCommand(found->second, m_wnd);
         return true;
       }
     }
@@ -284,14 +188,9 @@ namespace uiglue {
       auto viewModelCommands = m_viewModelCommandHandlers.find(wParam);
       if (viewModelCommands != end(m_viewModelCommandHandlers)) {
         for (auto& vmCommand : viewModelCommands->second)
-          m_vm->runCommand(vmCommand, *this);
+          m_vm->runCommand(vmCommand, m_wnd);
       }
 
-      return true;
-    }
-
-    if (msg == WM_CTLCOLORBTN || msg == WM_CTLCOLOREDIT || msg == WM_CTLCOLORSTATIC) {
-      result = reinterpret_cast<LRESULT>(GetStockObject(WHITE_BRUSH));
       return true;
     }
 
@@ -300,34 +199,21 @@ namespace uiglue {
 
   void View::applyBindings() {
     for (auto& control : m_bindingDeclarations) {
-      auto controlHandle = getChildControl(control.first);
+      auto controlHandle = curt::getDlgItem(m_wnd, control.first);
 
       for (auto& binding : control.second) {
-        auto handler = m_bindingHandlers.find(binding.first);
-        if (handler == end(m_bindingHandlers))
+        auto handler = m_handlerCache.getBindingHandler(binding.first);
+        if (!handler)
           continue;
 
         auto observable = makeObservable(binding.second, *m_vm);
-        handler->second->init(controlHandle, observable, *this);
+        handler->init(controlHandle, observable, *this);
 
         observable.subscribe([handler, controlHandle, this](UntypedObservable o) {
-          handler->second->update(controlHandle, o, *this);
+          handler->update(controlHandle, o, *this);
         });
       }
     }
-  }
-
-  HWND View::getChildControl(std::string name) const {
-    auto found = m_childIds.find(name);
-    if (found == end(m_childIds))
-      throw std::runtime_error("Child control doesn't exist: " + name);
-
-    auto handle = GetDlgItem(get(), found->second);
-
-    if (!handle)
-      throw std::runtime_error("Child control doesn't exist: " + name);
-
-    return handle;
   }
 
 }

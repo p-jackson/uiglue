@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef INCLUDE_WINDOWS_H
-#define INCLUDE_WINDOWS_H
+#ifndef CURT_INCLUDE_WINDOWS_H
+#define CURT_INCLUDE_WINDOWS_H
 
 #include <SDKDDKVer.h>
 

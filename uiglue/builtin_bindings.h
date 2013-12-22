@@ -8,10 +8,12 @@
 #ifndef BUILTIN_BINDINGS_H
 #define BUILTIN_BINDINGS_H
 
-#include "include_windows.h"
+#include "binding_handler.h"
 #include "observable.h"
 #include "view.h"
-#include "win_util.h"
+
+#include "curt/include_windows.h"
+#include "curt/util.h"
 
 #include <string>
 
@@ -20,7 +22,7 @@ using std::string;
 namespace uiglue {
 
   template<class Traits>
-  class BuiltinBinding : public Binding {
+  class BuiltinBinding : public BindingHandler {
   public:
     std::string name() const override {
       return Traits::name();
@@ -41,7 +43,7 @@ namespace uiglue {
       auto len = GetWindowTextLengthW(wnd);
       auto wide = std::wstring(len + 1, 0);
       GetWindowTextW(wnd, &wide[0], len + 1);
-      return uiglue::util::wideToUtf8(std::move(wide));
+      return curt::wideToUtf8(std::move(wide));
     }
 
     inline void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
@@ -49,7 +51,7 @@ namespace uiglue {
       auto text = stringObservable();
       if (checkFirst && text == getWindowText(wnd))
         return;
-      SetWindowTextW(wnd, uiglue::util::utf8ToWide(text).c_str());
+      SetWindowTextW(wnd, curt::utf8ToWide(text).c_str());
     }
 
     struct Text {

@@ -7,8 +7,7 @@ include(cotire)
 
 # Boost setup
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.55 COMPONENTS filesystem system REQUIRED)
-add_definitions(-DBOOST_ALL_NO_LIB)
+find_package(Boost 1.55)
 include_directories(${Boost_INCLUDE_DIR})
 
 # All projects can include headers relative to the root of the repository
@@ -19,4 +18,6 @@ if(build_tool MATCHES "(msdev|devenv|nmake|msbuild)")
   add_definitions(/W4)
 endif()
 
+add_subdirectory(curt)
+add_subdirectory(test)
 add_subdirectory(uiglue)
