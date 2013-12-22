@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef COMPUTED_H
-#define COMPUTED_H
+#ifndef UIGLUE_COMPUTED_H
+#define UIGLUE_COMPUTED_H
 
 #include "observable.h"
 

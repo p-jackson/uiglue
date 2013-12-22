@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef OBSERVABLE_H
-#define OBSERVABLE_H
+#ifndef UIGLUE_OBSERVABLE_H
+#define UIGLUE_OBSERVABLE_H
 
 #include <atomic>
 #include <boost/variant.hpp>

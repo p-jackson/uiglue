@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef CURT_WIN_UTIL_H
-#define CURT_WIN_UTIL_H
+#ifndef CURT_UTIL_H
+#define CURT_UTIL_H
 
 #include "api_params.h"
 #include "fwd_windows.h"

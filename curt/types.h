@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef CURT_WIN_TYPES_H
-#define CURT_WIN_TYPES_H
+#ifndef CURT_TYPES_H
+#define CURT_TYPES_H
 
 #include "fwd_windows.h"
 #include "handle.h"

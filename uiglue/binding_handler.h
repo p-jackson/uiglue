@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef BINDING_HANDLER_H
-#define BINDING_HANDLER_H
+#ifndef UIGLUE_BINDING_HANDLER_H
+#define UIGLUE_BINDING_HANDLER_H
 
 #include "curt/fwd_windows.h"
 

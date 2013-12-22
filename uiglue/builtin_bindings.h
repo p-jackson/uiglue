@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef BUILTIN_BINDINGS_H
-#define BUILTIN_BINDINGS_H
+#ifndef UIGLUE_BUILTIN_BINDINGS_H
+#define UIGLUE_BUILTIN_BINDINGS_H
 
 #include "binding_handler.h"
 #include "observable.h"

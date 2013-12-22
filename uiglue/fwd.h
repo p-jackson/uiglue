@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef FWD_H
-#define FWD_H
+#ifndef UIGLUE_FWD_H
+#define UIGLUE_FWD_H
 
 namespace uiglue {
   class View;

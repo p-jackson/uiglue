@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef BINDINGS_H
-#define BINDINGS_H
+#ifndef UIGLUE_BINDINGS_H
+#define UIGLUE_BINDINGS_H
 
 #include "binding_handler_cache.h"
 #include "view_model_ref.h"

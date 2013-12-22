@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef VIEW_MODEL_REF_H
-#define VIEW_MODEL_REF_H
+#ifndef UIGLUE_VIEW_MODEL_REF_H
+#define UIGLUE_VIEW_MODEL_REF_H
 
 #include "member_map.h"
 #include "observable.h"

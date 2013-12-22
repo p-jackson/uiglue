@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef VIEW_H
-#define VIEW_H
+#ifndef UIGLUE_VIEW_H
+#define UIGLUE_VIEW_H
 
 #include "binding_handler_cache.h"
 #include "member_map.h"

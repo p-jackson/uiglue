@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MEMBER_MAP_H
-#define MEMBER_MAP_H
+#ifndef UIGLUE_MEMBER_MAP_H
+#define UIGLUE_MEMBER_MAP_H
 
 #include "fwd.h"
 

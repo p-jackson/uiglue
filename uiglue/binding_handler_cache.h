@@ -5,8 +5,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef BINDING_HANDLER_CACHE
-#define BINDING_HANDLER_CACHE
+#ifndef UIGLUE_BINDING_HANDLER_CACHE_H
+#define UIGLUE_BINDING_HANDLER_CACHE_H
 
 #include <memory>
 #include <string>
