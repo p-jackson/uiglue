@@ -19,5 +19,6 @@ if(build_tool MATCHES "(msdev|devenv|nmake|msbuild)")
 endif()
 
 add_subdirectory(curt)
+add_subdirectory(hello_world)
 add_subdirectory(test)
 add_subdirectory(uiglue)

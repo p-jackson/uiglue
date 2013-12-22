@@ -27,7 +27,8 @@ std::string loadString(unsigned int resId);
 WPARAM pumpMessages();
 WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable);
 
-void setControlBackground(HandleOr<HWND> wnd, unsigned long rgb);
+void subclassControlBackground(HandleOr<HWND> wnd, unsigned long rgb);
+void subclassAppView(HandleOr<HWND> wnd);
 
 Font defaultFont();
 void setControlToDefaultFont(HandleOr<HWND> parent, int id);

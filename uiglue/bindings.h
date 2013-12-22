@@ -8,6 +8,7 @@
 #ifndef BINDINGS_H
 #define BINDINGS_H
 
+#include "binding_handler_cache.h"
 #include "view_model_ref.h"
 
 #include "curt/api_params.h"
@@ -19,7 +20,6 @@
 namespace uiglue {
 
 class View;
-class BindingHandlerCache;
 
 void applyBindingsInner(std::unique_ptr<ViewModelRef> vmRef, HWND view);
 

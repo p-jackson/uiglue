@@ -14,7 +14,6 @@
 #include "curt/include_windows.h"
 #include "curt/util.h"
 #include "uiglue/bindings.h"
-#include "uiglue/binding_handler_cache.h"
 
 static const wchar_t* className = L"uiglue main view";
 
@@ -87,9 +86,6 @@ static LRESULT CALLBACK MainViewProc(
     case WM_SIZE:
       resizeWindow(wnd, LOWORD(lParam), HIWORD(lParam));
       break;
-    case WM_DESTROY:
-      PostQuitMessage(0);
-      break;
     }
 
     return DefWindowProcW(wnd, msg, wParam, lParam);
@@ -141,7 +137,8 @@ curt::Window makeMainView() {
     nullptr
   );
 
-  curt::setControlBackground(mainView, RGB(255, 255, 255));
+  curt::subclassControlBackground(mainView, RGB(255, 255, 255));
+  curt::subclassAppView(mainView);
 
   auto bindingHandlers = defaultBindingHandlers();
 

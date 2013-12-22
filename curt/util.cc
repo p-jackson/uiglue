@@ -124,8 +124,34 @@ static LRESULT CALLBACK ctrlBgProc(
   }
 }
 
-void setControlBackground(HandleOr<HWND> wnd, unsigned long rgb) {
+void subclassControlBackground(HandleOr<HWND> wnd, unsigned long rgb) {
   setWindowSubclass(wnd, ctrlBgProc, 0, rgb);
+}
+
+static LRESULT CALLBACK appViewProc(
+  HWND wnd,
+  UINT msg,
+  WPARAM w,
+  LPARAM l,
+  UINT_PTR,
+  DWORD_PTR
+) {
+  try {
+    clearCurrentException();
+
+    if (msg == WM_DESTROY)
+      PostQuitMessage(0);
+
+    return defSubclassProc(wnd, msg, w, l);
+  }
+  catch (...) {
+    saveCurrentException();
+    return 0;
+  }
+}
+
+void subclassAppView(HandleOr<HWND> wnd) {
+  setWindowSubclass(wnd, appViewProc, 0, 0);
 }
 
 Font defaultFont() {
