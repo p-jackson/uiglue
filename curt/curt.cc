@@ -27,7 +27,7 @@ Font createFontIndirect(const LOGFONTW* logfont) {
 
 Window createWindowEx(
   unsigned long exStyle,
-  OptString className,
+  StringOrAtom className,
   OptString windowName,
   unsigned long style,
   int x, int y, int w, int h,
@@ -61,7 +61,7 @@ void destroyWindow(HandleOr<HWND> wnd) {
 
 intptr_t dialogBoxParam(
   HINSTANCE hInst,
-  StrOrId templateName,
+  StringOrId templateName,
   HandleOr<HWND> parent,
   DLGPROC proc,
   intptr_t param
@@ -238,7 +238,7 @@ HGDIOBJ getStockObject(int object) {
   return result;
 }
 
-HACCEL loadAccelerators(HINSTANCE hInst, StrOrId tableName) {
+HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName) {
   auto result = LoadAcceleratorsW(hInst, tableName);
   if (!result)
     throwLastWin32Error();

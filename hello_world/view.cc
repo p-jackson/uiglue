@@ -54,7 +54,7 @@ curt::Window createView() {
 
   auto view = curt::createWindowEx(
     WS_EX_APPWINDOW,
-    L"mainview",
+    atom,
     nullptr,
     WS_OVERLAPPEDWINDOW,
     x, x, x, x,

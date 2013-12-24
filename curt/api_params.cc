@@ -12,10 +12,14 @@
 
 namespace curt {
 
-StrOrId::StrOrId(int i) : str{ MAKEINTRESOURCEW(i) } {}
+StringOrId::StringOrId(int i)
+  : String(std::wstring{}),
+    m_ptr{ MAKEINTRESOURCEW(i) }
+{
+}
 
-String::String(const char* s) : str{ curt::utf8ToWide(s) } {}
+String::String(const char* s) : m_str{ curt::utf8ToWide(s) } {}
 
-String::String(const std::string& s) : str { curt::utf8ToWide(s) } {}
+String::String(const std::string& s) : m_str { curt::utf8ToWide(s) } {}
 
 } // end namespace curt

@@ -13,6 +13,7 @@
 #include "uiglue/bindings.h"
 #include "uiglue/observable.h"
 
+#include <sstream>
 #include <string>
 
 class ViewModel {
@@ -50,9 +51,19 @@ int APIENTRY wWinMain(
     auto returnCode = curt::pumpMessages();
     return static_cast<int>(returnCode);
   }
+  catch (std::system_error& e) {
+    auto ss = std::ostringstream{};
+    ss << "System error(" << e.code() << "): " << e.what();
+    curt::messageBox(nullptr, ss.str(), "Exception", MB_OK | MB_ICONERROR);
+    return 0;
+  }
+  catch (std::exception& e) {
+    curt::messageBox(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);
+    return 0;
+  }
   catch (...) {
-    const auto flags = MB_OK | MB_ICONERROR;
-    curt::messageBox(nullptr, "Uncaught exception", "Error", flags);
+    auto msg = std::string{ "Uncaught exception" };
+    curt::messageBox(nullptr, msg, "Exception", MB_OK | MB_ICONERROR);
     return 0;
   }
 }
