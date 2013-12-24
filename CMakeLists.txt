@@ -3,11 +3,13 @@ project(uiglue)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+enable_testing()
+
 include(cotire)
 
 # Boost setup
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.55)
+find_package(Boost 1.55 REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 # All projects can include headers relative to the root of the repository
@@ -21,4 +23,5 @@ endif()
 add_subdirectory(curt)
 add_subdirectory(bind_test)
 add_subdirectory(hello_world)
+add_subdirectory(tests)
 add_subdirectory(uiglue)

@@ -4,6 +4,18 @@
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
+//
+// To have a view model property participate in two-way databinding with a view,
+// it should be wrapped in an Observable. Observables control access and changes
+// to the wrapped value and allow others to subscribe to the changes.
+//
+// An Observable<T> is copy construcible if T is, move constructible if T is,
+// etc.
+// To be wrapped in an Observable T must be == comparable. The Observable uses
+// == in the setter to see if the value really changed before notifying the
+// subscribers.
+//
+//===----------------------------------------------------------------------===//
 
 #ifndef UIGLUE_OBSERVABLE_H
 #define UIGLUE_OBSERVABLE_H
@@ -77,7 +89,14 @@ class TypedObservable : public IUntypedObservable,
   };
 
 public:
-  T get() {
+  TypedObservable() = default;
+
+  TypedObservable(T t)
+    : m_value{ std::move(t) }
+  {
+  }
+
+  T& get() {
     if (DependencyTracker::isTracking())
       DependencyTracker::track(shared_from_this());
 
@@ -136,8 +155,9 @@ public:
   {
   }
 
-  Observable(T value) : Observable() {
-    m_inner->set(std::move(value));
+  Observable(T value)
+    : m_inner { std::make_shared<TypedObservable<T>>(std::move(value)) }
+  {
   }
 
   Observable(const Observable& o)
@@ -145,9 +165,9 @@ public:
   {
   }
 
-  Observable(Observable&& o) {
-    using std::swap;
-    swap(m_inner, o.m_inner);
+  Observable(Observable&& o)
+    : m_inner{ std::move(o.m_inner) }
+  {
   }
 
   Self& operator=(const Observable& o) {
@@ -156,12 +176,11 @@ public:
   }
 
   Self& operator=(Observable&& o) {
-    using std::swap;
-    swap(m_inner, o.m_inner);
+    m_inner = std::move(o.m_inner);
     return *this;
   }
 
-  T operator()() {
+  T& operator()() {
     return m_inner->get();
   }
 
