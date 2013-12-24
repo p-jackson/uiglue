@@ -48,10 +48,24 @@ Window createWindowEx(
     createParam
   );
 
+  throwIfSavedException();
+
   if (!newWindow)
     throwLastWin32Error();
 
   return { newWindow };
+}
+
+LRESULT defSubclassProc(HandleOr<HWND> h, unsigned int m, WPARAM w, LPARAM l) {
+  auto result = DefSubclassProc(h, m, w, l);
+  throwIfSavedException();
+  return result;
+}
+
+LRESULT defWindowProc(HandleOr<HWND> h, unsigned int m, WPARAM w, LPARAM l) {
+  auto result = DefWindowProcW(h, m, w, l);
+  throwIfSavedException();
+  return result;
 }
 
 void destroyWindow(HandleOr<HWND> wnd) {
@@ -205,7 +219,10 @@ void setWindowText(HandleOr<HWND> wnd, String str) {
 }
 
 bool showWindow(HandleOr<HWND> wnd, int showCmd) {
-  return ShowWindow(wnd, showCmd) != 0;
+  auto result = ShowWindow(wnd, showCmd);
+  // showWindow is often called outside of a message loop
+  throwIfSavedException();
+  return result != 0;
 }
 
 void systemParametersInfo(
@@ -227,7 +244,10 @@ bool translateMessage(const MSG* msg) {
 }
 
 void updateWindow(HandleOr<HWND> wnd) {
-  if (!UpdateWindow(wnd))
+  auto result = UpdateWindow(wnd);
+  // updateWindow is often called outside of a message loop
+  throwIfSavedException();
+  if (!result)
     throwLastWin32Error();
 }
 

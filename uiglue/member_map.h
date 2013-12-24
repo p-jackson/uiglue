@@ -34,23 +34,23 @@ public: \
 
 namespace uiglue {
 
-  template<class VM>
-  struct ViewModelMember {
-    using HandlerSig = void (*) (VM&, HWND);
-    using AccessorSig = UntypedObservable (*) (VM&);
+template<class VM>
+struct ViewModelMember {
+  using HandlerSig = void (*) (VM&, HWND);
+  using AccessorSig = UntypedObservable (*) (VM&);
 
-    const char* name;
-    HandlerSig handler;
-    AccessorSig accessor;
+  const char* name;
+  HandlerSig handler;
+  AccessorSig accessor;
 
-    ViewModelMember(const char* name_, HandlerSig handler_, AccessorSig accessor_)
-      : name(name_),
-        handler(handler_),
-        accessor(accessor_)
-    {
-    }
-  };
+  ViewModelMember(const char* name_, HandlerSig handler_, AccessorSig accessor_)
+    : name(name_),
+      handler(handler_),
+      accessor(accessor_)
+  {
+  }
+};
 
-}
+} // end namespace uiglue
 
 #endif

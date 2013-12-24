@@ -12,27 +12,27 @@ using std::shared_ptr;
 
 namespace uiglue {
 
-  std::atomic<int> TypedObservableSubscriberId::s_nextId;
+std::atomic<int> TypedObservableSubscriberId::s_nextId;
 
-  DependencyTracker* DependencyTracker::current = nullptr;
+DependencyTracker* DependencyTracker::current = nullptr;
 
-  DependencyTracker::DependencyTracker(set<shared_ptr<IUntypedObservable>>& dependencies)
-      : m_dependecies{ dependencies }
-    {
-      current = this;
-    }
-
-  DependencyTracker::~DependencyTracker() {
-    current = nullptr;
+DependencyTracker::DependencyTracker(set<shared_ptr<IUntypedObservable>>& dependencies)
+    : m_dependecies{ dependencies }
+  {
+    current = this;
   }
 
-  bool DependencyTracker::isTracking() {
-    return !!current;
-  }
-
-  void DependencyTracker::track(shared_ptr<IUntypedObservable> observable) {
-    if (current)
-      current->m_dependecies.insert(observable);
-  }
-
+DependencyTracker::~DependencyTracker() {
+  current = nullptr;
 }
+
+bool DependencyTracker::isTracking() {
+  return !!current;
+}
+
+void DependencyTracker::track(shared_ptr<IUntypedObservable> observable) {
+  if (current)
+    current->m_dependecies.insert(observable);
+}
+
+} // end namespace uiglue

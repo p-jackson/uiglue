@@ -10,14 +10,13 @@
 
 namespace curt {
 
-  void clearCurrentException();
-  void saveCurrentException();
-  void throwSavedException();
+void saveCurrentException();
+void throwIfSavedException();
 
-  void throwWin32Error(unsigned long error);
-  void throwIfWin32Error();
-  void throwLastWin32Error();
+void throwWin32Error(unsigned long error);
+void throwIfWin32Error();
+void throwLastWin32Error();
 
-}
+} // end namespace curt
 
 #endif

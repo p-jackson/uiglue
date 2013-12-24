@@ -16,17 +16,16 @@ static std::exception_ptr savedError;
 
 namespace curt {
 
-void clearCurrentException() {
-  savedError = {};
-}
-
 void saveCurrentException() {
   savedError = std::current_exception();
 }
 
-void throwSavedException() {
-  if (savedError != std::exception_ptr())
-    std::rethrow_exception(savedError);
+void throwIfSavedException() {
+  if (savedError != std::exception_ptr()) {
+    auto e = savedError;
+    savedError = {};
+    std::rethrow_exception(e);
+  }
 }
 
 void throwWin32Error(unsigned long err) {

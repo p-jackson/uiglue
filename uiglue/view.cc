@@ -98,13 +98,11 @@ namespace uiglue {
 
   LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR refData) {
     try {
-      curt::clearCurrentException();
-
       auto viewPtr = reinterpret_cast<View*>(refData);
 
       auto result = LRESULT{ 0 };
       if (!viewPtr->onMessage(msg, w, l, result))
-        result = DefSubclassProc(wnd, msg, w, l);
+        result = curt::defSubclassProc(wnd, msg, w, l);
 
       if (msg == WM_NCDESTROY) {
         viewPtr->m_wnd = nullptr;

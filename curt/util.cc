@@ -75,7 +75,7 @@ WPARAM pumpMessages() {
     translateMessage(&msg);
     dispatchMessage(&msg);
 
-    throwSavedException();
+    throwIfSavedException();
   }
 
   return msg.wParam;
@@ -88,7 +88,7 @@ WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable) {
       translateMessage(&msg);
       dispatchMessage(&msg);
         
-      throwSavedException();
+      throwIfSavedException();
     }
   }
 
@@ -104,8 +104,6 @@ static LRESULT CALLBACK ctrlBgProc(
   DWORD_PTR color
 ) {
   try {
-    clearCurrentException();
-
     switch (msg) {
       case WM_CTLCOLORBTN:
       case WM_CTLCOLORSTATIC:
@@ -115,7 +113,7 @@ static LRESULT CALLBACK ctrlBgProc(
         return reinterpret_cast<LRESULT>(getStockObject(DC_BRUSH));
       }
       default:
-        return DefSubclassProc(wnd, msg, w, l);
+        return defSubclassProc(wnd, msg, w, l);
     }
   }
   catch (...) {
@@ -137,12 +135,10 @@ static LRESULT CALLBACK appViewProc(
   DWORD_PTR
 ) {
   try {
-    clearCurrentException();
-
     if (msg == WM_DESTROY)
       PostQuitMessage(0);
 
-    return DefSubclassProc(wnd, msg, w, l);
+    return defSubclassProc(wnd, msg, w, l);
   }
   catch (...) {
     saveCurrentException();

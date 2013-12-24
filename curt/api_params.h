@@ -130,6 +130,6 @@ public:
   }
 };
 
-}
+} // end namespace curt
 
 #endif

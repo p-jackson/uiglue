@@ -77,8 +77,6 @@ static LRESULT CALLBACK MainViewProc(
   LPARAM lParam
 ) {
   try {
-    curt::clearCurrentException();
-
     switch (msg) {
     case WM_CREATE:
       createControls(wnd);
@@ -88,7 +86,7 @@ static LRESULT CALLBACK MainViewProc(
       break;
     }
 
-    return DefWindowProcW(wnd, msg, wParam, lParam);
+    return curt::defWindowProc(wnd, msg, wParam, lParam);
   }                      
   catch (...) {
     curt::saveCurrentException();

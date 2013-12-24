@@ -8,6 +8,7 @@
 #include "view.h"
 
 #include "curt/curt.h"
+#include "curt/error.h"
 #include "curt/include_windows.h"
 #include "curt/util.h"
 #include "uiglue/bindings.h"
@@ -30,11 +31,17 @@ void onSize(HWND wnd, UINT, int w, int h) {
 }
 
 LRESULT CALLBACK viewProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-  switch (msg) {
-    HANDLE_MSG(wnd, WM_CREATE, onCreate);
-    HANDLE_MSG(wnd, WM_SIZE, onSize);
-    default:
-      return DefWindowProcW(wnd, msg, wParam, lParam);
+  try {
+    switch (msg) {
+      HANDLE_MSG(wnd, WM_CREATE, onCreate);
+      HANDLE_MSG(wnd, WM_SIZE, onSize);
+      default:
+        return curt::defWindowProc(wnd, msg, wParam, lParam);
+    }
+  }
+  catch (...) {
+    curt::saveCurrentException();
+    return 0;
   }
 }
 

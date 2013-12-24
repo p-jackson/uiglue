@@ -44,6 +44,10 @@ Window createWindowEx(
   void *createParam
 );
 
+LRESULT defSubclassProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
+
+LRESULT defWindowProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
+
 void destroyWindow(HandleOr<HWND> wnd);
 
 std::intptr_t dialogBoxParam(

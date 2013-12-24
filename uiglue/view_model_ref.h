@@ -57,6 +57,6 @@ private:
   }
 };
 
-}
+} // end namespace uiglue
 
 #endif
