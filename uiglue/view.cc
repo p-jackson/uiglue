@@ -149,8 +149,12 @@ namespace uiglue {
     m_handlerCache = std::move(cache);
   }
 
-  void View::addBinding(int id, string bindingHandler, string bindingText) {
-    m_bindingDeclarations[id].emplace_back(bindingHandler, bindingText);
+  void View::addViewBinding(string bindingHandler, string bindingText) {
+    m_viewBindingDecls.emplace_back(move(bindingHandler), move(bindingText));
+  }
+
+  void View::addControlBinding(int id, string bindingHandler, string bindingText) {
+    m_controlBindingDecls[id].emplace_back(move(bindingHandler), move(bindingText));
   }
 
   bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
@@ -198,22 +202,27 @@ namespace uiglue {
     return false;
   }
 
+  void View::applyBindingsToWindow(const KeyValues& bindings, HWND wnd) {
+    for (auto& binding : bindings) {
+      auto handler = m_handlerCache.getBindingHandler(binding.first);
+      if (!handler)
+        continue;
+
+      auto observable = makeObservable(binding.second, *m_vm);
+      handler->init(wnd, observable, *this);
+
+      observable.subscribe([handler, wnd, this](UntypedObservable o) {
+        handler->update(wnd, o, *this);
+      });
+    }
+  }
+
   void View::applyBindings() {
-    for (auto& control : m_bindingDeclarations) {
+    applyBindingsToWindow(m_viewBindingDecls, m_wnd);
+
+    for (auto& control : m_controlBindingDecls) {
       auto controlHandle = curt::getDlgItem(m_wnd, control.first);
-
-      for (auto& binding : control.second) {
-        auto handler = m_handlerCache.getBindingHandler(binding.first);
-        if (!handler)
-          continue;
-
-        auto observable = makeObservable(binding.second, *m_vm);
-        handler->init(controlHandle, observable, *this);
-
-        observable.subscribe([handler, controlHandle, this](UntypedObservable o) {
-          handler->update(controlHandle, o, *this);
-        });
-      }
+      applyBindingsToWindow(control.second, controlHandle);
     }
   }
 

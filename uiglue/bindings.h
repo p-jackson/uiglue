@@ -31,6 +31,7 @@ public:
   BindingDecl(HWND handle, BindingHandlerCache cache);
   ~BindingDecl();
 
+  BindingDecl& operator()(std::string binding, std::string value);
   BindingDecl& operator()(int ctrlId, std::string binding, std::string value);
 };
 

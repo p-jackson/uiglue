@@ -55,7 +55,7 @@ curt::Window createView() {
   auto view = curt::createWindowEx(
     WS_EX_APPWINDOW,
     L"mainview",
-    L"Hello world example app",
+    nullptr,
     WS_OVERLAPPEDWINDOW,
     x, x, x, x,
     HWND_DESKTOP,
@@ -68,6 +68,7 @@ curt::Window createView() {
   curt::subclassAppView(view);
 
   uiglue::declareBindings(view, uiglue::defaultBindingHandlers())
+    ("text", "bind: title")
     (Message, "text", "bind: message")
   ;
 

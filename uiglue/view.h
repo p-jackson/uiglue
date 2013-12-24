@@ -30,7 +30,8 @@ namespace uiglue {
     std::unique_ptr<ViewModelRef> m_vm;
     std::unordered_map<int, std::string> m_menuCommands;
 
-    BindingDeclarations m_bindingDeclarations;
+    KeyValues m_viewBindingDecls;
+    BindingDeclarations m_controlBindingDecls;
     BindingHandlerCache m_handlerCache;
 
     std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
@@ -45,12 +46,14 @@ namespace uiglue {
     void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
 
     void addBindingHandlerCache(BindingHandlerCache cache);
-    void addBinding(int id, std::string bindingHandler, std::string bindingText);
+    void addViewBinding(std::string bindingHandler, std::string bindingText);
+    void addControlBinding(int id, std::string bindingHandler, std::string bindingText);
 
     static LRESULT __stdcall WndProc(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
   private:
     bool onMessage(unsigned int, WPARAM, LPARAM, LRESULT& result);
+    void applyBindingsToWindow(const KeyValues& bindings, HWND wnd);
     void applyBindings();
     WPARAM getCommandWParam(int commandCode, HWND control);
   };

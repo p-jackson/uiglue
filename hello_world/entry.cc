@@ -18,14 +18,17 @@
 class ViewModel {
 public:
   uiglue::Observable<std::string> message;
+  uiglue::Observable<std::string> title;
 
   ViewModel()
-    : message{ "Hello, world!" }
+    : message{ "Hello, world!" },
+      title{ "Hello world example app" }
   {
   }
 
   UIGLUE_BEGIN_MEMBER_MAP(ViewModel)
     UIGLUE_DECLARE_PROPERTY(message)
+    UIGLUE_DECLARE_PROPERTY(title)
   UIGLUE_END_MEMBER_MAP()
 };
 

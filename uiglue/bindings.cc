@@ -33,8 +33,13 @@ BindingDecl::~BindingDecl() {
   m_viewData.release();
 }
 
+BindingDecl& BindingDecl::operator()(string binding, string value) {
+  m_viewData->addViewBinding(move(binding), move(value));
+  return *this;
+}
+
 BindingDecl& BindingDecl::operator()(int ctrlId, string binding, string value) {
-  m_viewData->addBinding(ctrlId, binding, value);
+  m_viewData->addControlBinding(ctrlId, move(binding), move(value));
   return *this;
 }
 
