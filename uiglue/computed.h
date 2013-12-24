@@ -16,78 +16,78 @@
 
 namespace uiglue {
 
-  template<class T>
-  class Computed {
-    using Self = Computed<T>;
-    using ComputeFunction = std::function<T()>;
+template<class T>
+class Computed {
+  using Self = Computed<T>;
+  using ComputeFunction = std::function<T()>;
 
-    ComputeFunction m_compute;
-    Observable<T> m_inner;
-    bool m_needsUpdated;
-    std::unordered_map<int, std::shared_ptr<IUntypedObservable>> m_subscriptions;
+  ComputeFunction m_compute;
+  Observable<T> m_inner;
+  bool m_needsUpdated;
+  std::unordered_map<int, std::shared_ptr<IUntypedObservable>> m_subscriptions;
 
-  public:
-    Computed() : Computed(nullptr) {
-    }
+public:
+  Computed() : Computed(nullptr) {
+  }
 
-    Computed(ComputeFunction compute)
-      : m_compute{ std::move(compute) },
-        m_needsUpdated{ true }
-    {
-      operator()();
-    }
+  Computed(ComputeFunction compute)
+    : m_compute{ std::move(compute) },
+      m_needsUpdated{ true }
+  {
+    operator()();
+  }
 
-    T operator()() {
-      if (m_needsUpdated && m_compute) {
-        std::set<std::shared_ptr<IUntypedObservable>> dependencies;
-        clearDependencies();
+  T operator()() {
+    if (m_needsUpdated && m_compute) {
+      std::set<std::shared_ptr<IUntypedObservable>> dependencies;
+      clearDependencies();
 
-        T newValue;
-        {
-          DependencyTracker tracker(dependencies);
-          newValue = m_compute();
-        }
-
-        m_inner(std::move(newValue));
-
-        m_needsUpdated = false;
-
-        auto dependencyUpdated = std::bind(&Computed::dependencyUpdated, this, std::placeholders::_1);
-
-        for (auto& observable : dependencies) {
-          auto id = observable->subscribe(dependencyUpdated);
-          m_subscriptions[id] = observable;
-        }
+      T newValue;
+      {
+        DependencyTracker tracker(dependencies);
+        newValue = m_compute();
       }
 
-      return m_inner();
-    }
+      m_inner(std::move(newValue));
 
-    void subscribe(std::function<void(T)> f) {
-      m_inner->subscribe(std::move(f));
-    }
+      m_needsUpdated = false;
 
-    UntypedObservable asUntyped() {
-      return m_inner.asUntyped();
-    }
+      auto dependencyUpdated = std::bind(&Computed::dependencyUpdated, this, std::placeholders::_1);
 
-  private:
-    void dependencyUpdated(UntypedObservable) {
-      m_needsUpdated = true;
-      operator()();
-    }
-
-    void clearDependencies() {
-      for (auto& subscription : m_subscriptions) {
-        auto& observable = subscription.second;
-        auto id = subscription.first;
-        observable->unsubscribe(id);
+      for (auto& observable : dependencies) {
+        auto id = observable->subscribe(dependencyUpdated);
+        m_subscriptions[id] = observable;
       }
-
-      m_subscriptions.clear();
     }
-  };
 
-}
+    return m_inner();
+  }
+
+  void subscribe(std::function<void(T)> f) {
+    m_inner->subscribe(std::move(f));
+  }
+
+  UntypedObservable asUntyped() {
+    return m_inner.asUntyped();
+  }
+
+private:
+  void dependencyUpdated(UntypedObservable) {
+    m_needsUpdated = true;
+    operator()();
+  }
+
+  void clearDependencies() {
+    for (auto& subscription : m_subscriptions) {
+      auto& observable = subscription.second;
+      auto id = subscription.first;
+      observable->unsubscribe(id);
+    }
+
+    m_subscriptions.clear();
+  }
+};
+
+} // end namespace uiglue
 
 #endif
