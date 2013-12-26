@@ -17,7 +17,8 @@ std::atomic<int> TypedObservableSubscriberId::s_nextId;
 DependencyTracker* DependencyTracker::current = nullptr;
 
 DependencyTracker::DependencyTracker(DependencySet& dependencies)
-    : m_dependecies{ dependencies }
+    // GCC doesn't accept brace initialised references
+    : m_dependecies(dependencies)
   {
     current = this;
   }

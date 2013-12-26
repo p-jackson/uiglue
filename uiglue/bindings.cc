@@ -8,6 +8,7 @@
 #include "bindings.h"
 
 #include "builtin_bindings.h"
+#include "make_unique.h"
 #include "view.h"
 #include "view_messages.h"
 
@@ -19,7 +20,7 @@ using curt::HandleOr;
 namespace uiglue {
 
 BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
-  : m_viewData{ make_unique<View>(handle) },
+  : m_viewData{ detail::make_unique<View>(handle) },
     m_handle{ handle }
 {
   m_viewData->addBindingHandlerCache(move(cache));

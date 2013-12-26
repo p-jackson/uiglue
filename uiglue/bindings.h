@@ -9,6 +9,7 @@
 #define UIGLUE_BINDINGS_H
 
 #include "binding_handler_cache.h"
+#include "make_unique.h"
 #include "view_model_ref.h"
 
 #include "curt/api_params.h"
@@ -42,7 +43,7 @@ BindingHandlerCache defaultBindingHandlers();
 
 template<class ViewModel>
 void applyBindings(ViewModel& vm, curt::HandleOr<HWND> view) {
-  auto ref = std::make_unique<ViewModelRefImpl<ViewModel>>(vm);
+  auto ref = detail::make_unique<ViewModelRefImpl<ViewModel>>(vm);
   applyBindingsInner(std::move(ref), view);
 }
 

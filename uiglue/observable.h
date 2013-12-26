@@ -21,6 +21,9 @@
 #ifndef UIGLUE_OBSERVABLE_H
 #define UIGLUE_OBSERVABLE_H
 
+#include "make_unique.h"
+#include "remove_cv_t.h"
+
 #include <atomic>
 #include <boost/variant.hpp>
 #include <functional>
@@ -34,7 +37,7 @@ class UntypedObservable;
 
 struct IUntypedObservable {
   virtual ~IUntypedObservable() {}
-  virtual const type_info& type() const = 0;
+  virtual const std::type_info& type() const = 0;
   virtual int subscribe(std::function<void(UntypedObservable)> f) = 0;
   virtual void unsubscribe(int id) = 0;
 };
@@ -80,16 +83,19 @@ class TypedObservable
   std::unordered_map<int, Callback> m_subscribers;
 
   struct NotifySubscriber : public boost::static_visitor<void> {
-    TypedObservable& ref;
-    NotifySubscriber(TypedObservable& ref_) : ref{ ref_ } {}
+    TypedObservable& m_ref;
+
+    // GCC doesn't accept brace initialised references
+    NotifySubscriber(TypedObservable& ref) : m_ref(ref) {}
+
     NotifySubscriber& operator=(NotifySubscriber&) = delete;
 
     void operator()(std::function<void(T)>& f) {
-      f(ref.m_value);
+      f(m_ref.m_value);
     }
 
     void operator()(std::function<void(UntypedObservable)>& f) {
-      auto untyped = UntypedObservable{ ref.shared_from_this() };
+      auto untyped = UntypedObservable{ m_ref.shared_from_this() };
       f(untyped);
     }
   };
@@ -103,7 +109,7 @@ public:
 
   T& get() {
     if (DependencyTracker::isTracking())
-      DependencyTracker::track(shared_from_this());
+      DependencyTracker::track(this->shared_from_this());
 
     return m_value;
   }
@@ -139,14 +145,14 @@ public:
     return id;
   }
 
-  const type_info& type() const override {
+  const std::type_info& type() const override {
     return typeid(T);
   }
 
   std::unique_ptr<TypedObservable<T>> copy() const {
     // If the compile fails here then you may be copy constructing an
     // Observable<T> where the type T doesn't have a copy constructor.
-    return std::make_unique<TypedObservable<T>>(m_value);
+    return detail::make_unique<TypedObservable<T>>(m_value);
   }
 };
 
@@ -165,12 +171,15 @@ public:
   struct CanForward<P>
     : std::integral_constant<bool, !std::is_same<
         Observable<T>,
-        std::remove_cv_t<P>>::value
+        detail::remove_cv_t<P>>::value
       >
   {
   };
 
-  template<class... P, class = std::enable_if<CanForward<P...>::value>::type>
+  template<
+    class... P,
+    class = typename std::enable_if<CanForward<P...>::value>::type
+  >
   explicit Observable(P&&... a)
     : m_inner { std::make_shared<TypedObservable<T>>(std::forward<P>(a)...) }
   {
