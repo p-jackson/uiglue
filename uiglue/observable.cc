@@ -16,7 +16,7 @@ std::atomic<int> TypedObservableSubscriberId::s_nextId;
 
 DependencyTracker* DependencyTracker::current = nullptr;
 
-DependencyTracker::DependencyTracker(set<shared_ptr<IUntypedObservable>>& dependencies)
+DependencyTracker::DependencyTracker(DependencySet& dependencies)
     : m_dependecies{ dependencies }
   {
     current = this;

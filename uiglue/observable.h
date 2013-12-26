@@ -43,10 +43,12 @@ struct IUntypedObservable {
 class DependencyTracker {
   static DependencyTracker* current;
 
-  std::set<std::shared_ptr<IUntypedObservable>>& m_dependecies;
+  using DependencySet = std::set<std::shared_ptr<IUntypedObservable>>;
+
+  DependencySet& m_dependecies;
 
 public:
-  DependencyTracker(std::set<std::shared_ptr<IUntypedObservable>>& dependencies);
+  DependencyTracker(DependencySet& dependencies);
   ~DependencyTracker();
 
   DependencyTracker& operator=(DependencyTracker&) = delete;
@@ -61,9 +63,11 @@ protected:
 };
 
 template<class T>
-class TypedObservable : public IUntypedObservable,
-                        private TypedObservableSubscriberId,
-                        public std::enable_shared_from_this<TypedObservable<T>> {
+class TypedObservable
+  : public IUntypedObservable,
+    private TypedObservableSubscriberId,
+    public std::enable_shared_from_this<TypedObservable<T>>
+{
   friend UntypedObservable;
 
   T m_value;
