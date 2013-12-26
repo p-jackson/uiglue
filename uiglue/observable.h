@@ -215,6 +215,10 @@ public:
     return m_inner->subscribe(std::move(f));
   }
 
+  void unsubscribe(int subId) {
+    m_inner->unsubscribe(subId);
+  }
+
   UntypedObservable asUntyped();
 
 private:
