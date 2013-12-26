@@ -16,9 +16,18 @@
 
 #include <SDKDDKVer.h>
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#define OEMRESOURCE
+#if !defined(NOMINMAX)
+   #define NOMINMAX
+#endif
+
+#if !defined(WIN32_LEAN_AND_MEAN)
+   #define WIN32_LEAN_AND_MEAN
+#endif
+
+#if !defined(OEMRESOURCE)
+   #define OEMRESOURCE
+#endif
+
 #include <Windows.h>
 
 // If cotire (CMake module) includes Windows.h in it's precompiled header then

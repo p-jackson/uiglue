@@ -47,6 +47,9 @@ public:
   String(const String&) = delete;
   String& operator=(const String) = delete;
 
+  // MSVC can't =default move constructors yet
+  String(String&& o) : m_str{ std::move(o.m_str) } {}
+
   operator const wchar_t*() const { return m_str.c_str(); }
 };
 

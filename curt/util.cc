@@ -11,6 +11,8 @@
 #include "error.h"
 #include "include_windows.h"
 
+#include <limits>
+
 using std::string;
 using std::wstring;
 
@@ -30,7 +32,11 @@ string wideToUtf8(wstring wide) {
     throw std::runtime_error("String too long to convert to UTF-8");
 
   const auto nChar = static_cast<int>(wide.size());
+#if (WINVER >= 0x0600)
   const auto flags = WC_ERR_INVALID_CHARS;
+#else
+  const auto flags = 0;
+#endif
 
   const auto nBytes = wideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, nullptr, 0, nullptr, nullptr);
 
