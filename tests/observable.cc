@@ -116,3 +116,42 @@ TEST(Observable, assignMove) {
   ASSERT_EQ(114, o3().value);
   ASSERT_EQ(115, nextValue);
 }
+
+TEST(Observable, get) {
+  auto o1 = Observable<int>{ 113 };
+  ASSERT_EQ(113, o1());
+
+  auto o2 = Observable<std::tuple<int, int, int>>{ 1, 2, 3 };
+  ASSERT_EQ(std::make_tuple(1, 2, 3), o2());
+
+  // Test that the getter returns a modifiable reference
+  std::get<0>(o2()) = 2;
+  std::get<1>(o2()) = 4;
+  std::get<2>(o2()) = 6;
+  ASSERT_EQ(std::make_tuple(2, 4, 6), o2());
+}
+
+TEST(Observable, set) {
+  auto o1 = Observable<int>{ 113 };
+  ASSERT_EQ(113, o1());
+  o1(114);
+  ASSERT_EQ(114, o1());
+  o1(2 * o1());
+  ASSERT_EQ(228, o1());
+
+  static auto nextValue = 113;
+  struct Obj {
+    int value;
+    Obj() : value{ nextValue++ } {}
+    bool operator==(const Obj& o) { return value == o.value; }
+  };
+  auto obj = Obj{};
+  auto o2 = Observable<Obj>{};
+  ASSERT_EQ(113, obj.value);
+  ASSERT_EQ(114, o2().value);
+  ASSERT_EQ(115, nextValue);
+
+  o2(std::move(obj));
+  ASSERT_EQ(113, o2().value);
+  ASSERT_EQ(115, nextValue);
+}
