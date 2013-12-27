@@ -5,6 +5,9 @@ set(all_files ${sources} ${includes})
 
 # LPTSTR should be defined as wchar_t*
 add_definitions(-DUNICODE)
+if(CMAKE_COMPILER_IS_MINGW)
+  add_definitions(-municode)
+endif()
 
 # Create the executable hello_world project
 add_executable(hello_world WIN32 ${all_files})

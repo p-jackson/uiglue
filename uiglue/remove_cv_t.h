@@ -16,16 +16,8 @@
 
 namespace uiglue { namespace detail {
 
-#if _MSC_VER >= 1800
-
-using std::remove_cv_t;
-
-#else
-
 template<typename T>
 using remove_cv_t = typename std::remove_cv<T>::type;
-
-#endif
 
 } } // end namespace uiglue::detail
 

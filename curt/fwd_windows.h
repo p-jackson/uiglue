@@ -8,21 +8,14 @@
 #ifndef CURT_FWD_WINDOWS_H
 #define CURT_FWD_WINDOWS_H
 
-#if defined(_WIN64)
-  typedef __int64 INT_PTR;
-  typedef unsigned __int64 UINT_PTR;
-  typedef unsigned __int64 WPARAM;
-  typedef unsigned __int64 DWORD_PTR;
-  typedef __int64 LPARAM;
-  typedef __int64 LRESULT;
-#else
-  typedef _W64 int INT_PTR;
-  typedef _W64 unsigned int UINT_PTR;
-  typedef _W64 unsigned int WPARAM;
-  typedef _W64 unsigned long DWORD_PTR;
-  typedef _W64 long LPARAM;
-  typedef _W64 long LRESULT;
-#endif
+#include <cstdint>
+
+typedef std::intptr_t INT_PTR;
+typedef std::uintptr_t UINT_PTR;
+typedef std::uintptr_t WPARAM;
+typedef std::uintptr_t DWORD_PTR;
+typedef std::intptr_t LPARAM;
+typedef std::intptr_t LRESULT;
 
 
 #define CURT_DECLARE_HANDLE(name) \
@@ -36,6 +29,7 @@ CURT_DECLARE_HANDLE(HFONT);
 CURT_DECLARE_HANDLE(HACCEL);
 CURT_DECLARE_HANDLE(HDC);
 CURT_DECLARE_HANDLE(HMENU);
+
 
 #define CURT_DECLARE_STRUCT(name) \
   struct tag##name; \
@@ -54,6 +48,6 @@ typedef unsigned short ATOM;
 
 
 typedef INT_PTR (__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);
-typedef LRESULT (__stdcall *SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
+typedef LRESULT (__stdcall* SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
 #endif

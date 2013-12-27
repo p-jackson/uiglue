@@ -171,8 +171,8 @@ public:
   struct CanForward<P>
     : std::integral_constant<bool, !std::is_same<
         Observable<T>,
-        detail::remove_cv_t<P>>::value
-      >
+        detail::remove_cv_t<P>
+      >::value>
   {
   };
 

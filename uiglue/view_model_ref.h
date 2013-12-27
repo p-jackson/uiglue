@@ -33,7 +33,8 @@ class ViewModelRefImpl : public ViewModelRef {
   ViewModel& vm;
 
 public:
-  ViewModelRefImpl(ViewModel& vm_) : vm{ vm_ } {}
+  // GCC doesn't accept brace initialised references
+  ViewModelRefImpl(ViewModel& vm_) : vm(vm_) {}
 
   void runCommand(std::string name, HWND view) override {
     getMember(name).handler(vm, view);

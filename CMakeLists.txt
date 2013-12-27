@@ -15,8 +15,7 @@ include_directories(${Boost_INCLUDE_DIR})
 # All projects can include headers relative to the root of the repository
 include_directories(${uiglue_SOURCE_DIR})
 
-string(TOLOWER ${CMAKE_BUILD_TOOL} build_tool)
-if(build_tool MATCHES "(msdev|devenv|nmake|msbuild)")
+if(MSVC)
   add_definitions(/W4)
 endif()
 

@@ -6,6 +6,9 @@ set(all_files ${sources} ${includes} ${resources})
 
 # LPTSTR should be defined as wchar_t*
 add_definitions(-DUNICODE)
+if(CMAKE_COMPILER_IS_MINGW)
+  add_definitions(-municode)
+endif()
 
 # Create the executable test project
 add_executable(bind_test WIN32 ${all_files})
@@ -17,8 +20,10 @@ source_group("Resource Files" FILES ${resources})
 target_link_libraries(bind_test curt uiglue comctl32)
 
 # Create precompiled header with cotire (we don't need a unity build)
-set_target_properties(bind_test PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
-cotire(bind_test)
+if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  set_target_properties(bind_test PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
+  cotire(bind_test)
+endif()
 
 # Run the mt tool as a post build to embed bind_test.exe.manifest
 get_property(bind_test_exe_location TARGET bind_test PROPERTY LOCATION)

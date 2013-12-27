@@ -28,6 +28,8 @@
 #ifndef CURT_HANDLE_H
 #define CURT_HANDLE_H
 
+#include <utility>
+
 namespace curt {
 
 template<class Traits>
