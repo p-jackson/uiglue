@@ -28,7 +28,8 @@ string wideToUtf8(wstring wide) {
   if (wide.empty())
     return {};
 
-  if (wide.size() > std::numeric_limits<int>::max())
+  const auto maxSize = std::numeric_limits<int>::max();
+  if (wide.size() > static_cast<wstring::size_type>(maxSize))
     throw std::runtime_error("String too long to convert to UTF-8");
 
   const auto nChar = static_cast<int>(wide.size());
@@ -50,7 +51,8 @@ wstring utf8ToWide(string utf8) {
   if (utf8.empty())
     return {};
 
-  if (utf8.size() > std::numeric_limits<int>::max())
+  const auto maxSize = std::numeric_limits<int>::max();
+  if (utf8.size() > static_cast<string::size_type>(maxSize))
     throw std::runtime_error("String too long to convert to wide chars");
 
   const auto nBytes = static_cast<int>(utf8.size());
