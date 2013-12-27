@@ -13,9 +13,16 @@
 typedef std::intptr_t INT_PTR;
 typedef std::uintptr_t UINT_PTR;
 typedef std::uintptr_t WPARAM;
+
+#if defined(_WIN64)
 typedef std::uintptr_t DWORD_PTR;
 typedef std::intptr_t LPARAM;
 typedef std::intptr_t LRESULT;
+#else
+typedef _W64 unsigned long DWORD_PTR;
+typedef _W64 long LPARAM;
+typedef _W64 long LRESULT;
+#endif
 
 
 #define CURT_DECLARE_HANDLE(name) \
