@@ -19,6 +19,7 @@ typedef std::uintptr_t DWORD_PTR;
 typedef std::intptr_t LPARAM;
 typedef std::intptr_t LRESULT;
 #else
+// Windows.h defines these as longs, not ints
 typedef _W64 unsigned long DWORD_PTR;
 typedef _W64 long LPARAM;
 typedef _W64 long LRESULT;
