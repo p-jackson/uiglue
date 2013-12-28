@@ -7,7 +7,8 @@
 
 #include "uiglue/observable.h"
 
-#include <gtest/gtest.h>
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
 #include <string>
 
 using uiglue::Observable;
@@ -16,38 +17,48 @@ using uiglue::Observable;
 #define CONSTRUCTOR_FAIL() ([] { FAIL(); })()
 
 
-TEST(Observable, ctorDefault) {
+TEST_CASE("An Observable<T> is default constructible if T is default constructible", "[observable]") {
+  // The wrapped object equals a default constructed object
   auto o1 = Observable<std::string>{};
-  ASSERT_EQ(std::string{}, o1());
+  REQUIRE(o1() == std::string{});
 
+  // The wrapped object's default constructor will be called
   struct Obj {
     int count = 0;
     Obj() { ++count; }
   };
   auto o2 = Observable<Obj>{};
-  ASSERT_EQ(1, o2().count);
+  REQUIRE(o2().count == 1);
 }
 
-TEST(Observable, ctorForwarding) {
+TEST_CASE("Observables forward constructor arguments to the wrapped object's constructor", "[observable]") {
+  // Forwards a single argument
   auto o1 = Observable<std::string>{ "test" };
-  ASSERT_EQ("test", o1());
+  REQUIRE(o1() == "test");
 
-  auto o2 = Observable<std::pair<int, double>>{ 113, 3.14 };
-  ASSERT_EQ(std::make_pair(113, 3.14), o2());
+  // Forwards multiple arguments
+  auto o2 = Observable<std::tuple<int, double, float>>{ 113, 3.14, 6.28f };
+  REQUIRE(o2() == std::make_tuple(113, 3.14, 6.28f));
 
+  // Forwards moved objects without copying
   struct Obj {
-    int count;
-    Obj(int c) : count{ c } {}
+    bool copied = false;
+    Obj() = default;
+    Obj(const Obj&) : copied{ true } {}
+    // MSVC doesn't support default'd move ctors yet
+    Obj(Obj&& o) : copied{ o.copied } {}
   };
-  auto o3 = Observable<Obj>{ 3 };
-  ASSERT_EQ(3, o3().count);
+
+  auto obj = Obj{};
+  auto o3 = Observable<Obj>{ std::move(obj) };
+  REQUIRE_FALSE(o3().copied);
 }
 
-TEST(Observable, ctorCopy) {
+TEST_CASE("An Observable<T> is copy constructible if T is copy constructible", "[observable]") {
   auto o1 = Observable<int>{ 113 };
   auto o2 = o1;
-  ASSERT_EQ(113, o2());
-  ASSERT_EQ(o1(), o2());
+  REQUIRE(o2() == 113);
+  REQUIRE(o2() == o1());
 
   static auto nextValue = 113;
   struct Obj {
@@ -55,16 +66,16 @@ TEST(Observable, ctorCopy) {
     Obj() : value{ nextValue++ } {}
   };
   auto o3 = Observable<Obj>{};
-  ASSERT_EQ(113, o3().value);
+  REQUIRE(o3().value == 113);
   auto o4 = o3;
-  ASSERT_EQ(113, o4().value);
-  ASSERT_EQ(114, nextValue);
+  REQUIRE(o4().value == 113);
+  REQUIRE(nextValue == 114);
 }
 
-TEST(Observable, ctorMove) {
+TEST_CASE("Observables are move constructible", "[observable]") {
   auto o1 = Observable<int>{ 113 };
   auto o2 = std::move(o1);
-  ASSERT_EQ(113, o2());
+  REQUIRE(o2() == 113);
 
   static auto nextValue = 113;
   struct Obj {
@@ -74,16 +85,16 @@ TEST(Observable, ctorMove) {
   };
   auto o3 = Observable<Obj>{};
   auto o4 = std::move(o3);
-  ASSERT_EQ(113, o4().value);
-  ASSERT_EQ(114, nextValue);
+  REQUIRE(o4().value == 113);
+  REQUIRE(nextValue == 114);
 }
 
-TEST(Observable, assignCopy) {
+TEST_CASE("An Observable<T> is copy assignable if T is copyable", "[observable]") {
   Observable<int> o1;
   auto o2 = Observable<int>{ 113 };
   o1 = o2;
-  ASSERT_EQ(113, o1());
-  ASSERT_EQ(o1(), o2());
+  REQUIRE(o1() == 113);
+  REQUIRE(o2() == o1());
 
   static auto nextValue = 113;
   struct Obj {
@@ -92,17 +103,17 @@ TEST(Observable, assignCopy) {
   };
   Observable<Obj> o3; // This increments nextValue;
   auto o4 = Observable<Obj>{};
-  ASSERT_EQ(114, o4().value);
+  REQUIRE(o4().value == 114);
   o3 = o4;
-  ASSERT_EQ(114, o3().value);
-  ASSERT_EQ(115, nextValue);
+  REQUIRE(o3().value == 114);
+  REQUIRE(nextValue == 115);
 }
 
-TEST(Observable, assignMove) {
+TEST_CASE("Observables are move assignable", "[observable]") {
   Observable<int> o1;
   auto o2 = Observable<int>{ 113 };
   o1 = std::move(o2);
-  ASSERT_EQ(113, o1());
+  REQUIRE(o1() == 113);
 
   static auto nextValue = 113;
   struct Obj {
@@ -113,31 +124,39 @@ TEST(Observable, assignMove) {
   auto o3 = Observable<Obj>{};
   auto o4 = Observable<Obj>{};
   o3 = std::move(o4);
-  ASSERT_EQ(114, o3().value);
-  ASSERT_EQ(115, nextValue);
+  REQUIRE(o3().value == 114);
+  REQUIRE(nextValue == 115);
 }
 
-TEST(Observable, get) {
-  auto o1 = Observable<int>{ 113 };
-  ASSERT_EQ(113, o1());
+TEST_CASE("Observables can return wrapped value types", "[observable]") {
+  auto o = Observable<int>{ 113 };
+  REQUIRE(o() == 113);
 
-  auto o2 = Observable<std::tuple<int, int, int>>{ 1, 2, 3 };
-  ASSERT_EQ(std::make_tuple(1, 2, 3), o2());
-
-  // Test that the getter returns a modifiable reference
-  std::get<0>(o2()) = 2;
-  std::get<1>(o2()) = 4;
-  std::get<2>(o2()) = 6;
-  ASSERT_EQ(std::make_tuple(2, 4, 6), o2());
+  SECTION("the accessor returns a modifiable reference") {
+    o() = 114;
+    REQUIRE(o() == 114);
+  }
 }
 
-TEST(Observable, set) {
+TEST_CASE("Observables can return wrapped non-trivial data types", "[observable]") {
+  auto o = Observable<std::tuple<int, int, int>>{ 1, 2, 3 };
+  REQUIRE(o() == std::make_tuple(1, 2, 3));
+
+  SECTION("the accessor returns a modifiable reference") {
+    std::get<0>(o()) = 2;
+    std::get<1>(o()) = 4;
+    std::get<2>(o()) = 6;
+    REQUIRE(o() == std::make_tuple(2, 4, 6));
+  }
+}
+
+TEST_CASE("Observables can set the wrapped data types", "[observable]") {
   auto o1 = Observable<int>{ 113 };
-  ASSERT_EQ(113, o1());
+  REQUIRE(o1() == 113);
   o1(114);
-  ASSERT_EQ(114, o1());
+  REQUIRE(o1() == 114);
   o1(2 * o1());
-  ASSERT_EQ(228, o1());
+  REQUIRE(o1() == 228);
 
   static auto nextValue = 113;
   struct Obj {
@@ -147,62 +166,62 @@ TEST(Observable, set) {
   };
   auto obj = Obj{};
   auto o2 = Observable<Obj>{};
-  ASSERT_EQ(113, obj.value);
-  ASSERT_EQ(114, o2().value);
-  ASSERT_EQ(115, nextValue);
+  REQUIRE(obj.value == 113);
+  REQUIRE(o2().value == 114);
+  REQUIRE(nextValue == 115);
 
   o2(std::move(obj));
-  ASSERT_EQ(113, o2().value);
-  ASSERT_EQ(115, nextValue);
+  REQUIRE(o2().value == 113);
+  REQUIRE(nextValue == 115);
 }
 
-TEST(Observable, subscribeBasic) {
+TEST_CASE("Can be notified of changes to the wrapped object", "[observable]") {
   auto o1Count = 0;
   auto o1 = Observable<int>{ 113 };
   o1.subscribe([&o1Count](int v) {
     ++o1Count;
-    ASSERT_EQ(114, v);
+    REQUIRE(v == 114);
   });
   o1(114);
-  ASSERT_EQ(114, o1());
-  ASSERT_EQ(1, o1Count);
+  REQUIRE(o1() == 114);
+  REQUIRE(o1Count == 1);
   o1(114); // Shouldn't call the subscribed function a second time
-  ASSERT_EQ(114, o1());
-  ASSERT_EQ(1, o1Count);
+  REQUIRE(o1() == 114);
+  REQUIRE(o1Count == 1);
 
   // Again with strings
   auto o2Count = 0;
   auto o2 = Observable<std::string>{ "a" };
   o2.subscribe([&o2Count](std::string s) {
     ++o2Count;
-    ASSERT_EQ("b", s);
+    REQUIRE(s == "b");
   });
   o2("b");
-  ASSERT_EQ("b", o2());
-  ASSERT_EQ(1, o2Count);
+  REQUIRE(o2() == "b");
+  REQUIRE(o2Count == 1);
   o2("b"); // Shouldn't call the subscribed function a second time
-  ASSERT_EQ("b", o2());
-  ASSERT_EQ(1, o2Count);
+  REQUIRE(o2() == "b");
+  REQUIRE(o2Count == 1);
 }
 
-TEST(Observable, unsubscribeBasic) {
+TEST_CASE("Can unsubscribe to no longer be notified of changes to the wrapped object", "[observable]") {
   auto o = Observable<int>{ 113 };
 
   auto count1 = 0;
   auto sub1 = o.subscribe([&count1](int v) {
     ++count1;
-    ASSERT_EQ(114, v);
+    REQUIRE(v == 114);
   });
   o(114);
-  ASSERT_EQ(114, o());
-  ASSERT_EQ(1, count1);
+  REQUIRE(o() == 114);
+  REQUIRE(count1 == 1);
 
   o.unsubscribe(sub1);
   o(115);
-  ASSERT_EQ(1, count1);
+  REQUIRE(count1 == 1);
 }
 
-TEST(Observable, unsubscribeOutOfOrder) {
+TEST_CASE("Can unsubscribe from an observable in a different order", "[observable]") {
   auto o = Observable<std::string>{ "a" };
 
   auto count1 = 0;
@@ -212,16 +231,16 @@ TEST(Observable, unsubscribeOutOfOrder) {
   o.subscribe([&count2](std::string) { ++count2; });
 
   o("b");
-  ASSERT_EQ(1, count1);
-  ASSERT_EQ(1, count2);
+  REQUIRE(count1 == 1);
+  REQUIRE(count2 == 1);
 
   o.unsubscribe(sub1);
   o("c");
-  ASSERT_EQ(1, count1);
-  ASSERT_EQ(2, count2);
+  REQUIRE(count1 == 1);
+  REQUIRE(count2 == 2);
 }
 
-TEST(Observable, unsubscribeInCallback) {
+TEST_CASE("Can unsubscribe within the change handler", "[observable]") {
   auto o = Observable<int>{ 113 };
 
   auto count = 0;
@@ -232,13 +251,13 @@ TEST(Observable, unsubscribeInCallback) {
   });
 
   o(114);
-  ASSERT_EQ(1, count);
+  REQUIRE(count == 1);
 
   o(115);
-  ASSERT_EQ(1, count);
+  REQUIRE(count == 1);
 }
 
-TEST(Observable, modifyInCallback) {
+TEST_CASE("The wrapped object can be modified from within a change handler", "[observable]") {
   auto o = Observable<int>{ 113 };
 
   auto count = 0;
@@ -249,6 +268,6 @@ TEST(Observable, modifyInCallback) {
   });
 
   o(114);
-  ASSERT_EQ(115, o());
-  ASSERT_EQ(2, count);
+  REQUIRE(o() == 115);
+  REQUIRE(count == 2);
 }

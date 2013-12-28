@@ -2,6 +2,7 @@ project(uiglue)
 
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(EXT_PROJECTS_DIR "${CMAKE_SOURCE_DIR}/third_party")
 
 enable_testing()
 
@@ -24,3 +25,4 @@ add_subdirectory(bind_test)
 add_subdirectory(hello_world)
 add_subdirectory(tests)
 add_subdirectory(uiglue)
+add_subdirectory(${EXT_PROJECTS_DIR}/catch)

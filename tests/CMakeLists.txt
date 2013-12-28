@@ -6,10 +6,10 @@ set(all_files ${sources} ${includes})
 # Create the executable test project
 add_executable(tests ${all_files})
 
-# googletest setup
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIR})
+include_directories(${CATCH_INCLUDE_DIR})
 
-target_link_libraries(tests uiglue curt comctl32 ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(tests uiglue curt comctl32)
+
+add_dependencies(tests catch)
 
 add_test(NAME uiglue-unit-tests COMMAND tests)
