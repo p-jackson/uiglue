@@ -16,8 +16,13 @@ include_directories(${Boost_INCLUDE_DIR})
 # All projects can include headers relative to the root of the repository
 include_directories(${uiglue_SOURCE_DIR})
 
+# LPTSTR should be defined as wchar_t*
+add_definitions(-DUNICODE)
+
 if(MSVC)
-  add_definitions(/W4)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+elseif(MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
 endif()
 
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)

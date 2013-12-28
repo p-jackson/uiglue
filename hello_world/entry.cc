@@ -15,6 +15,7 @@
 
 #include <sstream>
 #include <string>
+#include <system_error>
 
 class ViewModel {
 public:
@@ -52,7 +53,7 @@ int APIENTRY wWinMain(
     return static_cast<int>(returnCode);
   }
   catch (std::system_error& e) {
-    auto ss = std::ostringstream{};
+    std::ostringstream ss{};
     ss << "System error(" << e.code() << "): " << e.what();
     curt::messageBox(nullptr, ss.str(), "Exception", MB_OK | MB_ICONERROR);
     return 0;

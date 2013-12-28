@@ -3,12 +3,6 @@ file(GLOB_RECURSE includes "*.h")
 file(GLOB_RECURSE sources "*.cc")
 set(all_files ${sources} ${includes})
 
-# LPTSTR should be defined as wchar_t*
-add_definitions(-DUNICODE)
-if(CMAKE_COMPILER_IS_MINGW)
-  add_definitions(-municode)
-endif()
-
 # Create the executable hello_world project
 add_executable(hello_world WIN32 ${all_files})
 
@@ -18,3 +12,7 @@ target_link_libraries(hello_world curt uiglue comctl32)
 # Create precompiled header with cotire (we don't need a unity build)
 set_target_properties(hello_world PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
 cotire(hello_world)
+
+if(MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
+endif()

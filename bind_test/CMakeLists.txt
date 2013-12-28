@@ -4,12 +4,6 @@ file(GLOB_RECURSE sources "*.cc")
 set(resources "bind_test.rc" "bind_test.exe.manifest")
 set(all_files ${sources} ${includes} ${resources})
 
-# LPTSTR should be defined as wchar_t*
-add_definitions(-DUNICODE)
-if(CMAKE_COMPILER_IS_MINGW)
-  add_definitions(-municode)
-endif()
-
 # Create the executable test project
 add_executable(bind_test WIN32 ${all_files})
 
@@ -25,11 +19,17 @@ if(NOT CMAKE_COMPILER_IS_GNUCXX)
   cotire(bind_test)
 endif()
 
-# Run the mt tool as a post build to embed bind_test.exe.manifest
-get_property(bind_test_exe_location TARGET bind_test PROPERTY LOCATION)
-add_custom_command(
-  TARGET bind_test
-  POST_BUILD
-  COMMAND "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\bind_test.exe.manifest\" -outputresource:\"${bind_test_exe_location}\"\;\#1 /nologo
-  COMMENT "Adding manifest"
-)
+if(MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
+endif()
+
+if(MSVC)
+  # Run the mt tool as a post build to embed bind_test.exe.manifest
+  get_property(bind_test_exe_location TARGET bind_test PROPERTY LOCATION)
+  add_custom_command(
+    TARGET bind_test
+    POST_BUILD
+    COMMAND "mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\bind_test.exe.manifest\" -outputresource:\"${bind_test_exe_location}\"\;\#1 /nologo
+    COMMENT "Adding manifest"
+  )
+endif()

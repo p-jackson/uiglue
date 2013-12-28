@@ -27,7 +27,7 @@ typedef _W64 long LRESULT;
 
 #define CURT_DECLARE_HANDLE(name) \
   struct name##__; \
-  typedef struct name##__* name;
+  typedef struct name##__* name
 
 CURT_DECLARE_HANDLE(HINSTANCE);
 CURT_DECLARE_HANDLE(HWND);
@@ -40,7 +40,7 @@ CURT_DECLARE_HANDLE(HMENU);
 
 #define CURT_DECLARE_STRUCT(name) \
   struct tag##name; \
-  typedef struct tag##name name;
+  typedef struct tag##name name
 
 CURT_DECLARE_STRUCT(MSG);
 CURT_DECLARE_STRUCT(LOGFONTW);
