@@ -20,12 +20,13 @@ if(MSVC)
   add_definitions(/W4)
 endif()
 
+add_subdirectory(${EXT_PROJECTS_DIR}/catch)
+
 add_subdirectory(curt)
 add_subdirectory(bind_test)
 add_subdirectory(hello_world)
 add_subdirectory(tests)
 add_subdirectory(uiglue)
-add_subdirectory(${EXT_PROJECTS_DIR}/catch)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(TARGET catch PROPERTY FOLDER "third_party")
