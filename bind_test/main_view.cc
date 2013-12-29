@@ -15,8 +15,6 @@
 #include "curt/util.h"
 #include "uiglue/bindings.h"
 
-static const wchar_t* className = L"uiglue main view";
-
 enum {
   NameLabel = 1,
   NameEdit,
@@ -94,39 +92,32 @@ static LRESULT CALLBACK MainViewProc(
   }
 }
 
-static bool isRegistered() {
-  WNDCLASSEXW wcex;
-  return GetClassInfoExW(curt::thisModule(), className, &wcex) != 0;
-}
-
-static void registerMainView() {
+static ATOM registerMainView() {
   auto wcex = WNDCLASSEXW{ sizeof(WNDCLASSEXW) };
 
   wcex.lpfnWndProc = &MainViewProc;
   wcex.hInstance = curt::thisModule();
   wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-  wcex.lpszClassName = className;
+  wcex.lpszClassName = L"uiglue main view";
   wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_UIGLUE);
   wcex.hIcon = LoadIconW(curt::thisModule(), MAKEINTRESOURCEW(IDI_UIGLUE));
   wcex.hIconSm = LoadIconW(curt::thisModule(), MAKEINTRESOURCEW(IDI_SMALL));
 
-  if (!RegisterClassExW(&wcex))
-    throw std::runtime_error("Failed to register window class");
+  return curt::registerClassEx(&wcex);
 }
 
 namespace uiglue {
 
 curt::Window makeMainView() {
-  if (!isRegistered())
-    registerMainView();
+  static auto classAtom = registerMainView();
 
   const auto x = CW_USEDEFAULT; // All dimensions are default
 
   auto mainView = curt::createWindowEx(
     WS_EX_APPWINDOW,
-    className,
-    curt::loadStringW(IDS_APP_TITLE),
+    classAtom,
+    nullptr,
     WS_OVERLAPPEDWINDOW,
     x, x, x, x,
     HWND_DESKTOP,
@@ -138,9 +129,10 @@ curt::Window makeMainView() {
   curt::subclassControlBackground(mainView, RGB(255, 255, 255));
   curt::subclassAppView(mainView);
 
-  auto bindingHandlers = defaultBindingHandlers();
-
-  declareBindings(mainView, bindingHandlers)
+  declareBindings(mainView)
+    (uiglue::ThisView, "text", curt::loadString(IDS_APP_TITLE))
+    (uiglue::MenuCommand, IDM_ABOUT, "onAbout")
+    (uiglue::MenuCommand, IDM_EXIT, "onExit")
     (NameLabel, "text", "Name:")
     (NameEdit, "value", "bind: name")
     (ModalButton, "text", "Modal")

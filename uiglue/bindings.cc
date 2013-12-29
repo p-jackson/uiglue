@@ -19,6 +19,9 @@ using curt::HandleOr;
 
 namespace uiglue {
 
+MenuCommandT MenuCommand;
+ThisViewT ThisView;
+
 BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
   : m_viewData{ detail::make_unique<View>(handle) },
     m_handle{ handle }
@@ -34,13 +37,18 @@ BindingDecl::~BindingDecl() {
   m_viewData.release();
 }
 
-BindingDecl& BindingDecl::operator()(string binding, string value) {
+BindingDecl& BindingDecl::operator()(ThisViewT, string binding, string value) {
   m_viewData->addViewBinding(move(binding), move(value));
   return *this;
 }
 
 BindingDecl& BindingDecl::operator()(int ctrlId, string binding, string value) {
   m_viewData->addControlBinding(ctrlId, move(binding), move(value));
+  return *this;
+}
+
+BindingDecl& BindingDecl::operator()(MenuCommandT, int id, string handler) {
+  m_viewData->addMenuCommand(id, handler);
   return *this;
 }
 

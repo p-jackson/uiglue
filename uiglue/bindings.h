@@ -24,6 +24,12 @@ class View;
 
 void applyBindingsInner(std::unique_ptr<ViewModelRef> vmRef, HWND view);
 
+struct MenuCommandT {};
+extern MenuCommandT MenuCommand;
+
+struct ThisViewT {};
+extern ThisViewT ThisView;
+
 class BindingDecl {
   std::unique_ptr<View> m_viewData;
   HWND m_handle;
@@ -32,14 +38,18 @@ public:
   BindingDecl(HWND handle, BindingHandlerCache cache);
   ~BindingDecl();
 
-  BindingDecl& operator()(std::string binding, std::string value);
+  BindingDecl& operator()(ThisViewT, std::string binding, std::string value);
   BindingDecl& operator()(int ctrlId, std::string binding, std::string value);
+  BindingDecl& operator()(MenuCommandT, int id, std::string handler);
 };
 
 
-BindingDecl declareBindings(curt::HandleOr<HWND> view, BindingHandlerCache);
-
 BindingHandlerCache defaultBindingHandlers();
+
+BindingDecl declareBindings(
+  curt::HandleOr<HWND> view,
+  BindingHandlerCache handlers = defaultBindingHandlers()
+);
 
 template<class ViewModel>
 void applyBindings(ViewModel& vm, curt::HandleOr<HWND> view) {

@@ -74,8 +74,8 @@ curt::Window createView() {
   curt::subclassControlBackground(view, RGB(255, 255, 255));
   curt::subclassAppView(view);
 
-  uiglue::declareBindings(view, uiglue::defaultBindingHandlers())
-    ("text", "bind: title")
+  uiglue::declareBindings(view)
+    (uiglue::ThisView, "text", "bind: title")
     (Message, "text", "bind: message")
   ;
 

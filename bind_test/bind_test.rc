@@ -130,7 +130,7 @@ END
 
 STRINGTABLE
 BEGIN
-   IDS_APP_TITLE       "uiglue"
+   IDS_APP_TITLE       "bind_test"
 END
 
 #endif
