@@ -39,10 +39,28 @@ string wideToUtf8(wstring wide) {
   const auto flags = 0;
 #endif
 
-  const auto nBytes = wideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, nullptr, 0, nullptr, nullptr);
+  const auto nBytes = wideCharToMultiByte(
+    CP_UTF8,
+    flags,
+    wide.data(),
+    nChar,
+    nullptr,
+    0,
+    nullptr,
+    nullptr
+  );
 
   auto narrow = string(nBytes, '\0');
-  wideCharToMultiByte(CP_UTF8, flags, wide.data(), nChar, &narrow[0], nBytes, nullptr, nullptr);
+  wideCharToMultiByte(
+    CP_UTF8,
+    flags,
+    wide.data(),
+    nChar,
+    &narrow[0],
+    nBytes,
+    nullptr,
+    nullptr
+  );
 
   return narrow;
 }
@@ -58,7 +76,14 @@ wstring utf8ToWide(string utf8) {
   const auto nBytes = static_cast<int>(utf8.size());
   const auto flags = MB_ERR_INVALID_CHARS;
 
-  const auto nChar = multiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, nullptr, 0);
+  const auto nChar = multiByteToWideChar(
+    CP_UTF8,
+    flags,
+    utf8.data(),
+    nBytes,
+    nullptr,
+    0
+  );
 
   auto wide = std::wstring(nChar, '\0');
   multiByteToWideChar(CP_UTF8, flags, utf8.data(), nBytes, &wide[0], nChar);
