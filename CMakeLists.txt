@@ -11,7 +11,9 @@ include(cotire)
 # Boost setup
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.55 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
+
+# The SYSTEM flag silences warnings from Boost on GCC
+include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
 # All projects can include headers relative to the root of the repository
 include_directories(${uiglue_SOURCE_DIR})
@@ -22,7 +24,8 @@ add_definitions(-DUNICODE)
 if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 elseif(MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
 endif()
 
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)
