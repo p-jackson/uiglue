@@ -75,6 +75,11 @@ bool getMessage(
 
 HGDIOBJ getStockObject(int object);
 
+int getWindowTextLength(HandleOr<HWND> wnd);
+
+int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize);
+int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
+
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName);
 
 int loadString(

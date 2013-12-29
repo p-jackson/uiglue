@@ -130,7 +130,7 @@ curt::Window makeMainView() {
   curt::subclassAppView(mainView);
 
   declareBindings(mainView)
-    (uiglue::ThisView, "text", curt::loadString(IDS_APP_TITLE))
+    (uiglue::ThisView, "title", curt::loadString(IDS_APP_TITLE))
     (uiglue::MenuCommand, IDM_ABOUT, "onAbout")
     (uiglue::MenuCommand, IDM_EXIT, "onExit")
     (NameLabel, "text", "Name:")

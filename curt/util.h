@@ -24,6 +24,9 @@ std::wstring utf8ToWide(std::string utf8);
 std::wstring loadStringW(unsigned int resId);
 std::string loadString(unsigned int resId);
 
+std::string getWindowTextString(HandleOr<HWND> wnd);
+std::wstring getWindowTextStringW(HandleOr<HWND> wnd);
+
 WPARAM pumpMessages();
 WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable);
 

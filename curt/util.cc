@@ -102,13 +102,23 @@ string loadString(unsigned int resId) {
   return wideToUtf8(loadStringW(resId));
 }
 
+string getWindowTextString(HandleOr<HWND> wnd) {
+  auto wide = getWindowTextStringW(wnd);
+  return curt::wideToUtf8(std::move(wide));
+}
+
+wstring getWindowTextStringW(HandleOr<HWND> wnd) {
+  auto len = curt::getWindowTextLength(wnd);
+  auto wide = std::wstring(len + 1, 0);
+  curt::getWindowTextW(wnd, &wide[0], len + 1);
+  return wide;
+}
+
 WPARAM pumpMessages() {
   MSG msg;
   while (getMessage(&msg, nullptr, 0, 0)) {
     translateMessage(&msg);
     dispatchMessage(&msg);
-
-    throwIfSavedException();
   }
 
   return msg.wParam;
@@ -120,8 +130,6 @@ WPARAM pumpMessages(HandleOr<HWND> translateWnd, HACCEL accelTable) {
     if (!translateAccelerator(translateWnd, accelTable, &msg)) {
       translateMessage(&msg);
       dispatchMessage(&msg);
-        
-      throwIfSavedException();
     }
   }
 

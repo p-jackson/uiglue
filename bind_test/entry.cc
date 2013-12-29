@@ -18,6 +18,7 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>
+#include <sstream>
 
 using std::string;
 using namespace curt;
@@ -98,9 +99,14 @@ int APIENTRY wWinMain(
   _In_ LPTSTR,
   _In_ int show
 ) {
+  // mainView declared outside of try/catch so the window isn't destroyed until
+  // after the message boxes can be shown. Message boxes seem to stop working
+  // after PostQuitMessage() has been called.
+  curt::Window mainView;
+
   try {
     auto vm = MainViewModel{};
-    auto mainView = makeMainView();
+    mainView = makeMainView();
 
     uiglue::applyBindings(vm, mainView);
 
@@ -112,6 +118,12 @@ int APIENTRY wWinMain(
     auto result = pumpMessages(mainView, accelTable);
 
     return static_cast<int>(result);
+  }
+  catch (std::system_error& e) {
+    std::ostringstream ss{};
+    ss << "System error(" << e.code() << "): " << e.what();
+    curt::messageBox(nullptr, ss.str(), "Exception", MB_OK | MB_ICONERROR);
+    return 0;
   }
   catch (std::exception& e) {
     messageBox(nullptr, e.what(), "Exception", MB_OK | MB_ICONERROR);

@@ -75,7 +75,7 @@ curt::Window createView() {
   curt::subclassAppView(view);
 
   uiglue::declareBindings(view)
-    (uiglue::ThisView, "text", "bind: title")
+    (uiglue::ThisView, "title", "bind: title")
     (Message, "text", "bind: message")
   ;
 

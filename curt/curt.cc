@@ -4,6 +4,19 @@
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
+//
+// The functions in this file try to do as little as possible.
+//
+// If a Windows function fails, and MSDN says to use GetLastError for more
+// information, then call throwLastWin32Error(). This throws a std::system_error
+// which wraps up the windows error code and it also looks like it tries to find
+// a text description of the error too.
+//
+// If a Windows function sends a message as part of it's implementation, then
+// it should call throwIfSavedException() immediately after it returns. This
+// ensures any exceptions thrown in client code are propagated.
+//
+//===----------------------------------------------------------------------===//
 
 #include "curt.h"
 
@@ -69,7 +82,9 @@ LRESULT defWindowProc(HandleOr<HWND> h, unsigned int m, WPARAM w, LPARAM l) {
 }
 
 void destroyWindow(HandleOr<HWND> wnd) {
-  if (!DestroyWindow(wnd))
+  auto result = DestroyWindow(wnd);
+  throwIfSavedException();
+  if (!result)
     throwLastWin32Error();
 }
 
@@ -86,7 +101,9 @@ intptr_t dialogBoxParam(
 }
 
 LRESULT dispatchMessage(const MSG* msg) {
-  return DispatchMessageW(msg);
+  auto result = DispatchMessageW(msg);
+  throwIfSavedException();
+  return result;
 }
 
 void endDialog(HandleOr<HWND> dlg, intptr_t result) {
@@ -115,6 +132,7 @@ int messageBox(
   unsigned int type
 ) {
   auto result = MessageBoxW(parent, text, caption, type);
+  throwIfSavedException();
   if (!result)
     throwLastWin32Error();
   return result;
@@ -174,11 +192,14 @@ LRESULT sendDlgItemMessage(
   WPARAM wParam,
   LPARAM lParam
 ) {
-  return SendDlgItemMessageW(dlg, dlgItemId, msg, wParam, lParam);
+  auto result = SendDlgItemMessageW(dlg, dlgItemId, msg, wParam, lParam);
+  throwIfSavedException();
+  return result;
 }
 
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
   auto result = SendMessageW(wnd, m, w, l);
+  throwIfSavedException();
   auto error = GetLastError();
   if (error)
     throwWin32Error(error);
@@ -198,7 +219,9 @@ void setWindowPos(
   int x, int y, int w, int h,
   unsigned int flags
 ) {
-  if (!SetWindowPos(wnd, insertAfter, x, y, w, h, flags))
+  auto result = SetWindowPos(wnd, insertAfter, x, y, w, h, flags);
+  throwIfSavedException();
+  if (!result)
     throwLastWin32Error();
 }
 
@@ -214,7 +237,12 @@ void setWindowSubclass(
 }
 
 void setWindowText(HandleOr<HWND> wnd, String str) {
-  if (!SetWindowTextW(wnd, str))
+  auto result = SetWindowTextW(wnd, str);
+
+  // SetWindowText sends a WM_SETTEXT message
+  throwIfSavedException();
+
+  if (!result)
     throwLastWin32Error();
 }
 
@@ -236,7 +264,12 @@ void systemParametersInfo(
 }
 
 bool translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg) {
-  return TranslateAcceleratorW(wnd, accelTable, msg) != 0;
+  auto result = TranslateAcceleratorW(wnd, accelTable, msg) != 0;
+
+  // TranslateAccelerator sends the message directly after translating
+  throwIfSavedException();
+
+  return result;
 }
 
 bool translateMessage(const MSG* msg) {
@@ -255,6 +288,42 @@ HGDIOBJ getStockObject(int object) {
   auto result = GetStockObject(object);
   if (!result)
     throwLastWin32Error();
+  return result;
+}
+
+int getWindowTextLength(HandleOr<HWND> wnd) {
+  auto result = GetWindowTextLengthW(wnd);
+
+  // GetWindowTextLength sends the WM_GETTEXTLENGTH message
+  throwIfSavedException();
+
+  auto error = GetLastError();
+  if (error)
+    throwWin32Error(error);
+  return result;
+}
+
+int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
+  auto result = GetWindowTextA(wnd, buffer, bufferSize);
+
+  // GetWindowText sends the WM_GETTEXT message
+  throwIfSavedException();
+
+  auto error = GetLastError();
+  if (error)
+    throwWin32Error(error);
+  return result;
+}
+
+int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
+  auto result = GetWindowTextW(wnd, buffer, bufferSize);
+
+  // GetWindowText sends the WM_GETTEXT message
+  throwIfSavedException();
+
+  auto error = GetLastError();
+  if (error)
+    throwWin32Error(error);
   return result;
 }
 

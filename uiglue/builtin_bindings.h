@@ -12,6 +12,7 @@
 #include "observable.h"
 #include "view.h"
 
+#include "curt/curt.h"
 #include "curt/include_windows.h"
 #include "curt/util.h"
 
@@ -39,19 +40,12 @@ public:
 
 namespace bindings {
 
-  inline string getWindowText(HWND wnd) {
-    auto len = GetWindowTextLengthW(wnd);
-    auto wide = std::wstring(len + 1, 0);
-    GetWindowTextW(wnd, &wide[0], len + 1);
-    return curt::wideToUtf8(std::move(wide));
-  }
-
   inline void setWindowText(HWND wnd, uiglue::UntypedObservable observable, bool checkFirst = false) {
     auto stringObservable = observable.as<string>();
     auto text = stringObservable();
-    if (checkFirst && text == getWindowText(wnd))
+    if (checkFirst && text == curt::getWindowTextString(wnd))
       return;
-    SetWindowTextW(wnd, curt::utf8ToWide(text).c_str());
+    curt::setWindowText(wnd, text);
   }
 
   struct Text {
@@ -85,7 +79,7 @@ namespace bindings {
       setWindowText(wnd, observable);
 
       view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
-        auto text = getWindowText(control);
+        auto text = curt::getWindowTextString(control);
         auto stringObservable = observable.as<string>();
         stringObservable(text);
       });
@@ -103,11 +97,11 @@ namespace bindings {
     }
 
     static void init(HWND wnd, UntypedObservable observable, View&) {
-      ShowWindow(wnd, showWindowCmd(observable));
+      curt::showWindow(wnd, showWindowCmd(observable));
     }
 
     static void update(HWND wnd, UntypedObservable observable, View&) {
-      ShowWindow(wnd, showWindowCmd(observable));
+      curt::showWindow(wnd, showWindowCmd(observable));
     }
 
     static int showWindowCmd(UntypedObservable observable) {
@@ -123,11 +117,11 @@ namespace bindings {
     }
 
     static void init(HWND wnd, UntypedObservable observable, View&) {
-      ShowWindow(wnd, showWindowCmd(observable));
+      curt::showWindow(wnd, showWindowCmd(observable));
     }
 
     static void update(HWND wnd, UntypedObservable observable, View&) {
-      ShowWindow(wnd, showWindowCmd(observable));
+      curt::showWindow(wnd, showWindowCmd(observable));
     }
 
     static int showWindowCmd(UntypedObservable observable) {
@@ -143,10 +137,10 @@ namespace bindings {
     }
 
     static void init(HWND wnd, UntypedObservable observable, View& view) {
-      SendMessageW(wnd, BM_SETCHECK, buttonState(observable), 0);
+      curt::sendMessage(wnd, BM_SETCHECK, buttonState(observable), 0);
 
       view.addCommandHandler(BN_CLICKED, wnd, [observable](HWND control) mutable {
-        auto state = SendMessageW(control, BM_GETCHECK, 0, 0);
+        auto state = curt::sendMessage(control, BM_GETCHECK, 0, 0);
         if (observable.is<int>()) {
           auto intObservable = observable.as<int>();
           intObservable(static_cast<int>(state));
@@ -159,7 +153,7 @@ namespace bindings {
     }
 
     static void update(HWND wnd, UntypedObservable observable, View&) {
-      SendMessageW(wnd, BM_SETCHECK, buttonState(observable), 0);
+      curt::sendMessage(wnd, BM_SETCHECK, buttonState(observable), 0);
     }
 
     static int buttonState(UntypedObservable observable) {
