@@ -1,0 +1,24 @@
+From 50e986b4f76dbe58456ac802951e3a0ab703d382 Mon Sep 17 00:00:00 2001
+From: Philip Jackson <p-jackson@live.com>
+Date: Sun, 29 Dec 2013 17:57:23 +1300
+Subject: [PATCH] Fixed warning in uiglue tests
+
+---
+ include/reporters/catch_reporter_bases.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/reporters/catch_reporter_bases.hpp b/include/reporters/catch_reporter_bases.hpp
+index 21e7098..1c6c338 100644
+--- a/include/reporters/catch_reporter_bases.hpp
++++ b/include/reporters/catch_reporter_bases.hpp
+@@ -98,6 +98,7 @@ namespace Catch {
+             bool operator() ( Ptr<SectionNode> const& node ) const {
+                 return node->stats.sectionInfo.lineInfo == m_other.lineInfo;
+             }
++            BySectionInfo& operator=(const BySectionInfo&) = delete;
+         private:
+             SectionInfo const& m_other;
+         };
+-- 
+1.8.1.msysgit.1
+

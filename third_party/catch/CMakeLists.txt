@@ -2,12 +2,15 @@ cmake_minimum_required(VERSION 2.8.8)
 project(catch_builder CXX)
 include(ExternalProject)
 
+set(catch_patch ${CMAKE_BINARY_DIR}/catch.patch)
+configure_file(${CMAKE_SOURCE_DIR}/third_party/catch/catch.patch ${catch_patch} NEWLINE_STYLE UNIX)
+
 ExternalProject_Add(
   catch
-  PREFIX ${CMAKE_BINARY_DIR}/catch
   GIT_REPOSITORY https://github.com/philsquared/Catch.git
+  GIT_TAG e45e3a139ad46de2a38549d877e2ec0b2be5bdab
   TIMEOUT 10
-  UPDATE_COMMAND ""
+  PATCH_COMMAND ${GIT_EXECUTABLE} apply ${catch_patch}
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
