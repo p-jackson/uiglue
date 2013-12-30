@@ -1,7 +1,7 @@
 language: cpp
 
 compiler:
-  - compiler: i586-mingw32msvc
+  - i686-w64-mingw32-g++
 
 branches:
   only:
@@ -12,7 +12,7 @@ env:
 
 install:
  - sudo apt-get -qq update
- - sudo apt-get -qq install libboost-dev
+ - sudo apt-get -qq install libboost-dev binutils-mingw-w64-i686 g++-mingw-w64-i686 
 
 script:
  - mkdir _build
