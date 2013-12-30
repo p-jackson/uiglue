@@ -5,7 +5,7 @@ compiler:
 
 matrix:
  include:
-   - compiler: i586-mingw32msvc-gcc
+   - compiler: i586-mingw32msvc-g++
 
 install:
  - sudo apt-get -qq update
