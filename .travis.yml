@@ -1,7 +1,7 @@
 language: cpp
 
 compiler:
-  - compiler: i586-mingw32msvc-g++
+  - compiler: i586-mingw32msvc
 
 branches:
   only:
