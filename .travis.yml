@@ -1,0 +1,22 @@
+language: cpp
+
+compiler:
+  - gcc
+
+branches:
+  only:
+    - travis-build
+
+matrix:
+ include:
+   - compiler: i586-mingw32msvc-g++
+
+install:
+ - sudo apt-get -qq update
+ - sudo apt-get -qq install libboost-dev
+
+script:
+ - mkdir _build
+ - cd _build
+ - cmake ..
+ - cmake --build .
