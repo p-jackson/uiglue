@@ -12,7 +12,7 @@ matrix:
     - compiler: i686-w64-mingw32-g++
       env: OPTIONS="-DMINGW=ON"
 
-install:
+before_install:
  - sudo apt-get -qq update
  - sudo apt-get -qq install libboost-dev binutils-mingw-w64-i686 g++-mingw-w64-i686 
 
