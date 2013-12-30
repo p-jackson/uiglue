@@ -12,6 +12,9 @@ include(cotire)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
 
+# Find git so it can be used for patching
+find_package(Git REQUIRED)
+
 # The SYSTEM flag silences warnings from Boost on GCC
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
