@@ -1,12 +1,14 @@
 language: cpp
 
 compiler:
-  - gcc
+  - compiler: i586-mingw32msvc-g++
 
-matrix:
- include:
-   - compiler: i586-mingw32msvc-g++
-     env: OPTIONS="-DMINGW=ON"
+branches:
+  only:
+    - travis-build
+
+env:
+  - OPTIONS="-DMINGW=ON"
 
 install:
  - sudo apt-get -qq update
