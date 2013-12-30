@@ -1,14 +1,16 @@
 language: cpp
 
 compiler:
-  - i686-w64-mingw32-g++
+  - gcc
 
 branches:
   only:
     - travis-build
 
-env:
-  - OPTIONS="-DMINGW=ON"
+matrix:
+  include:
+    - compiler: i686-w64-mingw32-g++
+      env: OPTIONS="-DMINGW=ON"
 
 install:
  - sudo apt-get -qq update
