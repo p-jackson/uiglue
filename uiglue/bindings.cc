@@ -4,23 +4,197 @@
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
+//
+// Some of these functions send custom messages to the view. The custom message
+// ids are defined using registerWindowMessage(). This is usually used for
+// inter-process communication, but is used here to prevent clashes with ids in
+// client code.
+//
+// This file also defines all the default binding handlers.
+//
+//===----------------------------------------------------------------------===//
 
 #include "bindings.h"
 
-#include "builtin_bindings.h"
+#include "binding_handler.h"
 #include "make_unique.h"
+#include "observable.h"
 #include "view.h"
 #include "view_messages.h"
 
 #include "curt/curt.h"
+#include "curt/include_windows.h"
+#include "curt/util.h"
 
 using namespace std;
-using curt::HandleOr;
+using namespace curt;
+using namespace uiglue;
+
+// The following namespace contains the built-in binding handlers.
+namespace {
+
+void setTextFromObservable(HWND wnd, UntypedObservable observable) {
+  auto asStr = observable.as<string>();
+  curt::setWindowText(wnd, asStr());
+}
+
+void setTextIfChanged(HWND wnd, UntypedObservable observable) {
+  auto asStr = observable.as<string>();
+  auto text = asStr();
+  if (text != curt::getWindowTextString(wnd))
+    curt::setWindowText(wnd, text);
+}
+
+// Sets the window text using SetWindowText()
+struct Text {
+  static string name() {
+    return { "text" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View&) {
+    setTextFromObservable(wnd, observable);
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    setTextFromObservable(wnd, observable);
+  }
+};
+
+// Alias for `text`
+struct Title : public Text {
+  static string name() {
+    return { "title" };
+  }
+};
+
+// Two-way binding for edit controls
+struct Value {
+  static string name() {
+    return { "value" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    setTextFromObservable(wnd, observable);
+
+    view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
+      auto text = curt::getWindowTextString(control);
+      auto stringObservable = observable.as<string>();
+      stringObservable(text);
+    });
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    setTextIfChanged(wnd, observable);
+  }
+};
+
+// Sets the window visibility using ShowWindow()
+struct Visible {
+  static string name() {
+    return { "visible" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    Visible::update(wnd, move(observable), view);
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    auto asBool = observable.as<bool>();
+    curt::showWindow(wnd, asBool() ? SW_SHOWNA : SW_HIDE);
+  }
+};
+
+// Sets the window visibility using ShowWindow()
+// Same as Visible, just opposite polarity
+struct Hidden {
+  static string name() {
+    return { "hidden" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    Hidden::update(wnd, std::move(observable), view);
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    auto asBool = observable.as<bool>();
+    curt::showWindow(wnd, asBool() ? SW_HIDE : SW_SHOWNA);
+  }
+};
+
+// Two-way binding for checkbox buttons
+struct Checked {
+  static string name() {
+    return { "checked" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    Checked::update(wnd, std::move(observable), view);
+
+    view.addCommandHandler(BN_CLICKED, wnd, [observable](HWND control) mutable {
+      auto state = curt::sendMessage(control, BM_GETCHECK, 0, 0);
+      if (observable.is<int>()) {
+        auto asInt = observable.as<int>();
+        asInt(static_cast<int>(state));
+      }
+      else {
+        auto boolObservable = observable.as<bool>();
+        boolObservable(state == BST_CHECKED);
+      }
+    });
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    int state;
+    if (observable.is<int>()) {
+      auto asInt = observable.as<int>();
+      state = asInt();
+    }
+    else {
+      auto asBool = observable.as<bool>();
+      state = asBool() ? BST_CHECKED : BST_UNCHECKED;
+    }
+
+    curt::sendMessage(wnd, BM_SETCHECK, state, 0);
+  }
+};
+
+// Sets up a handler for a BN_CLICKED command
+struct Click {
+  static string name() {
+    return { "click" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    auto stringObservable = observable.as<string>();
+    view.addCommandHandler(BN_CLICKED, wnd, stringObservable());
+  }
+
+  static void update(HWND, UntypedObservable, View&) {
+  }
+};
+
+} // end namespace
+
 
 namespace uiglue {
 
-MenuCommandT MenuCommand;
-ThisViewT ThisView;
+// Defines keywords used in the binding DSL
+detail::MenuCommandT MenuCommand;
+detail::ThisViewT ThisView;
+
+namespace detail {
+
+// The inner workings of applyBindings. Uses a window message to pass ownership
+// of the ViewModelRef to the view.
+void applyBindingsInner(unique_ptr<ViewModelRef> vmRef, HWND view) {
+  static auto msg = registerWindowMessage(applyBindingsMsg);
+  auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
+  sendMessage(view, msg, 0, asLParam);
+
+  // Ownership of vmRef has been passed to the view
+  vmRef.release();
+}
+
 
 BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
   : m_viewData{ detail::make_unique<View>(handle) },
@@ -29,57 +203,63 @@ BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
   m_viewData->addBindingHandlerCache(move(cache));
 }
 
+// Once the binding declarations are complete the window is subclassed by View
+// so it can respond to commands and call the binding handlers.
 BindingDecl::~BindingDecl() {
   auto asInt = reinterpret_cast<uintptr_t>(m_viewData.get());
-  curt::setWindowSubclass(m_handle, &View::WndProc, 0, asInt);
+  setWindowSubclass(m_handle, &View::WndProc, 0, asInt);
 
   // Ownership of m_viewData has been passed to the view
   m_viewData.release();
 }
 
+// Handles binding to the view itself
 BindingDecl& BindingDecl::operator()(ThisViewT, string binding, string value) {
   m_viewData->addViewBinding(move(binding), move(value));
   return *this;
 }
 
+// Handles binding view children
 BindingDecl& BindingDecl::operator()(int ctrlId, string binding, string value) {
   m_viewData->addControlBinding(ctrlId, move(binding), move(value));
   return *this;
 }
 
+// Handles menu commands
 BindingDecl& BindingDecl::operator()(MenuCommandT, int id, string handler) {
   m_viewData->addMenuCommand(id, handler);
   return *this;
 }
 
-BindingDecl declareBindings(HandleOr<HWND> view, BindingHandlerCache cache) {
+} // end namespace detail
+
+
+// Starts the binding DSL by returning a BindingDecl.
+detail::BindingDecl declareBindings(
+  HandleOr<HWND> view,
+  BindingHandlerCache cache
+) {
   return { view, move(cache) };
 }
 
+
+// Sends a message to the view subclass.
 void detachViewModel(HandleOr<HWND> view) {
-  static auto msg = curt::registerWindowMessage(detachVMMsg);
-  curt::sendMessage(view, msg, 0, 0);
+  static auto msg = registerWindowMessage(detachVMMsg);
+  sendMessage(view, msg, 0, 0);
 }
 
-void applyBindingsInner(unique_ptr<ViewModelRef> vmRef, HWND view) {
-  static auto msg = curt::registerWindowMessage(applyBindingsMsg);
-  auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
-  curt::sendMessage(view, msg, 0, asLParam);
-
-  // Ownership of vmRef has been passed to the view
-  vmRef.release();
-}
 
 BindingHandlerCache defaultBindingHandlers() {
   auto cache = BindingHandlerCache{};
 
-  cache.addBindingHandler<BuiltinBinding<bindings::Text>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Title>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Value>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Visible>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Hidden>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Checked>>();
-  cache.addBindingHandler<BuiltinBinding<bindings::Click>>();
+  cache.addBindingHandler<BindingHandlerImpl<Text>>();
+  cache.addBindingHandler<BindingHandlerImpl<Title>>();
+  cache.addBindingHandler<BindingHandlerImpl<Value>>();
+  cache.addBindingHandler<BindingHandlerImpl<Visible>>();
+  cache.addBindingHandler<BindingHandlerImpl<Hidden>>();
+  cache.addBindingHandler<BindingHandlerImpl<Checked>>();
+  cache.addBindingHandler<BindingHandlerImpl<Click>>();
 
   return cache;
 }

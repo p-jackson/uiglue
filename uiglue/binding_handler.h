@@ -28,6 +28,26 @@ struct BindingHandler {
   virtual void update(HWND ctrl, UntypedObservable ob, View& view) const = 0;
 };
 
+template<class Traits>
+class BindingHandlerImpl : public BindingHandler {
+public:
+  std::string name() const override {
+    return Traits::name();
+  }
+
+  void init(HWND wnd, UntypedObservable observable, View& view) const override {
+    Traits::init(wnd, std::move(observable), view);
+  }
+
+  void update(
+    HWND wnd,
+    UntypedObservable observable,
+    View& view
+  ) const override {
+    Traits::update(wnd, std::move(observable), view);
+  }
+};
+
 } // end namespace uiglue
 
 #endif
