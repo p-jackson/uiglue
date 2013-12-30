@@ -10,7 +10,7 @@ include(cotire)
 
 # Boost setup
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.55 REQUIRED)
+find_package(Boost REQUIRED)
 
 # The SYSTEM flag silences warnings from Boost on GCC
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
