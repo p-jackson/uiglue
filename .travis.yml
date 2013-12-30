@@ -3,6 +3,10 @@ language: cpp
 compiler:
   - gcc
 
+branches:
+  only:
+    - travis-build
+
 matrix:
  include:
    - compiler: i586-mingw32msvc-g++
