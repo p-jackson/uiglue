@@ -6,6 +6,7 @@ compiler:
 matrix:
  include:
    - compiler: i586-mingw32msvc-g++
+     env: OPTIONS="-DMINGW=ON"
 
 install:
  - sudo apt-get -qq update
