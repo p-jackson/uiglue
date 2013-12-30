@@ -3,7 +3,7 @@ project(catch_builder CXX)
 include(ExternalProject)
 
 set(catch_patch ${CMAKE_BINARY_DIR}/catch.patch)
-configure_file(${CMAKE_SOURCE_DIR}/third_party/catch/catch.patch ${catch_patch} NEWLINE_STYLE UNIX)
+configure_file(catch.patch ${catch_patch} NEWLINE_STYLE UNIX)
 
 ExternalProject_Add(
   catch

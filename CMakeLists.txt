@@ -2,7 +2,7 @@ project(uiglue)
 
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-set(EXT_PROJECTS_DIR "${CMAKE_SOURCE_DIR}/third_party")
+set(EXT_PROJECTS_DIR "${CMAKE_SOURCE_DIR}/deps")
 
 enable_testing()
 
@@ -31,10 +31,12 @@ endif()
 add_subdirectory(${EXT_PROJECTS_DIR}/catch)
 
 add_subdirectory(curt)
-add_subdirectory(bind_test)
-add_subdirectory(hello_world)
 add_subdirectory(tests)
 add_subdirectory(uiglue)
+add_subdirectory(examples/bind_test)
+add_subdirectory(examples/hello_world)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(TARGET catch PROPERTY FOLDER "third_party")
+set_property(TARGET catch PROPERTY FOLDER "deps")
+set_property(TARGET bind_test PROPERTY FOLDER "examples")
+set_property(TARGET hello_world PROPERTY FOLDER "examples")
