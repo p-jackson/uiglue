@@ -200,9 +200,7 @@ LRESULT sendDlgItemMessage(
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
   auto result = SendMessageW(wnd, m, w, l);
   throwIfSavedException();
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
@@ -297,9 +295,7 @@ int getWindowTextLength(HandleOr<HWND> wnd) {
   // GetWindowTextLength sends the WM_GETTEXTLENGTH message
   throwIfSavedException();
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
@@ -309,9 +305,7 @@ int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
   // GetWindowText sends the WM_GETTEXT message
   throwIfSavedException();
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
@@ -321,9 +315,7 @@ int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
   // GetWindowText sends the WM_GETTEXT message
   throwIfSavedException();
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
