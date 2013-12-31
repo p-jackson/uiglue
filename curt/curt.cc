@@ -88,6 +88,18 @@ void destroyWindow(HandleOr<HWND> wnd) {
     throwLastWin32Error();
 }
 
+intptr_t dialogBox(
+  HINSTANCE hInst,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+) {
+  auto result = DialogBoxParamW(hInst, templateName, parent, proc, 0);
+  throwIfSavedException();
+  throwIfWin32Error();
+  return result;
+}
+
 intptr_t dialogBoxParam(
   HINSTANCE hInst,
   StringOrId templateName,
@@ -96,6 +108,7 @@ intptr_t dialogBoxParam(
   intptr_t param
 ) {
   auto result = DialogBoxParamW(hInst, templateName, parent, proc, param);
+  throwIfSavedException();
   throwIfWin32Error();
   return result;
 }

@@ -14,7 +14,7 @@ target_link_libraries(dialog curt uiglue comctl32)
 
 # Create precompiled header with cotire (we don't need a unity build)
 set_target_properties(dialog PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
-cotire(bind_test)
+cotire(dialog)
 
 if(MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")

@@ -8,6 +8,8 @@
 #ifndef UIGLUE_BINDING_HANDLER_H
 #define UIGLUE_BINDING_HANDLER_H
 
+#include "observable.h"
+
 #include "curt/fwd_windows.h"
 
 #include <string>

@@ -50,6 +50,13 @@ LRESULT defWindowProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
 
 void destroyWindow(HandleOr<HWND> wnd);
 
+std::intptr_t dialogBox(
+  HINSTANCE hInst,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+);
+
 std::intptr_t dialogBoxParam(
   HINSTANCE hInst,
   StringOrId templateName,
