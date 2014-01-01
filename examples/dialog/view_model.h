@@ -13,6 +13,7 @@
 #include "uiglue/observable.h"
 
 #include <string>
+#include <tuple>
 
 namespace dialogExample {
 
@@ -24,6 +25,7 @@ public:
   uiglue::Computed<std::string> greenText;
   uiglue::Observable<int> bluePercentage;
   uiglue::Computed<std::string> blueText;
+  uiglue::Computed<std::tuple<int, int, int>> rgbTriple;
 
   UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
     UIGLUE_DECLARE_PROPERTY(redText)
@@ -32,6 +34,7 @@ public:
     UIGLUE_DECLARE_PROPERTY(greenPercentage)
     UIGLUE_DECLARE_PROPERTY(blueText)
     UIGLUE_DECLARE_PROPERTY(bluePercentage)
+    UIGLUE_DECLARE_PROPERTY(rgbTriple)
   UIGLUE_END_MEMBER_MAP()
 
   MainViewModel();
@@ -40,6 +43,7 @@ private:
   std::string computeRedText();
   std::string computeGreenText();
   std::string computeBlueText();
+  std::tuple<int, int, int> computeTriple();
 };
 
 } // end namespace dialogExample

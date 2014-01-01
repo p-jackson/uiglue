@@ -30,6 +30,14 @@ using namespace std;
 
 namespace curt {
 
+HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps) {
+  auto dc = BeginPaint(wnd, ps);
+  throwIfSavedException();
+  if (!dc)
+    throw std::runtime_error("No display context is available");
+  return dc;
+}
+
 Window createDialog(
   HINSTANCE instance,
   StringOrId templateName,
@@ -132,9 +140,20 @@ LRESULT dispatchMessage(const MSG* msg) {
   return result;
 }
 
+int drawText(HDC dc, String text, int textLen, RECT* rect, unsigned int fmt) {
+  auto result = DrawTextW(dc, text, textLen, rect, fmt);
+  if (!result)
+    throw std::runtime_error("Failed to draw text");
+  return result;
+}
+
 void endDialog(HandleOr<HWND> dlg, intptr_t result) {
   if (!EndDialog(dlg, result))
     throwLastWin32Error();
+}
+
+void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps) {
+  EndPaint(wnd, ps);
 }
 
 int getDlgCtrlID(HandleOr<HWND> hwndCtl) {
@@ -226,7 +245,9 @@ LRESULT sendDlgItemMessage(
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
   auto result = SendMessageW(wnd, m, w, l);
   throwIfSavedException();
-  throwIfWin32Error();
+  if (GetLastError() == 5)
+    // Message was blocked by UIPI
+    throwLastWin32Error();
   return result;
 }
 

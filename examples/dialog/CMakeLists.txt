@@ -10,7 +10,7 @@ add_executable(dialog WIN32 ${all_files})
 source_group("Resource Files" FILES ${resources})
 
 # Link to static libraries
-target_link_libraries(dialog curt uiglue comctl32)
+target_link_libraries(dialog curt uiglue comctl32 d2d1)
 
 # Create precompiled header with cotire (we don't need a unity build)
 if(NOT CMAKE_COMPILER_IS_GNUCXX)

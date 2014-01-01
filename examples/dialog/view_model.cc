@@ -55,7 +55,8 @@ MainViewModel::MainViewModel()
     greenPercentage{ 33 },
     greenText{ std::bind(&MainViewModel::computeGreenText, this) },
     bluePercentage{ 33 },
-    blueText{ std::bind(&MainViewModel::computeBlueText, this) }
+    blueText{ std::bind(&MainViewModel::computeBlueText, this) },
+    rgbTriple{ std::bind(&MainViewModel::computeTriple, this) }
 {
   redPercentage.subscribe([this](int r) mutable {
     adjustPercentages(r, greenPercentage, bluePercentage);
@@ -80,6 +81,10 @@ string MainViewModel::computeGreenText() {
 
 string MainViewModel::computeBlueText() {
   return formatPercentage(bluePercentage());
+}
+
+std::tuple<int, int, int> MainViewModel::computeTriple() {
+  return std::make_tuple(redPercentage(), greenPercentage(), bluePercentage());
 }
 
 } // end namespace dialogExample

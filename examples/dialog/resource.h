@@ -19,5 +19,6 @@
 #define IDC_GREEN_TEXT      1005
 #define IDC_BLUE_SLIDER     1006
 #define IDC_BLUE_TEXT       1007
+#define IDC_GRAPH           1008
 
 #endif

@@ -294,15 +294,15 @@ void detachViewModel(HandleOr<HWND> view) {
 BindingHandlerCache defaultBindingHandlers() {
   auto cache = BindingHandlerCache{};
 
-  cache.addBindingHandler<BindingHandlerImpl<Text>>();
-  cache.addBindingHandler<BindingHandlerImpl<Title>>();
-  cache.addBindingHandler<BindingHandlerImpl<Value>>();
-  cache.addBindingHandler<BindingHandlerImpl<Visible>>();
-  cache.addBindingHandler<BindingHandlerImpl<Hidden>>();
-  cache.addBindingHandler<BindingHandlerImpl<Checked>>();
-  cache.addBindingHandler<BindingHandlerImpl<Click>>();
-  cache.addBindingHandler<BindingHandlerImpl<Min>>();
-  cache.addBindingHandler<BindingHandlerImpl<Max>>();
+  cache.addBindingHandler<Text>();
+  cache.addBindingHandler<Title>();
+  cache.addBindingHandler<Value>();
+  cache.addBindingHandler<Visible>();
+  cache.addBindingHandler<Hidden>();
+  cache.addBindingHandler<Checked>();
+  cache.addBindingHandler<Click>();
+  cache.addBindingHandler<Min>();
+  cache.addBindingHandler<Max>();
 
   return cache;
 }

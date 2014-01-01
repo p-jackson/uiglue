@@ -26,6 +26,8 @@
 
 namespace curt {
 
+HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps);
+
 Window createDialog(
   HINSTANCE instance,
   StringOrId templateName,
@@ -74,7 +76,11 @@ std::intptr_t dialogBoxParam(
 
 LRESULT dispatchMessage(const MSG* msg);
 
+int drawText(HDC dc, String text, int textLen, RECT* rect, unsigned int fmt);
+
 void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
+
+void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps);
 
 int getDlgCtrlID(HandleOr<HWND> hwndCtl);
 
