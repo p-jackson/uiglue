@@ -6,9 +6,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "views.h"
+#include "view_model.h"
 
 #include "curt/curt.h"
 #include "curt/include_windows.h"
+#include "uiglue/bindings.h"
 
 #include <system_error>
 #include <sstream>
@@ -22,8 +24,13 @@ int APIENTRY wWinMain(
   _In_ LPTSTR,
   _In_ int show
 ) {
+  Window dialog;
+
   try {
-    auto dialog = dialogExample::createMainView();
+    dialog = dialogExample::createMainView();
+    auto vm = dialogExample::MainViewModel{};
+
+    uiglue::applyBindings(vm, dialog);
 
     showWindow(dialog, show);
 

@@ -15,6 +15,7 @@
 #include "curt/fwd_windows.h"
 #include "curt/types.h"
 
+#include <boost/variant.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -23,7 +24,8 @@ namespace uiglue {
 struct ViewModelRef;
 
 class View {
-  using KeyValues = std::vector<std::pair<std::string, std::string>>;
+  using Value = boost::variant<std::string, UntypedObservable>;
+  using KeyValues = std::vector<std::pair<std::string, Value>>;
   using BindingDeclarations = std::unordered_map<int, KeyValues>;
 
   HWND m_wnd;
@@ -36,6 +38,7 @@ class View {
 
   std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
   std::unordered_map<WPARAM, std::vector<std::string>> m_viewModelCommandHandlers;
+  std::unordered_map<unsigned int, std::vector<std::function<void(WPARAM, LPARAM)>>> m_msgHandlers;
 
 public:
   explicit View(HWND wnd);
@@ -44,10 +47,13 @@ public:
   void addMenuCommand(int id, std::string command);
   void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
   void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
+  void addMessageHandler(unsigned int msg, std::function<void(WPARAM, LPARAM)> handler);
 
   void addBindingHandlerCache(BindingHandlerCache cache);
   void addViewBinding(std::string bindingHandler, std::string bindingText);
+  void addViewBinding(std::string bindingHandler, UntypedObservable value);
   void addControlBinding(int id, std::string bindingHandler, std::string bindingText);
+  void addControlBinding(int id, std::string bindingHandler, UntypedObservable value);
 
   static LRESULT __stdcall WndProc(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 

@@ -72,22 +72,34 @@ string stripBindingPrefix(BindType type, string s) {
   }
 }
 
-UntypedObservable makeObservable(string binding, ViewModelRef& viewModel) {
-  auto type = getBindingType(binding);
-  auto value = stripBindingPrefix(type, binding);
+struct MakeObservable : public boost::static_visitor<UntypedObservable> {
+  ViewModelRef& m_vm;
 
-  switch (type) {
-  case BindType::Literal:
-    return Observable<string>{ value }.asUntyped();
+  // GCC doesn't accept brace initialised references
+  MakeObservable(ViewModelRef& vm) : m_vm(vm) {}
+  MakeObservable& operator=(const MakeObservable&) = delete;
 
-  case BindType::Bind:
-    return viewModel.getObservable(value);
-
-  default:
-    BOOST_ASSERT(0);
-    return Observable<string>().asUntyped();
+  UntypedObservable operator()(UntypedObservable value) {
+    return value;
   }
-}
+
+  UntypedObservable operator()(string binding) {
+    auto type = getBindingType(binding);
+    auto value = stripBindingPrefix(type, binding);
+
+    switch (type) {
+    case BindType::Literal:
+      return Observable<string>{ value }.asUntyped();
+
+    case BindType::Bind:
+      return m_vm.getObservable(value);
+
+    default:
+      BOOST_ASSERT(0);
+      return Observable<string>().asUntyped();
+    }
+  }
+};
 
 } // end namespace
 
@@ -143,6 +155,10 @@ void View::addCommandHandler(int commandCode, HWND control, string viewModelComm
   m_viewModelCommandHandlers[key].push_back(std::move(viewModelCommand));
 }
 
+void View::addMessageHandler(unsigned int msg, std::function<void(WPARAM, LPARAM)> handler) {
+  m_msgHandlers[msg].push_back(std::move(handler));
+}
+
 void View::addBindingHandlerCache(BindingHandlerCache cache) {
   m_handlerCache = std::move(cache);
 }
@@ -151,8 +167,16 @@ void View::addViewBinding(string bindingHandler, string bindingText) {
   m_viewBindingDecls.emplace_back(move(bindingHandler), move(bindingText));
 }
 
+void View::addViewBinding(string bindingHandler, UntypedObservable value) {
+  m_viewBindingDecls.emplace_back(move(bindingHandler), std::move(value));
+}
+
 void View::addControlBinding(int id, string bindingHandler, string bindingText) {
   m_controlBindingDecls[id].emplace_back(move(bindingHandler), move(bindingText));
+}
+
+void View::addControlBinding(int id, string bindingHandler, UntypedObservable value) {
+  m_controlBindingDecls[id].emplace_back(move(bindingHandler), std::move(value));
 }
 
 bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
@@ -170,14 +194,18 @@ bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
     return true;
   }
 
+  auto msgHandlers = m_msgHandlers.find(msg);
+  if (msgHandlers != end(m_msgHandlers)) {
+    for (auto& handler : msgHandlers->second)
+      handler(wParam, lParam);
+  }
+
   if (msg == WM_COMMAND && HIWORD(wParam) == 0 && !lParam && m_vm) {
     // Handle menu commands
     auto id = LOWORD(wParam);
     auto found = m_menuCommands.find(id);
-    if (found != m_menuCommands.end()) {
+    if (found != m_menuCommands.end())
       m_vm->runCommand(found->second, m_wnd);
-      return true;
-    }
   }
 
   if (msg == WM_COMMAND && lParam) {
@@ -193,8 +221,6 @@ bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
       for (auto& vmCommand : viewModelCommands->second)
         m_vm->runCommand(vmCommand, m_wnd);
     }
-
-    return true;
   }
 
   return false;
@@ -206,7 +232,9 @@ void View::applyBindingsToWindow(const KeyValues& bindings, HWND wnd) {
     if (!handler)
       continue;
 
-    auto observable = makeObservable(binding.second, *m_vm);
+    MakeObservable makeObservable(*m_vm);
+
+    auto observable = boost::apply_visitor(makeObservable, binding.second);
     handler->init(wnd, observable, *this);
 
     observable.subscribe([handler, wnd, this](UntypedObservable o) {

@@ -26,6 +26,8 @@
 #include "curt/include_windows.h"
 #include "curt/util.h"
 
+#include <CommCtrl.h>
+
 using namespace std;
 using namespace curt;
 using namespace uiglue;
@@ -67,25 +69,44 @@ struct Title : public Text {
   }
 };
 
-// Two-way binding for edit controls
+// Two-way binding for edit and slider controls
 struct Value {
   static string name() {
     return { "value" };
   }
 
   static void init(HWND wnd, UntypedObservable observable, View& view) {
-    setTextFromObservable(wnd, observable);
-
+    Value::update(wnd, observable, view);
+    
     view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
-      auto text = curt::getWindowTextString(control);
-      auto stringObservable = observable.as<string>();
-      stringObservable(text);
+      auto text = getWindowTextString(control);
+      auto asString = observable.as<string>();
+      asString(text);
     });
+
+    auto scrollHandler = [observable, wnd](WPARAM, LPARAM lParam) mutable {
+      if (wnd != reinterpret_cast<HWND>(lParam))
+        return;
+
+      auto pos = sendMessage(wnd, TBM_GETPOS, 0, 0);
+      auto asInt = observable.as<int>();
+      asInt(static_cast<int>(pos));
+    };
+
+    view.addMessageHandler(WM_VSCROLL, scrollHandler);
+    view.addMessageHandler(WM_HSCROLL, scrollHandler);
   }
 
   static void update(HWND wnd, UntypedObservable observable, View&) {
-    setTextIfChanged(wnd, observable);
+    if (observable.is<string>())
+      setTextIfChanged(wnd, observable);
+    else {
+      auto asInt = observable.as<int>();
+      sendMessage(wnd, TBM_SETPOS, 1, asInt());
+    }
   }
+
+  typedef LRESULT (__stdcall* SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 };
 
 // Sets the window visibility using ShowWindow()
@@ -173,6 +194,38 @@ struct Click {
   }
 };
 
+// Sets the minimum for a slider control
+struct Min {
+  static string name() {
+    return { "min" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    Min::update(wnd, observable, view);
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    auto asInt = observable.as<int>();
+    sendMessage(wnd, TBM_SETRANGEMIN, 1, asInt());
+  }
+};
+
+// Sets the maximum for a slider control
+struct Max {
+  static string name() {
+    return { "max" };
+  }
+
+  static void init(HWND wnd, UntypedObservable observable, View& view) {
+    Max::update(wnd, observable, view);
+  }
+
+  static void update(HWND wnd, UntypedObservable observable, View&) {
+    auto asInt = observable.as<int>();
+    sendMessage(wnd, TBM_SETRANGEMAX, 1, asInt());
+  }
+};
+
 } // end namespace
 
 
@@ -213,18 +266,6 @@ BindingDecl::~BindingDecl() {
   m_viewData.release();
 }
 
-// Handles binding to the view itself
-BindingDecl& BindingDecl::operator()(ThisViewT, string binding, string value) {
-  m_viewData->addViewBinding(move(binding), move(value));
-  return *this;
-}
-
-// Handles binding view children
-BindingDecl& BindingDecl::operator()(int ctrlId, string binding, string value) {
-  m_viewData->addControlBinding(ctrlId, move(binding), move(value));
-  return *this;
-}
-
 // Handles menu commands
 BindingDecl& BindingDecl::operator()(MenuCommandT, int id, string handler) {
   m_viewData->addMenuCommand(id, handler);
@@ -260,6 +301,8 @@ BindingHandlerCache defaultBindingHandlers() {
   cache.addBindingHandler<BindingHandlerImpl<Hidden>>();
   cache.addBindingHandler<BindingHandlerImpl<Checked>>();
   cache.addBindingHandler<BindingHandlerImpl<Click>>();
+  cache.addBindingHandler<BindingHandlerImpl<Min>>();
+  cache.addBindingHandler<BindingHandlerImpl<Max>>();
 
   return cache;
 }
