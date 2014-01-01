@@ -110,7 +110,7 @@ string getWindowTextString(HandleOr<HWND> wnd) {
 wstring getWindowTextStringW(HandleOr<HWND> wnd) {
   auto len = curt::getWindowTextLength(wnd);
   auto wide = std::wstring(len + 1, 0);
-  curt::getWindowTextW(wnd, &wide[0], len + 1);
+  curt::getWindowText(wnd, &wide[0], len + 1);
   return wide;
 }
 

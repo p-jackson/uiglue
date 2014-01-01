@@ -5,7 +5,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "resource.h"
+#include "views.h"
 
 #include "curt/curt.h"
 #include "curt/include_windows.h"
@@ -16,36 +16,26 @@
 using namespace curt;
 using namespace std;
 
-INT_PTR CALLBACK mainViewProc(HWND wnd, UINT Message, WPARAM wParam, LPARAM) {
-  switch (Message) {
-  case WM_INITDIALOG:
-    return TRUE;
-  case WM_COMMAND:
-    switch (LOWORD(wParam)) {
-    case IDOK:
-      EndDialog(wnd, IDOK);
-      break;
-    case IDCANCEL:
-      EndDialog(wnd, IDCANCEL);
-      break;
-    }
-    break;
-  default:
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
 int APIENTRY wWinMain(
-  _In_ HINSTANCE hInst,
+  _In_ HINSTANCE,
   _In_opt_ HINSTANCE,
   _In_ LPTSTR,
-  _In_ int
+  _In_ int show
 ) {
   try {
-    curt::dialogBox(hInst, IDD_MAIN_VIEW, HWND_DESKTOP, mainViewProc);
-    return 0;
+    auto dialog = dialogExample::createMainView();
+
+    showWindow(dialog, show);
+
+    MSG msg;
+    while (getMessage(&msg, nullptr, 0, 0)) {
+      if (isDialogMessage(dialog.get(), &msg))
+        continue;
+      translateMessage(&msg);
+      dispatchMessage(&msg);
+    }
+
+    return static_cast<int>(msg.wParam);
   }
   catch (system_error& e) {
     ostringstream ss{};

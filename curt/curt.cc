@@ -30,6 +30,19 @@ using namespace std;
 
 namespace curt {
 
+Window createDialog(
+  HINSTANCE instance,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+) {
+  Window dlg = CreateDialogParamW(instance, templateName, parent, proc, 0);
+  throwIfSavedException();
+  if (!dlg)
+    throwLastWin32Error();
+  return dlg;
+}
+
 Font createFontIndirect(const LOGFONTA* logfont) {
   return { CreateFontIndirectA(logfont) };
 }
@@ -312,8 +325,9 @@ int getWindowTextLength(HandleOr<HWND> wnd) {
   return result;
 }
 
-int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
-  auto result = GetWindowTextA(wnd, buffer, bufferSize);
+template<class CharT, class Func>
+int getTextInner(HWND wnd, CharT* buffer, int bufferSize, Func func) {
+  auto result = func(wnd, buffer, bufferSize);
 
   // GetWindowText sends the WM_GETTEXT message
   throwIfSavedException();
@@ -322,14 +336,19 @@ int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
   return result;
 }
 
-int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
-  auto result = GetWindowTextW(wnd, buffer, bufferSize);
+int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
+  return getTextInner(wnd, buffer, bufferSize, GetWindowTextA);
+}
 
-  // GetWindowText sends the WM_GETTEXT message
+int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
+  return getTextInner(wnd, buffer, bufferSize, GetWindowTextW);
+}
+
+bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg) {
+  auto result = IsDialogMessageW(dlg, msg);
+  // IsDialogMessage dispatches messages internally
   throwIfSavedException();
-
-  throwIfWin32Error();
-  return result;
+  return result != 0;
 }
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName) {

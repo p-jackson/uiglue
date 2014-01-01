@@ -26,6 +26,13 @@
 
 namespace curt {
 
+Window createDialog(
+  HINSTANCE instance,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+);
+
 Font createFontIndirect(const LOGFONTA* logfont);
 Font createFontIndirect(const LOGFONTW* logfont);
 
@@ -84,8 +91,10 @@ HGDIOBJ getStockObject(int object);
 
 int getWindowTextLength(HandleOr<HWND> wnd);
 
-int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize);
-int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
+int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize);
+int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
+
+bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg);
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName);
 
