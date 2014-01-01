@@ -49,7 +49,7 @@ Window createWindowEx(
   HINSTANCE hInst,
   void *createParam
 ) {
-  auto newWindow = CreateWindowExW(
+  Window newWindow = CreateWindowExW(
     exStyle,
     className,
     windowName,
@@ -59,14 +59,14 @@ Window createWindowEx(
     menu,
     hInst,
     createParam
-  );
+    );
 
   throwIfSavedException();
 
   if (!newWindow)
     throwLastWin32Error();
 
-  return { newWindow };
+  return newWindow;
 }
 
 LRESULT defSubclassProc(HandleOr<HWND> h, unsigned int m, WPARAM w, LPARAM l) {
