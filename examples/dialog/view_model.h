@@ -19,21 +19,21 @@ namespace dialogExample {
 
 class MainViewModel {
 public:
-  uiglue::Observable<int> redPercentage;
+  uiglue::Observable<int> redPer10k;
   uiglue::Computed<std::string> redText;
-  uiglue::Observable<int> greenPercentage;
+  uiglue::Observable<int> greenPer10k;
   uiglue::Computed<std::string> greenText;
-  uiglue::Observable<int> bluePercentage;
+  uiglue::Observable<int> bluePer10k;
   uiglue::Computed<std::string> blueText;
   uiglue::Computed<std::tuple<int, int, int>> rgbTriple;
 
   UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
     UIGLUE_DECLARE_PROPERTY(redText)
-    UIGLUE_DECLARE_PROPERTY(redPercentage)
+    UIGLUE_DECLARE_PROPERTY(redPer10k)
     UIGLUE_DECLARE_PROPERTY(greenText)
-    UIGLUE_DECLARE_PROPERTY(greenPercentage)
+    UIGLUE_DECLARE_PROPERTY(greenPer10k)
     UIGLUE_DECLARE_PROPERTY(blueText)
-    UIGLUE_DECLARE_PROPERTY(bluePercentage)
+    UIGLUE_DECLARE_PROPERTY(bluePer10k)
     UIGLUE_DECLARE_PROPERTY(rgbTriple)
   UIGLUE_END_MEMBER_MAP()
 

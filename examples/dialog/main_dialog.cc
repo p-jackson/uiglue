@@ -199,18 +199,18 @@ curt::Window createMainView() {
   handlers.addBindingHandler<Graph>();
 
   uiglue::declareBindings(dlg, handlers)
-    (IDC_RED_TEXT, "text", "bind: redText")
-    (IDC_RED_SLIDER, "value", "bind: redPercentage")
     (IDC_RED_SLIDER, "min", 0)
-    (IDC_RED_SLIDER, "max", 100)
-    (IDC_GREEN_TEXT, "text", "bind: greenText")
-    (IDC_GREEN_SLIDER, "value", "bind: greenPercentage")
+    (IDC_RED_SLIDER, "max", 10000)
+    (IDC_RED_SLIDER, "value", "bind: redPer10k")
+    (IDC_RED_TEXT, "text", "bind: redText")
     (IDC_GREEN_SLIDER, "min", 0)
-    (IDC_GREEN_SLIDER, "max", 100)
-    (IDC_BLUE_TEXT, "text", "bind: blueText")
-    (IDC_BLUE_SLIDER, "value", "bind: bluePercentage")
+    (IDC_GREEN_SLIDER, "max", 10000)
+    (IDC_GREEN_SLIDER, "value", "bind: greenPer10k")
+    (IDC_GREEN_TEXT, "text", "bind: greenText")
     (IDC_BLUE_SLIDER, "min", 0)
-    (IDC_BLUE_SLIDER, "max", 100)
+    (IDC_BLUE_SLIDER, "max", 10000)
+    (IDC_BLUE_SLIDER, "value", "bind: bluePer10k")
+    (IDC_BLUE_TEXT, "text", "bind: blueText")
     (IDC_GRAPH, "graph", "bind: rgbTriple")
   ;
 

@@ -11,80 +11,86 @@ using uiglue::Observable;
 using std::string;
 
 static string formatPercentage(int percentage) {
-  return std::to_string(percentage) + "%";
+  return std::to_string(percentage / 100) + "%";
 }
 
 static void adjustPercentages(int changed, Observable<int>& o1, Observable<int>& o2) {
+  static bool changing = false;
+  if (changing)
+    return;
+
   auto p1 = o1();
   auto p2 = o2();
 
   auto total = changed + p1 + p2;
-  if (total == 100)
+  if (total == 10000)
     return;
 
-  auto over = total - 100;
+  auto over = total - 10000;
   p1 = p1 - over / 2 - over %2;
   p2 = p2 - over / 2;
 
   if (p1 < 0) {
     p1 = 0;
-    p2 = 100 - changed;
+    p2 = 10000 - changed;
   }
   else if (p2 < 0) {
     p2 = 0;
-    p1 = 100 - changed;
+    p1 = 10000 - changed;
   }
-  else if (p1 > 100) {
+  else if (p1 > 10000) {
     p1 = 100;
     p2 = 0;
   }
-  else if (p2 > 100) {
-    p2 = 100;
+  else if (p2 > 10000) {
+    p2 = 10000;
     p1 = 0;
   }
 
+  changing = true;
   o1(p1);
   o2(p2);
+  changing = false;
 }
 
 namespace dialogExample {
 
 MainViewModel::MainViewModel()
-  : redPercentage{ 34 },
+  : redPer10k{ 3400 },
     redText{ std::bind(&MainViewModel::computeRedText, this) },
-    greenPercentage{ 33 },
+    greenPer10k{ 3300 },
     greenText{ std::bind(&MainViewModel::computeGreenText, this) },
-    bluePercentage{ 33 },
+    bluePer10k{ 3300 },
     blueText{ std::bind(&MainViewModel::computeBlueText, this) },
     rgbTriple{ std::bind(&MainViewModel::computeTriple, this) }
 {
-  redPercentage.subscribe([this](int r) mutable {
-    adjustPercentages(r, greenPercentage, bluePercentage);
+  redPer10k.subscribe([this](int r) mutable {
+    adjustPercentages(r, greenPer10k, bluePer10k);
   });
 
-  greenPercentage.subscribe([this](int r) mutable {
-    adjustPercentages(r, redPercentage, bluePercentage);
+  greenPer10k.subscribe([this](int r) mutable {
+    adjustPercentages(r, redPer10k, bluePer10k);
   });
 
-  bluePercentage.subscribe([this](int r) mutable {
-    adjustPercentages(r, redPercentage, greenPercentage);
+  bluePer10k.subscribe([this](int r) mutable {
+    adjustPercentages(r, redPer10k, greenPer10k);
   });
 }
 
 string MainViewModel::computeRedText() {
-  return formatPercentage(redPercentage());
+  return formatPercentage(redPer10k());
 }
 
 string MainViewModel::computeGreenText() {
-  return formatPercentage(greenPercentage());
+  return formatPercentage(greenPer10k());
 }
 
 string MainViewModel::computeBlueText() {
-  return formatPercentage(bluePercentage());
+  return formatPercentage(bluePer10k());
 }
 
 std::tuple<int, int, int> MainViewModel::computeTriple() {
-  return std::make_tuple(redPercentage(), greenPercentage(), bluePercentage());
+  return std::make_tuple(redPer10k(), greenPer10k(), bluePer10k());
 }
 
 } // end namespace dialogExample
