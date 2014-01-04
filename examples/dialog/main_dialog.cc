@@ -14,6 +14,7 @@
 #include "curt/util.h"
 #include "uiglue/bindings.h"
 
+#include <cmath>
 #include <CommCtrl.h>
 #include <d2d1.h>
 #include <windowsx.h>
@@ -33,12 +34,82 @@ struct GraphData {
   ID2D1SolidColorBrush* redBrush;
   ID2D1SolidColorBrush* greenBrush;
   ID2D1SolidColorBrush* blueBrush;
+  ID2D1PathGeometry* redGeometry;
+  ID2D1PathGeometry* greenGeometry;
+  ID2D1PathGeometry* blueGeometry;
 
   GraphData() : rt{ nullptr } {}
 };
 
+float toRadians(int per10k) {
+  return per10k * 2 * 3.141f / 10000;
+}
+
+D2D1_POINT_2F positionFromAngle(float radians, float radius, D2D1_POINT_2F centre) {
+  return D2D1::Point2F(std::sin(radians) * radius + centre.x, -std::cos(radians) * radius + centre.y);
+}
+
 void onGraphInit(GraphData* data) {
   D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &data->d2dFactory);
+  data->d2dFactory->CreatePathGeometry(&data->redGeometry);
+  data->d2dFactory->CreatePathGeometry(&data->greenGeometry);
+  data->d2dFactory->CreatePathGeometry(&data->blueGeometry);
+}
+
+void onGraphSetTriple(HWND wnd, GraphData* data) {
+  RECT rc;
+  GetClientRect(wnd, &rc);
+
+  data->d2dFactory->CreatePathGeometry(&data->redGeometry);
+  data->d2dFactory->CreatePathGeometry(&data->greenGeometry);
+  data->d2dFactory->CreatePathGeometry(&data->blueGeometry);
+
+  auto radius = 0.9f * std::min(rc.right - rc.left, rc.bottom - rc.top) / 2;
+
+  auto centre = D2D1::Point2F((rc.right - rc.left) / 2.f, (rc.bottom - rc.top) / 2.f);
+
+  auto arcSegment = D2D1::ArcSegment(D2D1::Point2F(), D2D1::SizeF(radius, radius), 0.f, D2D1_SWEEP_DIRECTION_CLOCKWISE, D2D1_ARC_SIZE_SMALL);
+
+  auto currentPos = D2D1::Point2F(centre.x, centre.y - radius);
+
+  ID2D1GeometrySink* redSink;
+  data->redGeometry->Open(&redSink);
+  redSink->SetFillMode(D2D1_FILL_MODE_WINDING);
+  redSink->BeginFigure(currentPos, D2D1_FIGURE_BEGIN_FILLED);
+  auto redPer10k = std::get<0>(data->rgb);
+  arcSegment.point = currentPos = positionFromAngle(toRadians(redPer10k), radius, centre);
+  arcSegment.arcSize = redPer10k > 5000 ? D2D1_ARC_SIZE_LARGE : D2D1_ARC_SIZE_SMALL;
+  redSink->AddArc(arcSegment);
+  redSink->AddLine(centre);
+  redSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+  redSink->Close();
+  redSink->Release();
+
+  ID2D1GeometrySink* greenSink;
+  data->greenGeometry->Open(&greenSink);
+  greenSink->SetFillMode(D2D1_FILL_MODE_WINDING);
+  greenSink->BeginFigure(currentPos, D2D1_FIGURE_BEGIN_FILLED);
+  auto greenPer10k = std::get<1>(data->rgb);
+  arcSegment.point = currentPos = positionFromAngle(toRadians(redPer10k + greenPer10k), radius, centre);
+  arcSegment.arcSize = greenPer10k > 5000 ? D2D1_ARC_SIZE_LARGE : D2D1_ARC_SIZE_SMALL;
+  greenSink->AddArc(arcSegment);
+  greenSink->AddLine(centre);
+  greenSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+  greenSink->Close();
+  greenSink->Release();
+
+  ID2D1GeometrySink* blueSink;
+  data->blueGeometry->Open(&blueSink);
+  blueSink->SetFillMode(D2D1_FILL_MODE_WINDING);
+  blueSink->BeginFigure(currentPos, D2D1_FIGURE_BEGIN_FILLED);
+  arcSegment.point = D2D1::Point2F(centre.x, centre.y - radius);
+  auto bluePer10k = std::get<2>(data->rgb);
+  arcSegment.arcSize = bluePer10k > 5000 ? D2D1_ARC_SIZE_LARGE : D2D1_ARC_SIZE_SMALL;
+  blueSink->AddArc(arcSegment);
+  blueSink->AddLine(centre);
+  blueSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+  blueSink->Close();
+  blueSink->Release();
 }
 
 void createDeviceResources(GraphData* data) {
@@ -70,23 +141,16 @@ void onGraphPaint(HWND wnd, GraphData* data) {
   RECT rc;
   GetClientRect(wnd, &rc);
 
-  auto radius = 0.9 * std::min(rc.right - rc.left, rc.bottom - rc.top) / 2;
-
-  auto centre = D2D1::Point2F((rc.right - rc.left) / 2, (rc.bottom - rc.top) / 2);
-
   createDeviceResources(data);
 
   data->rt->BindDC(dc, &rc);
   data->rt->BeginDraw();
   data->rt->SetTransform(D2D1::Matrix3x2F::Identity());
   data->rt->Clear(D2D1::ColorF(RGB(240, 240, 240)));
-  
-  data->rt->DrawEllipse(D2D1::Ellipse(centre, radius, radius), data->blackBrush);
 
-  data->rt->DrawLine(D2D1::Point2F(centre.x, centre.y - radius), centre, data->redBrush);
-  data->rt->DrawLine(D2D1::Point2F(centre.x + radius, centre.y), centre, data->redBrush);
-  data->rt->DrawLine(D2D1::Point2F(centre.x, centre.y + radius), centre, data->greenBrush);
-  data->rt->DrawLine(D2D1::Point2F(centre.x - radius, centre.y), centre, data->blueBrush);
+  data->rt->FillGeometry(data->redGeometry, data->redBrush);
+  data->rt->FillGeometry(data->greenGeometry, data->greenBrush);
+  data->rt->FillGeometry(data->blueGeometry, data->blueBrush);
 
   if (data->rt->EndDraw() == D2DERR_RECREATE_TARGET)
     data->rt = nullptr;
@@ -107,6 +171,8 @@ LRESULT CALLBACK graphProc(HWND wnd, unsigned int msg, WPARAM wParam, LPARAM lPa
       break;
     case k_graphSetTriple:
       graphData->rgb = *reinterpret_cast<std::tuple<int, int, int>*>(lParam);
+      onGraphSetTriple(wnd, graphData);
+      curt::invalidateRect(wnd, nullptr, 0);
       break;
     case WM_PAINT:
       onGraphPaint(wnd, graphData);

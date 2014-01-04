@@ -100,6 +100,8 @@ int getWindowTextLength(HandleOr<HWND> wnd);
 int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize);
 int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
 
+void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase);
+
 bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg);
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName);

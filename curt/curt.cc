@@ -365,6 +365,13 @@ int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
   return getTextInner(wnd, buffer, bufferSize, GetWindowTextW);
 }
 
+void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase) {
+  auto result = InvalidateRect(wnd, rect, erase ? 1 : 0);
+  throwIfSavedException();
+  if (!result)
+    throw std::runtime_error("Failed to invalidate rect");
+}
+
 bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg) {
   auto result = IsDialogMessageW(dlg, msg);
   // IsDialogMessage dispatches messages internally
