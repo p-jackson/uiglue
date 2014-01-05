@@ -145,7 +145,8 @@ void Graph::updateGeometry(int red, int green, int blue) {
   m_blueGeometry->Open(getOut(blueSink));
   blueSink->SetFillMode(D2D1_FILL_MODE_WINDING);
   blueSink->BeginFigure(currentPos, D2D1_FIGURE_BEGIN_FILLED);
-  arcSegment.point = Point2F(centre.x, centre.y - radius);
+  angleSoFar = per10kToRadians(red + green + blue);
+  arcSegment.point = currentPos = positionFromAngle(angleSoFar, radius, centre);
   arcSegment.arcSize = per10kToArcSize(blue);
   blueSink->AddArc(arcSegment);
   blueSink->AddLine(centre);
