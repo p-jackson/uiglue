@@ -13,11 +13,11 @@
 
 // boost::intrusive_ptr uses ADL to find these methods.
 
-void intrusive_ptr_add_ref(IUnknown* p) {
+inline void intrusive_ptr_add_ref(IUnknown* p) {
   p->AddRef();
 }
 
-void intrusive_ptr_release(IUnknown* p) {
+inline void intrusive_ptr_release(IUnknown* p) {
   p->Release();
 }
 
