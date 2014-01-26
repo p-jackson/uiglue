@@ -8,8 +8,9 @@
 #include "view.h"
 
 #include "binding_handler.h"
+#include "i_view_model_ref.h"
 #include "view_messages.h"
-#include "view_model_ref.h"
+
 
 #include "curt/curt.h"
 #include "curt/error.h"
@@ -73,10 +74,10 @@ string stripBindingPrefix(BindType type, string s) {
 }
 
 struct MakeObservable : public boost::static_visitor<UntypedObservable> {
-  ViewModelRef& m_vm;
+  IViewModelRef& m_vm;
 
   // GCC doesn't accept brace initialised references
-  MakeObservable(ViewModelRef& vm) : m_vm(vm) {}
+  MakeObservable(IViewModelRef& vm) : m_vm(vm) {}
   MakeObservable& operator=(const MakeObservable&) = delete;
 
   UntypedObservable operator()(UntypedObservable value) {
@@ -184,7 +185,7 @@ bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {
   static auto kDetachVM = curt::registerWindowMessage(detachVMMsg);
 
   if (msg == kApplyBindings) {
-    m_vm.reset(reinterpret_cast<ViewModelRef*>(lParam));
+    m_vm.reset(reinterpret_cast<IViewModelRef*>(lParam));
     applyBindings();
     return true;
   }

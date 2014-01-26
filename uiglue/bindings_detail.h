@@ -27,7 +27,6 @@
 namespace uiglue {
 
 class BindingHandlerCache;
-struct ViewModelRef;
 
 namespace detail {
 

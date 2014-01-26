@@ -21,10 +21,10 @@
 #ifndef UIGLUE_OBSERVABLE_H
 #define UIGLUE_OBSERVABLE_H
 
+#include "i_untyped_observable.h"
 #include "make_unique.h"
 #include "remove_cv_t.h"
-#include "untyped_observable.h"
-#include "view_model_ref_impl.h"
+#include "view_model_ref.h"
 
 #include <atomic>
 #include <boost/variant.hpp>
@@ -126,17 +126,16 @@ public:
     return typeid(T);
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRef() override {
+  std::unique_ptr<IViewModelRef> asViewModelRef() override {
     return asViewModelRefInner(detail::IsViewModel<T>{});
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRefInner(std::true_type) {
-    return detail::make_unique<ViewModelRefImpl<T>>(m_value);
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) {
+    return detail::make_unique<ViewModelRef<T>>(m_value);
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRefInner(std::false_type) {
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::false_type) {
     throw std::bad_cast{};
-    return std::unique_ptr<ViewModelRef>{};
   }
 };
 
@@ -224,15 +223,15 @@ public:
     return typeid(T);
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRef() override {
+  std::unique_ptr<IViewModelRef> asViewModelRef() override {
     return asViewModelRefInner(detail::IsViewModel<T>{});
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRefInner(std::true_type) const {
-    return detail::make_unique<ViewModelRefImpl<T>>(m_value);
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) const {
+    return detail::make_unique<ViewModelRef<T>>(m_value);
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRefInner(std::false_type) const {
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::false_type) const {
     throw std::bad_cast{};
   }
 
@@ -359,7 +358,7 @@ public:
     return m_inner->type() == typeid(T);
   }
 
-  std::unique_ptr<ViewModelRef> asViewModelRef() {
+  std::unique_ptr<IViewModelRef> asViewModelRef() {
     if (DependencyTracker::isTracking())
       DependencyTracker::track(m_inner);
     return m_inner->asViewModelRef();

@@ -21,7 +21,7 @@
 
 namespace uiglue {
 
-struct ViewModelRef;
+struct IViewModelRef;
 
 class View {
   using Value = boost::variant<std::string, UntypedObservable>;
@@ -29,7 +29,7 @@ class View {
   using BindingDeclarations = std::unordered_map<int, KeyValues>;
 
   HWND m_wnd;
-  std::unique_ptr<ViewModelRef> m_vm;
+  std::unique_ptr<IViewModelRef> m_vm;
   std::unordered_map<int, std::string> m_menuCommands;
 
   KeyValues m_viewBindingDecls;

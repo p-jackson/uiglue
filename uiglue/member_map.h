@@ -10,7 +10,6 @@
 
 #include "fwd.h"
 #include "make_unique.h"
-#include "untyped_observable.h"
 
 #include "curt/fwd_windows.h"
 
@@ -43,6 +42,8 @@ public: \
   }
 
 namespace uiglue {
+
+struct IUntypedObservable;
 
 template<class T>
 std::shared_ptr<IUntypedObservable> asUntyped(T property) {

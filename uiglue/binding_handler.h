@@ -1,4 +1,4 @@
-//===-- BindingHandler abstract base class --------------------------------===//
+//===-- BindingHandler class template -------------------------------------===//
 //
 // Copyright (c) 2013 Philip Jackson
 // This file may be freely distributed under the MIT license.
@@ -19,11 +19,11 @@ namespace uiglue {
 class UntypedObservable;
 class View;
 
-struct BindingHandler {
-  virtual ~BindingHandler() {}
-  BindingHandler() = default;
-  BindingHandler(const BindingHandler&) = delete;
-  BindingHandler& operator=(const BindingHandler&) = delete;
+struct IBindingHandler {
+  virtual ~IBindingHandler() {}
+  IBindingHandler() = default;
+  IBindingHandler(const IBindingHandler&) = delete;
+  IBindingHandler& operator=(const IBindingHandler&) = delete;
 
   virtual std::string name() const = 0;
   virtual void init(HWND ctrl, UntypedObservable ob, View& view) const = 0;
@@ -31,7 +31,7 @@ struct BindingHandler {
 };
 
 template<class Traits>
-class BindingHandlerImpl : public BindingHandler {
+class BindingHandler : public IBindingHandler {
 public:
   std::string name() const override {
     return Traits::name();

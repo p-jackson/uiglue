@@ -17,13 +17,13 @@
 namespace uiglue {
 
 class BindingHandlerCache {
-  using HandlerPtr = std::shared_ptr<const BindingHandler>;
+  using HandlerPtr = std::shared_ptr<const IBindingHandler>;
   std::unordered_map<std::string, HandlerPtr> m_handlers;
 
 public:
   template<class T>
   void addBindingHandler() {
-    addBindingHandler(std::make_shared<BindingHandlerImpl<T>>());
+    addBindingHandler(std::make_shared<BindingHandler<T>>());
   }
 
   HandlerPtr getBindingHandler(std::string name) const;

@@ -274,7 +274,7 @@ detail::BindingDecl declareBindings(
 
 // Applies bindings to a view model already wrapped in a ViewModelRef.
 // Uses a window message to pass ownership of the ViewModelRef to the view.
-void applyBindings(unique_ptr<ViewModelRef> vmRef, HWND view) {
+void applyBindings(unique_ptr<IViewModelRef> vmRef, HWND view) {
   static auto msg = registerWindowMessage(applyBindingsMsg);
   auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
   sendMessage(view, msg, 0, asLParam);
