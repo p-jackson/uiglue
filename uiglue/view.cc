@@ -92,7 +92,7 @@ struct MakeObservable : public boost::static_visitor<UntypedObservable> {
       return Observable<string>{ value }.asUntyped();
 
     case BindType::Bind:
-      return m_vm.getObservable(value);
+      return UntypedObservable{ m_vm.getObservable(value) };
 
     default:
       BOOST_ASSERT(0);

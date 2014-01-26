@@ -11,7 +11,7 @@
 #include "bindings_detail.h"
 #include "binding_handler_cache.h"
 #include "make_unique.h"
-#include "view_model_ref.h"
+#include "view_model_ref_impl.h"
 
 #include "curt/api_params.h"
 #include "curt/fwd_windows.h"
@@ -27,10 +27,12 @@ detail::BindingDecl declareBindings(
   BindingHandlerCache handlers = defaultBindingHandlers()
 );
 
+void applyBindings(std::unique_ptr<ViewModelRef> vmRef, HWND view);
+
 template<class ViewModel>
 void applyBindings(ViewModel& vm, curt::HandleOr<HWND> view) {
   auto ref = detail::make_unique<ViewModelRefImpl<ViewModel>>(vm);
-  detail::applyBindingsInner(std::move(ref), view);
+  applyBindings(std::move(ref), view);
 }
 
 void detachViewModel(curt::HandleOr<HWND> view);

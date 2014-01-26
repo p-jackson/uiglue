@@ -1,12 +1,12 @@
-//===-- MainViewModel class declaration -----------------------------------===//
+//===-- SliderViewModel class declaration ---------------------------------===//
 //
 // Copyright (c) 2013 Philip Jackson
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef DIALOG_VIEW_MODEL_H
-#define DIALOG_VIEW_MODEL_H
+#ifndef DIALOG_SLIDER_VIEW_MODEL_H
+#define DIALOG_SLIDER_VIEW_MODEL_H
 
 #include "uiglue/computed.h"
 #include "uiglue/member_map.h"
@@ -17,7 +17,7 @@
 
 namespace dialogExample {
 
-class MainViewModel {
+class SliderViewModel {
 public:
   uiglue::Observable<int> redPer10k;
   uiglue::Computed<std::string> redText;
@@ -27,7 +27,7 @@ public:
   uiglue::Computed<std::string> blueText;
   uiglue::Computed<std::tuple<int, int, int>> rgbTriple;
 
-  UIGLUE_BEGIN_MEMBER_MAP(MainViewModel)
+  UIGLUE_BEGIN_MEMBER_MAP(SliderViewModel)
     UIGLUE_DECLARE_PROPERTY(redText)
     UIGLUE_DECLARE_PROPERTY(redPer10k)
     UIGLUE_DECLARE_PROPERTY(greenText)
@@ -37,7 +37,7 @@ public:
     UIGLUE_DECLARE_PROPERTY(rgbTriple)
   UIGLUE_END_MEMBER_MAP()
 
-  MainViewModel();
+  SliderViewModel();
 
 private:
   std::string computeRedText();

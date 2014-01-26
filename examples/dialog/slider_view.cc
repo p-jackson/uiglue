@@ -1,16 +1,16 @@
-//===-- Main Dialog procedure ---------------------------------------------===//
+//===-- Slider sub-dialog procedure ---------------------------------------===//
 //
 // Copyright (c) 2013 Philip Jackson
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
 //
-// Creates the main dialog view with createMainView(), using dlgProc() as the
+// Creates the slider view with createSliderView(), using dlgProc() as the
 // dialog procedure.
 //
-// The main view subclasses the placeholder control in the dialog
-// with the graphProc() procedure and creates an instance of the Graph class,
-// which handles the drawing of the pie graph.
+// The view subclasses the placeholder control in the dialog with the
+// graphProc() procedure and creates an instance of the Graph class, which
+// handles the drawing of the pie graph.
 // A custom binding handler (GraphHandler) is defined to bind the view model
 // properties to the custom graph control.
 //
@@ -281,16 +281,10 @@ bool onInitDialog(HWND wnd, HWND, LPARAM) {
   return true;
 }
 
-void onCommand(HWND wnd, int id, HWND, UINT) {
-  if (id == IDCANCEL)
-    curt::destroyWindow(wnd);
-}
-
-// Procedure for the main view.
+// Procedure for the slider view.
 INT_PTR CALLBACK dlgProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
     HANDLE_MSG(wnd, WM_INITDIALOG, onInitDialog);
-    HANDLE_MSG(wnd, WM_COMMAND, onCommand);
   default:
     return FALSE;
   }
@@ -300,13 +294,10 @@ INT_PTR CALLBACK dlgProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 namespace dialogExample {
 
-// Creates the main dialog view and declares the uiglue bindings.
-curt::Window createMainView() {
+// Creates the slider sub-dialog view and declares the uiglue bindings.
+curt::Window createSliderView(HWND parent) {
   auto inst = curt::thisModule();
-  auto parent = HWND_DESKTOP;
-  auto dlg = curt::createDialog(inst, IDD_MAIN_VIEW, parent, dlgProc);
-
-  curt::subclassAppView(dlg);
+  auto dlg = curt::createDialog(inst, IDD_SLIDER_VIEW, parent, dlgProc);
 
   auto handlers = uiglue::defaultBindingHandlers();
   handlers.addBindingHandler<GraphHandler>();

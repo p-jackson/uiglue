@@ -237,18 +237,6 @@ detail::ThisViewT ThisView;
 
 namespace detail {
 
-// The inner workings of applyBindings. Uses a window message to pass ownership
-// of the ViewModelRef to the view.
-void applyBindingsInner(unique_ptr<ViewModelRef> vmRef, HWND view) {
-  static auto msg = registerWindowMessage(applyBindingsMsg);
-  auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
-  sendMessage(view, msg, 0, asLParam);
-
-  // Ownership of vmRef has been passed to the view
-  vmRef.release();
-}
-
-
 BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
   : m_viewData{ detail::make_unique<View>(handle) },
     m_handle{ handle }
@@ -281,6 +269,18 @@ detail::BindingDecl declareBindings(
   BindingHandlerCache cache
 ) {
   return { view, move(cache) };
+}
+
+
+// Applies bindings to a view model already wrapped in a ViewModelRef.
+// Uses a window message to pass ownership of the ViewModelRef to the view.
+void applyBindings(unique_ptr<ViewModelRef> vmRef, HWND view) {
+  static auto msg = registerWindowMessage(applyBindingsMsg);
+  auto asLParam = reinterpret_cast<LPARAM>(vmRef.get());
+  sendMessage(view, msg, 0, asLParam);
+
+  // Ownership of vmRef has been passed to the view
+  vmRef.release();
 }
 
 

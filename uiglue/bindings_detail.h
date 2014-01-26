@@ -31,8 +31,6 @@ struct ViewModelRef;
 
 namespace detail {
 
-void applyBindingsInner(std::unique_ptr<ViewModelRef> vmRef, HWND view);
-
 struct MenuCommandT {};
 struct ThisViewT {};
 

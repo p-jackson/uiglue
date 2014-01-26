@@ -1,11 +1,11 @@
-//===-- MainViewModel class definition ------------------------------------===//
+//===-- SliderViewModel class definition ----------------------------------===//
 //
 // Copyright (c) 2013 Philip Jackson
 // This file may be freely distributed under the MIT license.
 //
 //===----------------------------------------------------------------------===//
 
-#include "view_model.h"
+#include "slider_view_model.h"
 
 using uiglue::Observable;
 using std::string;
@@ -55,14 +55,14 @@ static void adjustPercentages(int changed, Observable<int>& o1, Observable<int>&
 
 namespace dialogExample {
 
-MainViewModel::MainViewModel()
-  : redPer10k{ 3400 },
-    redText{ std::bind(&MainViewModel::computeRedText, this) },
-    greenPer10k{ 3300 },
-    greenText{ std::bind(&MainViewModel::computeGreenText, this) },
-    bluePer10k{ 3300 },
-    blueText{ std::bind(&MainViewModel::computeBlueText, this) },
-    rgbTriple{ std::bind(&MainViewModel::computeTriple, this) }
+SliderViewModel::SliderViewModel()
+  : redPer10k{ 3334 },
+    redText{ std::bind(&SliderViewModel::computeRedText, this) },
+    greenPer10k{ 3333 },
+    greenText{ std::bind(&SliderViewModel::computeGreenText, this) },
+    bluePer10k{ 3333 },
+    blueText{ std::bind(&SliderViewModel::computeBlueText, this) },
+    rgbTriple{ std::bind(&SliderViewModel::computeTriple, this) }
 {
   redPer10k.subscribe([this](int r) mutable {
     adjustPercentages(r, greenPer10k, bluePer10k);
@@ -77,19 +77,19 @@ MainViewModel::MainViewModel()
   });
 }
 
-string MainViewModel::computeRedText() {
+string SliderViewModel::computeRedText() {
   return formatPercentage(redPer10k());
 }
 
-string MainViewModel::computeGreenText() {
+string SliderViewModel::computeGreenText() {
   return formatPercentage(greenPer10k());
 }
 
-string MainViewModel::computeBlueText() {
+string SliderViewModel::computeBlueText() {
   return formatPercentage(bluePer10k());
 }
 
-std::tuple<int, int, int> MainViewModel::computeTriple() {
+std::tuple<int, int, int> SliderViewModel::computeTriple() {
   return std::make_tuple(redPer10k(), greenPer10k(), bluePer10k());
 }
 

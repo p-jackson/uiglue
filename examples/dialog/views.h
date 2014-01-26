@@ -13,6 +13,7 @@
 namespace dialogExample {
 
 curt::Window createMainView();
+curt::Window createSliderView(HWND parent);
 
 } // end namespace dialogExample
 

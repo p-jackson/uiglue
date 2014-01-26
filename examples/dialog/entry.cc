@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "views.h"
-#include "view_model.h"
+#include "main_view_model.h"
 
 #include "curt/curt.h"
 #include "curt/include_windows.h"

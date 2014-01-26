@@ -71,6 +71,10 @@ public:
     return m_inner.asUntyped();
   }
 
+  std::shared_ptr<IUntypedObservable> asUntypedPtr() {
+    return m_inner.asUntypedPtr();
+  }
+
 private:
   void dependencyUpdated(UntypedObservable) {
     m_needsUpdated = true;
