@@ -33,7 +33,7 @@ class ComPtrWrapper {
 
 public:
   explicit ComPtrWrapper(boost::intrusive_ptr<I>& ref)
-    : m_ref{ ref },
+    : m_ref(ref),
       m_ptr{ nullptr }
   {
   }
