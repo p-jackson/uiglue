@@ -95,20 +95,17 @@ namespace detail {
 }
 
 // Provides type-erasure for view model properties. This is lighter-weight than
-// an observable because it doesn't do subscription or dependency tracking.
+// an observable because it doesn't do subscription, dependency tracking, and
+// it holds on to a reference.
 template<class T>
 class ValueWrapper : public IUntypedObservable
 {
   friend UntypedObservable;
 
-  T m_value;
+  T& m_value;
 
 public:
-  template<class... P>
-  ValueWrapper(P&&... a)
-    : m_value{ std::forward<P>(a)... }
-  {
-  }
+  ValueWrapper(T& value) : m_value(value) {}
 
   T get() {
     return m_value;
@@ -376,11 +373,6 @@ public:
 template<class T>
 UntypedObservable Observable<T>::asUntyped() {
   return UntypedObservable{ m_inner };
-}
-
-template<class T>
-std::shared_ptr<IUntypedObservable> untypedObservabeFromValue(T t) {
-  return std::make_shared<ValueWrapper<T>>(std::move(t));
 }
 
 } // end namespace uiglue

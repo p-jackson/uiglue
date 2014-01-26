@@ -46,8 +46,8 @@ namespace uiglue {
 struct IUntypedObservable;
 
 template<class T>
-std::shared_ptr<IUntypedObservable> asUntyped(T property) {
-  return untypedObservabeFromValue(std::move(property));
+std::shared_ptr<IUntypedObservable> asUntyped(T& property) {
+  return std::make_shared<ValueWrapper<T>>(property);
 }
 
 template<class T>
