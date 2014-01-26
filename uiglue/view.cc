@@ -237,6 +237,7 @@ void View::applyBindingsToWindow(const KeyValues& bindings, HWND wnd) {
 
     auto observable = boost::apply_visitor(makeObservable, binding.second);
     handler->init(wnd, observable, *this);
+    handler->update(wnd, observable, *this);
 
     observable.subscribe([handler, wnd, this](UntypedObservable o) {
       handler->update(wnd, o, *this);

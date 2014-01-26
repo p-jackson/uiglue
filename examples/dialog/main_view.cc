@@ -32,10 +32,6 @@ struct With {
     return { "with" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    With::update(wnd, observable, view);
-  }
-
   static void update(HWND view, UntypedObservable observable, View&) {
     auto vm = observable.asViewModelRef();
     uiglue::applyBindings(std::move(vm), view);

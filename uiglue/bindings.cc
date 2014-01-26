@@ -53,10 +53,6 @@ struct Text {
     return { "text" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View&) {
-    setTextFromObservable(wnd, observable);
-  }
-
   static void update(HWND wnd, UntypedObservable observable, View&) {
     setTextFromObservable(wnd, observable);
   }
@@ -76,8 +72,6 @@ struct Value {
   }
 
   static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Value::update(wnd, observable, view);
-    
     view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
       auto text = getWindowTextString(control);
       auto asString = observable.as<string>();
@@ -105,18 +99,12 @@ struct Value {
       sendMessage(wnd, TBM_SETPOS, 1, asInt());
     }
   }
-
-  typedef LRESULT (__stdcall* SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 };
 
 // Sets the window visibility using ShowWindow()
 struct Visible {
   static string name() {
     return { "visible" };
-  }
-
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Visible::update(wnd, move(observable), view);
   }
 
   static void update(HWND wnd, UntypedObservable observable, View&) {
@@ -132,10 +120,6 @@ struct Hidden {
     return { "hidden" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Hidden::update(wnd, std::move(observable), view);
-  }
-
   static void update(HWND wnd, UntypedObservable observable, View&) {
     auto asBool = observable.as<bool>();
     curt::showWindow(wnd, asBool() ? SW_HIDE : SW_SHOWNA);
@@ -149,8 +133,6 @@ struct Checked {
   }
 
   static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Checked::update(wnd, std::move(observable), view);
-
     view.addCommandHandler(BN_CLICKED, wnd, [observable](HWND control) mutable {
       auto state = curt::sendMessage(control, BM_GETCHECK, 0, 0);
       if (observable.is<int>()) {
@@ -189,19 +171,12 @@ struct Click {
     auto stringObservable = observable.as<string>();
     view.addCommandHandler(BN_CLICKED, wnd, stringObservable());
   }
-
-  static void update(HWND, UntypedObservable, View&) {
-  }
 };
 
 // Sets the minimum for a slider control
 struct Min {
   static string name() {
     return { "min" };
-  }
-
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Min::update(wnd, observable, view);
   }
 
   static void update(HWND wnd, UntypedObservable observable, View&) {
@@ -214,10 +189,6 @@ struct Min {
 struct Max {
   static string name() {
     return { "max" };
-  }
-
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    Max::update(wnd, observable, view);
   }
 
   static void update(HWND wnd, UntypedObservable observable, View&) {
