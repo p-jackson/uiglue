@@ -100,8 +100,6 @@ namespace detail {
 template<class T>
 class ValueWrapper : public IUntypedObservable
 {
-  friend UntypedObservable;
-
   T& m_value;
 
 public:
@@ -142,8 +140,6 @@ class TypedObservable
     private TypedObservableSubscriberId,
     public std::enable_shared_from_this<TypedObservable<T>>
 {
-  friend UntypedObservable;
-
   T m_value;
 
   using Callback = boost::variant<
