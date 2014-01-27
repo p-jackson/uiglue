@@ -197,6 +197,18 @@ struct Max {
   }
 };
 
+// Binds a child view to a child view model
+struct With {
+  static std::string name() {
+    return { "with" };
+  }
+
+  static void update(HWND view, UntypedObservable observable, View&) {
+    auto vm = observable.asViewModelRef();
+    uiglue::applyBindings(std::move(vm), view);
+  }
+};
+
 } // end namespace
 
 
@@ -274,6 +286,7 @@ BindingHandlerCache defaultBindingHandlers() {
   cache.addBindingHandler<Click>();
   cache.addBindingHandler<Min>();
   cache.addBindingHandler<Max>();
+  cache.addBindingHandler<With>();
 
   return cache;
 }

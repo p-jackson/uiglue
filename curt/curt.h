@@ -82,6 +82,9 @@ void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
 
 void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps);
 
+void getClientRect(HandleOr<HWND> wnd, RECT* rect);
+RECT getClientRect(HandleOr<HWND> wnd);
+
 int getDlgCtrlID(HandleOr<HWND> hwndCtl);
 
 HWND getDlgItem(HandleOr<HWND> wnd, int childId);
@@ -146,6 +149,8 @@ LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int, WPARAM, LPARAM);
 
 COLORREF setDCBrushColor(HDC hdc, COLORREF color);
 
+long setWindowLong(HandleOr<HWND> wnd, int index, long newLong);
+
 void setWindowPos(
   HandleOr<HWND> wnd,
   HandleOr<HWND> insertAfter,
@@ -176,6 +181,8 @@ bool translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg);
 bool translateMessage(const MSG* msg);
 
 void updateWindow(HandleOr<HWND> wnd);
+
+void validateRect(HandleOr<HWND> wnd, const RECT* rect);
 
 int wideCharToMultiByte(
   unsigned int codePage,

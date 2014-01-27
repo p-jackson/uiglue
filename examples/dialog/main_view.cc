@@ -22,32 +22,17 @@
 #include <CommCtrl.h>
 #include <windowsx.h>
 
+using namespace curt;
+
 namespace {
-
-struct With {
-  using UntypedObservable = uiglue::UntypedObservable;
-  using View = uiglue::View;
-
-  static std::string name() {
-    return { "with" };
-  }
-
-  static void update(HWND view, UntypedObservable observable, View&) {
-    auto vm = observable.asViewModelRef();
-    uiglue::applyBindings(std::move(vm), view);
-  }
-};
-
 
 // Create the custom graph control by subclassing the IDC_GRAPH placeholder.
 bool onInitDialog(HWND wnd, HWND, LPARAM) {
-  auto placeholder = curt::getDlgItem(wnd, IDC_SUB_DIALOG_SIZER);
-  RECT rc;
-  GetClientRect(placeholder, &rc);
+  auto rc = getClientRect(getDlgItem(wnd, IDC_SUB_DIALOG_SIZER));
   auto sliderView = dialogExample::createSliderView(wnd);
-  curt::setWindowPos(sliderView, nullptr, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_SHOWWINDOW);
+  setWindowPos(sliderView, nullptr, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_SHOWWINDOW);
 
-  SetWindowLongW(sliderView.get(), GWL_ID, IDC_SUB_DIALOG);
+  setWindowLong(sliderView.get(), GWL_ID, IDC_SUB_DIALOG);
 
   sliderView.release();
 
@@ -56,7 +41,7 @@ bool onInitDialog(HWND wnd, HWND, LPARAM) {
 
 void onCommand(HWND wnd, int id, HWND, UINT) {
   if (id == IDCANCEL)
-    curt::destroyWindow(wnd);
+    destroyWindow(wnd);
 }
 
 // Procedure for the slider view.
@@ -74,17 +59,12 @@ INT_PTR CALLBACK dlgProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 namespace dialogExample {
 
 // Creates the main view and declares the uiglue bindings.
-curt::Window createMainView() {
-  auto inst = curt::thisModule();
-  auto parent = HWND_DESKTOP;
-  auto dlg = curt::createDialog(inst, IDD_MAIN_VIEW, parent, dlgProc);
+Window createMainView() {
+  auto dlg = createDialog(thisModule(), IDD_MAIN_VIEW, HWND_DESKTOP, dlgProc);
 
-  curt::subclassAppView(dlg);
+  subclassAppView(dlg);
 
-  auto handlers = uiglue::defaultBindingHandlers();
-  handlers.addBindingHandler<With>();
-
-  uiglue::declareBindings(dlg, handlers)
+  uiglue::declareBindings(dlg)
     (IDC_SUB_DIALOG, "with", "bind: slider")
   ;
 

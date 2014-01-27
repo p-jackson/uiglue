@@ -32,7 +32,7 @@
 #include <windowsx.h>
 
 using boost::intrusive_ptr;
-using curt::getOut;
+using namespace curt;
 using namespace D2D1;
 
 namespace {
@@ -93,12 +93,11 @@ Graph::Graph(HWND wnd) : m_wnd{ wnd } {
 void Graph::updateRGB(int r, int g, int b) {
   updateGeometry(r, g, b);
   // Will causes a WM_PAINT to be sent to the window.
-  curt::invalidateRect(m_wnd, nullptr, 0);
+  invalidateRect(m_wnd, nullptr, 0);
 }
 
 void Graph::updateGeometry(int red, int green, int blue) {
-  RECT rc;
-  GetClientRect(m_wnd, &rc);
+  auto rc = getClientRect(m_wnd);
   const auto width = rc.right - rc.left;
   const auto height = rc.bottom - rc.top;
   const auto radius = 0.9f * std::min(width, height) / 2;
@@ -173,9 +172,8 @@ void Graph::createDeviceResources() {
 
 void Graph::paint() {
   PAINTSTRUCT ps;
-  auto dc = curt::beginPaint(m_wnd, &ps);
-  RECT rc;
-  GetClientRect(m_wnd, &rc);
+  auto dc = beginPaint(m_wnd, &ps);
+  auto rc = getClientRect(m_wnd);
 
   createDeviceResources();
 
@@ -194,7 +192,7 @@ void Graph::paint() {
   if (m_rt->EndDraw() == D2DERR_RECREATE_TARGET)
     m_rt.reset();
 
-  ValidateRect(m_wnd, &rc);
+  validateRect(m_wnd, &rc);
 }
 
 
@@ -231,13 +229,13 @@ LRESULT CALLBACK graphProc(
       break;
 
     default:
-      return curt::defSubclassProc(wnd, msg, wParam, lParam);
+      return defSubclassProc(wnd, msg, wParam, lParam);
     }
 
     return 0;
   }
   catch (...) {
-    curt::saveCurrentException();
+    saveCurrentException();
     return 0;
   }
 }
@@ -262,7 +260,7 @@ struct GraphHandler {
     auto asTuple = observable.as<std::tuple<int, int, int>>();
     auto tuple = asTuple();
     auto asLParam = reinterpret_cast<LPARAM>(&tuple);
-    curt::sendMessage(wnd, k_graphUpdateTriple, 0, asLParam);
+    sendMessage(wnd, k_graphUpdateTriple, 0, asLParam);
   }
 };
 
@@ -295,9 +293,9 @@ INT_PTR CALLBACK dlgProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 namespace dialogExample {
 
 // Creates the slider sub-dialog view and declares the uiglue bindings.
-curt::Window createSliderView(HWND parent) {
-  auto inst = curt::thisModule();
-  auto dlg = curt::createDialog(inst, IDD_SLIDER_VIEW, parent, dlgProc);
+Window createSliderView(HWND parent) {
+  auto inst = thisModule();
+  auto dlg = createDialog(inst, IDD_SLIDER_VIEW, parent, dlgProc);
 
   auto handlers = uiglue::defaultBindingHandlers();
   handlers.addBindingHandler<GraphHandler>();

@@ -156,6 +156,17 @@ void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps) {
   EndPaint(wnd, ps);
 }
 
+void getClientRect(HandleOr<HWND> wnd, RECT* rect) {
+  if (!GetClientRect(wnd, rect))
+    throwLastWin32Error();
+}
+
+RECT getClientRect(HandleOr<HWND> wnd) {
+  RECT rect;
+  getClientRect(wnd, &rect);
+  return rect;
+}
+
 int getDlgCtrlID(HandleOr<HWND> hwndCtl) {
   auto result = GetDlgCtrlID(hwndCtl);
   if (!result)
@@ -258,6 +269,13 @@ COLORREF setDCBrushColor(HDC hdc, COLORREF color) {
   return prev;
 }
 
+long setWindowLong(HandleOr<HWND> wnd, int index, long newLong) {
+  SetLastError(0);
+  auto result = SetWindowLongW(wnd, index, newLong);
+  throwIfWin32Error();
+  return result;
+}
+
 void setWindowPos(
   HandleOr<HWND> wnd,
   HandleOr<HWND> insertAfter,
@@ -327,6 +345,11 @@ void updateWindow(HandleOr<HWND> wnd) {
   throwIfSavedException();
   if (!result)
     throwLastWin32Error();
+}
+
+void validateRect(HandleOr<HWND> wnd, const RECT* rect) {
+  if (!ValidateRect(wnd, rect))
+    throw std::runtime_error("Failed to validate rect");
 }
 
 HGDIOBJ getStockObject(int object) {
