@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <functional>
 #include <sstream>
+#include <system_error>
 
 using std::string;
 using namespace curt;

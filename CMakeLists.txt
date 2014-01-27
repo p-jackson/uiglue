@@ -8,6 +8,8 @@ enable_testing()
 
 include(cotire)
 
+find_package(Git)
+
 # Boost setup
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
@@ -34,9 +36,11 @@ add_subdirectory(curt)
 add_subdirectory(tests)
 add_subdirectory(uiglue)
 add_subdirectory(examples/bind_test)
+add_subdirectory(examples/dialog)
 add_subdirectory(examples/hello_world)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(TARGET catch PROPERTY FOLDER "deps")
 set_property(TARGET bind_test PROPERTY FOLDER "examples")
+set_property(TARGET dialog PROPERTY FOLDER "examples")
 set_property(TARGET hello_world PROPERTY FOLDER "examples")

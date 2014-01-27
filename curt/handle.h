@@ -47,7 +47,7 @@ public:
   Handle(const Handle&) = delete;
   Handle& operator=(const Handle&) = delete;
 
-  Handle(Handle&& other) : Handle(nullptr) {
+  Handle(Handle&& other) : Handle() {
     using std::swap;
     swap(other.handle, handle);
   }

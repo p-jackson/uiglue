@@ -21,8 +21,10 @@
 #ifndef UIGLUE_OBSERVABLE_H
 #define UIGLUE_OBSERVABLE_H
 
+#include "i_untyped_observable.h"
 #include "make_unique.h"
 #include "remove_cv_t.h"
+#include "view_model_ref.h"
 
 #include <atomic>
 #include <boost/variant.hpp>
@@ -33,14 +35,8 @@
 
 namespace uiglue {
 
-class UntypedObservable;
-
-struct IUntypedObservable {
-  virtual ~IUntypedObservable() {}
-  virtual const std::type_info& type() const = 0;
-  virtual int subscribe(std::function<void(UntypedObservable)> f) = 0;
-  virtual void unsubscribe(int id) = 0;
-};
+template<class VM>
+struct ViewModelMember;
 
 
 class DependencyTracker {
@@ -65,14 +61,85 @@ protected:
   static std::atomic<int> s_nextId;
 };
 
+namespace detail {
+
+  template<class T, bool isFundamental>
+  struct HasMemberMap;
+
+  template<class T>
+  struct HasMemberMap<T, true> {
+    using type = std::false_type;
+  };
+
+  template<class T>
+  struct HasMemberMap<T, false> {
+
+    using Result = ViewModelMember<T>*;
+
+    template<class A, A> class Helper {};
+
+    template<class A>
+    static std::true_type test(
+      A*,
+      Helper<Result (*)(), &A::uiglueGetMemberMap>* = nullptr
+    );
+
+    static std::false_type test(...);
+
+    using type = decltype(test(static_cast<T*>(nullptr)));
+  };
+
+  template<class T>
+  struct IsViewModel : HasMemberMap<T, std::is_fundamental<T>::value>::type {};
+
+}
+
+// Provides type-erasure for view model properties. This is lighter-weight than
+// an observable because it doesn't do subscription, dependency tracking, and
+// it holds on to a reference.
+template<class T>
+class ValueWrapper : public IUntypedObservable
+{
+  T& m_value;
+
+public:
+  ValueWrapper(T& value) : m_value(value) {}
+
+  T get() {
+    return m_value;
+  }
+
+  // ValueWrapper ignores subscriptions.
+  int subscribe(std::function<void(UntypedObservable)>) override {
+    // Won't collide with any ids returned by TypedObservable::subscribe
+    return -1;
+  }
+
+  void unsubscribe(int) override {}
+
+  const std::type_info& type() const override {
+    return typeid(T);
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRef() override {
+    return asViewModelRefInner(detail::IsViewModel<T>{});
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) {
+    return detail::make_unique<ViewModelRef<T>>(m_value);
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::false_type) {
+    throw std::bad_cast{};
+  }
+};
+
 template<class T>
 class TypedObservable
   : public IUntypedObservable,
     private TypedObservableSubscriberId,
     public std::enable_shared_from_this<TypedObservable<T>>
 {
-  friend UntypedObservable;
-
   T m_value;
 
   using Callback = boost::variant<
@@ -147,6 +214,18 @@ public:
 
   const std::type_info& type() const override {
     return typeid(T);
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRef() override {
+    return asViewModelRefInner(detail::IsViewModel<T>{});
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) const {
+    return detail::make_unique<ViewModelRef<T>>(m_value);
+  }
+
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::false_type) const {
+    throw std::bad_cast{};
   }
 
   std::unique_ptr<TypedObservable<T>> copy() const {
@@ -230,6 +309,10 @@ public:
 
   UntypedObservable asUntyped();
 
+  std::shared_ptr<IUntypedObservable> asUntypedPtr() {
+    return m_inner;
+  }
+
 private:
   friend UntypedObservable;
   explicit Observable(std::shared_ptr<TypedObservable<T>> i)
@@ -242,13 +325,22 @@ class UntypedObservable {
   std::shared_ptr<IUntypedObservable> m_inner;
 
 public:
+  explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
+    : m_inner{ std::move(i) }
+  {
+  }
+
   template<class T>
   Observable<T> as() {
     if (!is<T>())
       throw std::bad_cast();
 
     auto asTyped = std::dynamic_pointer_cast<TypedObservable<T>>(m_inner);
-    return Observable<T>{ asTyped };
+    if (asTyped)
+      return Observable<T>{ asTyped };
+
+    auto asValueWrapper = std::dynamic_pointer_cast<ValueWrapper<T>>(m_inner);
+    return Observable<T>{ asValueWrapper->get() };
   }
 
   template<class T>
@@ -259,21 +351,18 @@ public:
     return m_inner->type() == typeid(T);
   }
 
+  std::unique_ptr<IViewModelRef> asViewModelRef() {
+    if (DependencyTracker::isTracking())
+      DependencyTracker::track(m_inner);
+    return m_inner->asViewModelRef();
+  }
+
   int subscribe(std::function<void(UntypedObservable)> f) {
     return m_inner->subscribe(std::move(f));
   }
 
   void unsubscribe(int id) {
     m_inner->unsubscribe(id);
-  }
-
-private:
-  template<class U> friend class Observable;
-  template<class U> friend struct TypedObservable<U>::NotifySubscriber;
-
-  explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
-    : m_inner{ std::move(i) }
-  {
   }
 };
 

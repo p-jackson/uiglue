@@ -27,10 +27,12 @@ detail::BindingDecl declareBindings(
   BindingHandlerCache handlers = defaultBindingHandlers()
 );
 
+void applyBindings(std::unique_ptr<IViewModelRef> vmRef, HWND view);
+
 template<class ViewModel>
 void applyBindings(ViewModel& vm, curt::HandleOr<HWND> view) {
-  auto ref = detail::make_unique<ViewModelRefImpl<ViewModel>>(vm);
-  detail::applyBindingsInner(std::move(ref), view);
+  auto ref = detail::make_unique<ViewModelRef<ViewModel>>(vm);
+  applyBindings(std::move(ref), view);
 }
 
 void detachViewModel(curt::HandleOr<HWND> view);

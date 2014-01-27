@@ -9,7 +9,7 @@
 
 #include "binding_handler.h"
 
-using HandlerPtr = std::shared_ptr<const uiglue::BindingHandler>;
+using HandlerPtr = std::shared_ptr<const uiglue::IBindingHandler>;
 using std::string;
 
 namespace uiglue {

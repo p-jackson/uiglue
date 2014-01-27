@@ -30,6 +30,27 @@ using namespace std;
 
 namespace curt {
 
+HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps) {
+  auto dc = BeginPaint(wnd, ps);
+  throwIfSavedException();
+  if (!dc)
+    throw std::runtime_error("No display context is available");
+  return dc;
+}
+
+Window createDialog(
+  HINSTANCE instance,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+) {
+  Window dlg = CreateDialogParamW(instance, templateName, parent, proc, 0);
+  throwIfSavedException();
+  if (!dlg)
+    throwLastWin32Error();
+  return dlg;
+}
+
 Font createFontIndirect(const LOGFONTA* logfont) {
   return { CreateFontIndirectA(logfont) };
 }
@@ -49,7 +70,7 @@ Window createWindowEx(
   HINSTANCE hInst,
   void *createParam
 ) {
-  auto newWindow = CreateWindowExW(
+  Window newWindow = CreateWindowExW(
     exStyle,
     className,
     windowName,
@@ -59,14 +80,14 @@ Window createWindowEx(
     menu,
     hInst,
     createParam
-  );
+    );
 
   throwIfSavedException();
 
   if (!newWindow)
     throwLastWin32Error();
 
-  return { newWindow };
+  return newWindow;
 }
 
 LRESULT defSubclassProc(HandleOr<HWND> h, unsigned int m, WPARAM w, LPARAM l) {
@@ -88,6 +109,18 @@ void destroyWindow(HandleOr<HWND> wnd) {
     throwLastWin32Error();
 }
 
+intptr_t dialogBox(
+  HINSTANCE hInst,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+) {
+  auto result = DialogBoxParamW(hInst, templateName, parent, proc, 0);
+  throwIfSavedException();
+  throwIfWin32Error();
+  return result;
+}
+
 intptr_t dialogBoxParam(
   HINSTANCE hInst,
   StringOrId templateName,
@@ -96,6 +129,7 @@ intptr_t dialogBoxParam(
   intptr_t param
 ) {
   auto result = DialogBoxParamW(hInst, templateName, parent, proc, param);
+  throwIfSavedException();
   throwIfWin32Error();
   return result;
 }
@@ -106,9 +140,31 @@ LRESULT dispatchMessage(const MSG* msg) {
   return result;
 }
 
+int drawText(HDC dc, String text, int textLen, RECT* rect, unsigned int fmt) {
+  auto result = DrawTextW(dc, text, textLen, rect, fmt);
+  if (!result)
+    throw std::runtime_error("Failed to draw text");
+  return result;
+}
+
 void endDialog(HandleOr<HWND> dlg, intptr_t result) {
   if (!EndDialog(dlg, result))
     throwLastWin32Error();
+}
+
+void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps) {
+  EndPaint(wnd, ps);
+}
+
+void getClientRect(HandleOr<HWND> wnd, RECT* rect) {
+  if (!GetClientRect(wnd, rect))
+    throwLastWin32Error();
+}
+
+RECT getClientRect(HandleOr<HWND> wnd) {
+  RECT rect;
+  getClientRect(wnd, &rect);
+  return rect;
 }
 
 int getDlgCtrlID(HandleOr<HWND> hwndCtl) {
@@ -200,9 +256,9 @@ LRESULT sendDlgItemMessage(
 LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int m, WPARAM w, LPARAM l) {
   auto result = SendMessageW(wnd, m, w, l);
   throwIfSavedException();
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  if (GetLastError() == 5)
+    // Message was blocked by UIPI
+    throwLastWin32Error();
   return result;
 }
 
@@ -211,6 +267,13 @@ COLORREF setDCBrushColor(HDC hdc, COLORREF color) {
   if (prev == CLR_INVALID)
     throw std::invalid_argument("Invalid color argument for SetDCBrushColor");
   return prev;
+}
+
+long setWindowLong(HandleOr<HWND> wnd, int index, long newLong) {
+  SetLastError(0);
+  auto result = SetWindowLongW(wnd, index, newLong);
+  throwIfWin32Error();
+  return result;
 }
 
 void setWindowPos(
@@ -284,6 +347,11 @@ void updateWindow(HandleOr<HWND> wnd) {
     throwLastWin32Error();
 }
 
+void validateRect(HandleOr<HWND> wnd, const RECT* rect) {
+  if (!ValidateRect(wnd, rect))
+    throw std::runtime_error("Failed to validate rect");
+}
+
 HGDIOBJ getStockObject(int object) {
   auto result = GetStockObject(object);
   if (!result)
@@ -297,34 +365,41 @@ int getWindowTextLength(HandleOr<HWND> wnd) {
   // GetWindowTextLength sends the WM_GETTEXTLENGTH message
   throwIfSavedException();
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
-int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
-  auto result = GetWindowTextA(wnd, buffer, bufferSize);
+template<class CharT, class Func>
+int getTextInner(HWND wnd, CharT* buffer, int bufferSize, Func func) {
+  auto result = func(wnd, buffer, bufferSize);
 
   // GetWindowText sends the WM_GETTEXT message
   throwIfSavedException();
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
+  throwIfWin32Error();
   return result;
 }
 
-int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
-  auto result = GetWindowTextW(wnd, buffer, bufferSize);
+int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize) {
+  return getTextInner(wnd, buffer, bufferSize, GetWindowTextA);
+}
 
-  // GetWindowText sends the WM_GETTEXT message
+int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
+  return getTextInner(wnd, buffer, bufferSize, GetWindowTextW);
+}
+
+void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase) {
+  auto result = InvalidateRect(wnd, rect, erase ? 1 : 0);
   throwIfSavedException();
+  if (!result)
+    throw std::runtime_error("Failed to invalidate rect");
+}
 
-  auto error = GetLastError();
-  if (error)
-    throwWin32Error(error);
-  return result;
+bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg) {
+  auto result = IsDialogMessageW(dlg, msg);
+  // IsDialogMessage dispatches messages internally
+  throwIfSavedException();
+  return result != 0;
 }
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName) {

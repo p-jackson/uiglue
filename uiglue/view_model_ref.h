@@ -8,40 +8,42 @@
 #ifndef UIGLUE_VIEW_MODEL_REF_H
 #define UIGLUE_VIEW_MODEL_REF_H
 
-#include "member_map.h"
-#include "observable.h"
+#include "i_untyped_observable.h"
+#include "i_view_model_ref.h"
+
+#include "curt/fwd_windows.h"
 
 #include <stdexcept>
 #include <string>
 
 namespace uiglue {
 
-class UntypedObservable;
-
-struct ViewModelRef {
-  virtual ~ViewModelRef() {};
-  virtual void runCommand(std::string name, HWND view) = 0;
-  virtual UntypedObservable getObservable(std::string name) = 0;
-
-  ViewModelRef() = default;
-  ViewModelRef(const ViewModelRef&) = delete;
-  ViewModelRef& operator=(const ViewModelRef&) = delete;
-};
+template<class> struct ViewModelMember;
 
 template<class ViewModel>
-class ViewModelRefImpl : public ViewModelRef {
+class ViewModelRef : public IViewModelRef {
   ViewModel& vm;
 
 public:
   // GCC doesn't accept brace initialised references
-  ViewModelRefImpl(ViewModel& vm_) : vm(vm_) {}
+  ViewModelRef(ViewModel& vm_) : vm(vm_) {}
 
   void runCommand(std::string name, HWND view) override {
-    getMember(name).handler(vm, view);
+    auto handler = getMember(name).handler;
+    
+    if (!handler)
+      throw std::runtime_error("The member \"" + name + "\" is not a command handler");
+
+    handler(vm, view);
   }
 
-  UntypedObservable getObservable(std::string name) override {
-    return getMember(name).accessor(vm);
+  std::shared_ptr<IUntypedObservable> getObservable(std::string name) override {
+    auto accessor = getMember(name).accessor;
+
+    if (!accessor)
+      throw std::runtime_error("The member \"" + name + "\" is not a property");
+
+    return accessor(vm);
   }
 
 private:

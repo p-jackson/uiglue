@@ -26,6 +26,15 @@
 
 namespace curt {
 
+HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps);
+
+Window createDialog(
+  HINSTANCE instance,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+);
+
 Font createFontIndirect(const LOGFONTA* logfont);
 Font createFontIndirect(const LOGFONTW* logfont);
 
@@ -50,6 +59,13 @@ LRESULT defWindowProc(HandleOr<HWND> wnd, unsigned int msg, WPARAM, LPARAM);
 
 void destroyWindow(HandleOr<HWND> wnd);
 
+std::intptr_t dialogBox(
+  HINSTANCE hInst,
+  StringOrId templateName,
+  HandleOr<HWND> parent,
+  DLGPROC proc
+);
+
 std::intptr_t dialogBoxParam(
   HINSTANCE hInst,
   StringOrId templateName,
@@ -60,7 +76,14 @@ std::intptr_t dialogBoxParam(
 
 LRESULT dispatchMessage(const MSG* msg);
 
+int drawText(HDC dc, String text, int textLen, RECT* rect, unsigned int fmt);
+
 void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
+
+void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps);
+
+void getClientRect(HandleOr<HWND> wnd, RECT* rect);
+RECT getClientRect(HandleOr<HWND> wnd);
 
 int getDlgCtrlID(HandleOr<HWND> hwndCtl);
 
@@ -77,8 +100,12 @@ HGDIOBJ getStockObject(int object);
 
 int getWindowTextLength(HandleOr<HWND> wnd);
 
-int getWindowTextA(HandleOr<HWND> wnd, char* buffer, int bufferSize);
-int getWindowTextW(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
+int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize);
+int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
+
+void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase);
+
+bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg);
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName);
 
@@ -122,6 +149,8 @@ LRESULT sendMessage(HandleOr<HWND> wnd, unsigned int, WPARAM, LPARAM);
 
 COLORREF setDCBrushColor(HDC hdc, COLORREF color);
 
+long setWindowLong(HandleOr<HWND> wnd, int index, long newLong);
+
 void setWindowPos(
   HandleOr<HWND> wnd,
   HandleOr<HWND> insertAfter,
@@ -152,6 +181,8 @@ bool translateAccelerator(HandleOr<HWND> wnd, HACCEL accelTable, MSG* msg);
 bool translateMessage(const MSG* msg);
 
 void updateWindow(HandleOr<HWND> wnd);
+
+void validateRect(HandleOr<HWND> wnd, const RECT* rect);
 
 int wideCharToMultiByte(
   unsigned int codePage,

@@ -8,22 +8,22 @@
 #ifndef UIGLUE_BINDING_HANDLER_CACHE_H
 #define UIGLUE_BINDING_HANDLER_CACHE_H
 
+#include "binding_handler.h"
+
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 namespace uiglue {
 
-struct BindingHandler;
-
 class BindingHandlerCache {
-  using HandlerPtr = std::shared_ptr<const BindingHandler>;
+  using HandlerPtr = std::shared_ptr<const IBindingHandler>;
   std::unordered_map<std::string, HandlerPtr> m_handlers;
 
 public:
   template<class T>
   void addBindingHandler() {
-    addBindingHandler(std::make_shared<T>());
+    addBindingHandler(std::make_shared<BindingHandler<T>>());
   }
 
   HandlerPtr getBindingHandler(std::string name) const;

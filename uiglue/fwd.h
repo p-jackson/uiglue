@@ -11,6 +11,9 @@
 namespace uiglue {
   class View;
   class UntypedObservable;
+
+  template<class> class Computed;
+  template<class> class Observable;
 }
 
 #endif
