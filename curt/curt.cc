@@ -30,6 +30,16 @@ using namespace std;
 
 namespace curt {
 
+void adjustWindowRectEx(
+  RECT* rect,
+  unsigned long style,
+  bool menu,
+  unsigned long exStyle
+) {
+  if (!AdjustWindowRectEx(rect, style, menu, exStyle))
+    throwLastWin32Error();
+}
+
 HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps) {
   auto dc = BeginPaint(wnd, ps);
   throwIfSavedException();
@@ -156,6 +166,13 @@ void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps) {
   EndPaint(wnd, ps);
 }
 
+HRSRC findResource(HMODULE module, StringOrId name, StringOrId type) {
+  auto result = FindResourceW(module, name, type);
+  if (!result)
+    throwLastWin32Error();
+  return result;
+}
+
 void getClientRect(HandleOr<HWND> wnd, RECT* rect) {
   if (!GetClientRect(wnd, rect))
     throwLastWin32Error();
@@ -179,6 +196,18 @@ HWND getDlgItem(HandleOr<HWND> wnd, int childId) {
   if (!result)
     throwLastWin32Error();
   return result;
+}
+
+void* lockResource(HGLOBAL resData) {
+  auto result = LockResource(resData);
+  if (!result)
+    throw std::runtime_error("Failed to lock resource");
+  return result;
+}
+
+void mapDialogRect(HandleOr<HWND> dlg, RECT* rect) {
+  if (!MapDialogRect(dlg, rect))
+    throwLastWin32Error();
 }
 
 int messageBox(
@@ -218,6 +247,11 @@ int multiByteToWideChar(
   if (!res)
     throwLastWin32Error();
   return res;
+}
+
+void offsetRect(RECT* rect, int dx, int dy) {
+  if (!OffsetRect(rect, dx, dy))
+    throw std::runtime_error("Failed to offset rect");
 }
 
 ATOM registerClassEx(const WNDCLASSEXA* wc) {
@@ -288,6 +322,19 @@ void setWindowPos(
     throwLastWin32Error();
 }
 
+void setWindowPos(HandleOr<HWND> wnd, RECT r, unsigned int flags) {
+  const auto w = r.right - r.left;
+  const auto h = r.bottom - r.top;
+  setWindowPos(wnd, nullptr, r.left, r.top, w, h, flags | SWP_NOZORDER);
+}
+
+void setWindowPos(HandleOr<HWND> wnd, POINT p, unsigned int flags) {
+  setWindowPos(wnd, nullptr, p.x, p.y, 0, 0, SWP_NOZORDER | SWP_NOSIZE | flags);
+}
+
+void setWindowPos(HandleOr<HWND> wnd, SIZE s, unsigned int flags) {
+  setWindowPos(wnd, nullptr, 0, 0, s.cx, s.cy, SWP_NOZORDER | SWP_NOMOVE | flags);
+}
 
 void setWindowSubclass(
   HandleOr<HWND> wnd,
@@ -388,6 +435,11 @@ int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize) {
   return getTextInner(wnd, buffer, bufferSize, GetWindowTextW);
 }
 
+void initCommonControlsEx(const INITCOMMONCONTROLSEX* initCtrls) {
+  if (!InitCommonControlsEx(initCtrls))
+    throw std::runtime_error("Failed to init common controls");
+}
+
 void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase) {
   auto result = InvalidateRect(wnd, rect, erase ? 1 : 0);
   throwIfSavedException();
@@ -404,6 +456,13 @@ bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg) {
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName) {
   auto result = LoadAcceleratorsW(hInst, tableName);
+  if (!result)
+    throwLastWin32Error();
+  return result;
+}
+
+HGLOBAL loadResource(HMODULE module, HRSRC resInfo) {
+  auto result = LoadResource(module, resInfo);
   if (!result)
     throwLastWin32Error();
   return result;

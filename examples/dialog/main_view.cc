@@ -5,7 +5,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// Creates the slider view with createMainView(), using dlgProc() as the dialog
+// Creates the tabbed view with createMainView(), using dlgProc() as the dialog
 // procedure.
 //
 //===----------------------------------------------------------------------===//
@@ -26,14 +26,74 @@ using namespace curt;
 
 namespace {
 
-// Create the custom graph control by subclassing the IDC_GRAPH placeholder.
+// Memory layout of an extended dialog template
+struct DLGTEMPLATEEX {
+  WORD dlgVer;
+  WORD signature;
+  DWORD helpID;
+  DWORD exStyle;
+  DWORD style;
+  WORD cDlgItems;
+  short x;
+  short y;
+  short cx;
+  short cy;
+  // Rest omitted
+};
+
+// Returns the dialog template with the given id.
+DLGTEMPLATEEX* lockDialogResource(int id) {
+  auto res = findResource(thisModule(), id, RT_DIALOG);
+  auto buffer = loadResource(thisModule(), res);
+
+  // LockResource is called that for historical reasons, we don't actually
+  // need to unlock anything once we're done.
+  return reinterpret_cast<DLGTEMPLATEEX*>(lockResource(buffer));
+}
+
+RECT maxSubDialogSize(HWND dlg, std::initializer_list<int> idList) {
+  auto max = RECT{};
+  for (auto id : idList) {
+    auto dlgResource = lockDialogResource(id);
+    max.right = std::max<long>(max.right, dlgResource->cx);
+    max.bottom = std::max<long>(max.bottom, dlgResource->cy);
+  }
+  mapDialogRect(dlg, &max);
+  return max;
+}
+
+POINT duToPix(HWND dlg, POINT pt) {
+  auto rc = RECT{ 0, 0, pt.x, pt.y };
+  mapDialogRect(dlg, &rc);
+  return { rc.right, rc.bottom };
+}
+
 bool onInitDialog(HWND wnd, HWND, LPARAM) {
-  auto rc = getClientRect(getDlgItem(wnd, IDC_SUB_DIALOG_SIZER));
+  auto tab = getDlgItem(wnd, IDC_TAB);
+
+  auto item = TCITEMW{ TCIF_TEXT };
+  item.pszText = L"Sliders";
+  sendMessage(tab, TCM_INSERTITEM, 0, reinterpret_cast<LPARAM>(&item));
+
+  auto rcTab = maxSubDialogSize(wnd, { IDD_SLIDER_VIEW });
+  sendMessage(tab, TCM_ADJUSTRECT, true, reinterpret_cast<LPARAM>(&rcTab));
+
+  auto margin = duToPix(wnd, { 7, 7 });
+  offsetRect(&rcTab, margin.x - rcTab.left, margin.y - rcTab.top);
+  setWindowPos(tab, rcTab);
+
+  auto rcWindow = RECT{ 0, 0, rcTab.right + margin.x, rcTab.bottom + margin.y };
+  const auto dlgStyle = GetWindowStyle(wnd);
+  const auto dlgExStyle = GetWindowExStyle(wnd);
+  adjustWindowRectEx(&rcWindow, dlgStyle, false, dlgExStyle);
+  setWindowPos(wnd, rcWindow, SWP_NOMOVE);
+
+  auto display = rcTab;
+  sendMessage(tab, TCM_ADJUSTRECT, false, reinterpret_cast<LPARAM>(&display));
+
   auto sliderView = dialogExample::createSliderView(wnd);
-  setWindowPos(sliderView, nullptr, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_SHOWWINDOW);
-
   setWindowLong(sliderView.get(), GWL_ID, IDC_SUB_DIALOG);
-
+  setWindowPos(sliderView, display, SWP_SHOWWINDOW);
   sliderView.release();
 
   return true;

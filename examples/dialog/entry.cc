@@ -27,6 +27,12 @@ int APIENTRY wWinMain(
   Window dialog;
 
   try {
+    auto iccex = INITCOMMONCONTROLSEX{
+      sizeof(INITCOMMONCONTROLSEX),
+      ICC_TAB_CLASSES
+    };
+    initCommonControlsEx(&iccex);
+
     dialog = dialogExample::createMainView();
     auto vm = dialogExample::MainViewModel{};
 

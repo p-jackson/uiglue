@@ -23,5 +23,6 @@
 #define IDD_SLIDER_VIEW       1009
 #define IDC_SUB_DIALOG_SIZER  1010
 #define IDC_SUB_DIALOG        1011
+#define IDC_TAB               1012
 
 #endif

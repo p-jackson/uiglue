@@ -121,7 +121,7 @@ class StringOrId : public String {
   }
 
 public:
-  StringOrId(const wchar_t* s) : StringOrId(true, s) {}
+  StringOrId(const wchar_t* s) : String(std::wstring{}), m_ptr{ s } {}
   StringOrId(std::wstring s) : StringOrId(true, std::move(s)) {}
   StringOrId(const char* s) : StringOrId(true, s) {}
   StringOrId(const std::string& s) : StringOrId(true, s) {}

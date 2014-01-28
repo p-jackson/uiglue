@@ -26,6 +26,13 @@
 
 namespace curt {
 
+void adjustWindowRectEx(
+  RECT* rect,
+  unsigned long style,
+  bool menu,
+  unsigned long exStyle
+);
+
 HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps);
 
 Window createDialog(
@@ -82,6 +89,8 @@ void endDialog(HandleOr<HWND> dlg, std::intptr_t result);
 
 void endPaint(HandleOr<HWND> wnd, const PAINTSTRUCT* ps);
 
+HRSRC findResource(HMODULE module, StringOrId name, StringOrId type);
+
 void getClientRect(HandleOr<HWND> wnd, RECT* rect);
 RECT getClientRect(HandleOr<HWND> wnd);
 
@@ -103,11 +112,15 @@ int getWindowTextLength(HandleOr<HWND> wnd);
 int getWindowText(HandleOr<HWND> wnd, char* buffer, int bufferSize);
 int getWindowText(HandleOr<HWND> wnd, wchar_t* buffer, int bufferSize);
 
+void initCommonControlsEx(const INITCOMMONCONTROLSEX* initCtrls);
+
 void invalidateRect(HandleOr<HWND> wnd, const RECT* rect, bool erase);
 
 bool isDialogMessage(HandleOr<HWND> dlg, MSG* msg);
 
 HACCEL loadAccelerators(HINSTANCE hInst, StringOrId tableName);
+
+HGLOBAL loadResource(HMODULE module, HRSRC resInfo);
 
 int loadString(
   HINSTANCE hInst,
@@ -115,6 +128,10 @@ int loadString(
   wchar_t* buffer,
   int bufferSize
 );
+
+void* lockResource(HGLOBAL resData);
+
+void mapDialogRect(HandleOr<HWND> dlg, RECT* rect);
 
 int messageBox(
   HandleOr<HWND> parent,
@@ -131,6 +148,8 @@ int multiByteToWideChar(
   wchar_t* wideStr,
   int numChars
 );
+
+void offsetRect(RECT* rect, int dx, int dy);
 
 ATOM registerClassEx(const WNDCLASSEXA* wc);
 ATOM registerClassEx(const WNDCLASSEXW* wc);
@@ -157,6 +176,10 @@ void setWindowPos(
   int x, int y, int w, int h,
   unsigned int flags
 );
+
+void setWindowPos(HandleOr<HWND> wnd, RECT newPos, unsigned int flags = 0);
+void setWindowPos(HandleOr<HWND> wnd, POINT newPos, unsigned int flags = 0);
+void setWindowPos(HandleOr<HWND> wnd, SIZE newSize, unsigned int flags = 0);
 
 void setWindowSubclass(
   HandleOr<HWND> wnd,
