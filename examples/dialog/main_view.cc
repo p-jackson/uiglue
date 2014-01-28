@@ -20,6 +20,7 @@
 #include "uiglue/bindings.h"
 
 #include <CommCtrl.h>
+#include <string>
 #include <windowsx.h>
 
 using namespace curt;
@@ -72,7 +73,8 @@ bool onInitDialog(HWND wnd, HWND, LPARAM) {
   auto tab = getDlgItem(wnd, IDC_TAB);
 
   auto item = TCITEMW{ TCIF_TEXT };
-  item.pszText = L"Sliders";
+  auto tabName = std::wstring{ L"Sliders" };
+  item.pszText = &tabName[0];
   sendMessage(tab, TCM_INSERTITEM, 0, reinterpret_cast<LPARAM>(&item));
 
   auto rcTab = maxSubDialogSize(wnd, { IDD_SLIDER_VIEW });

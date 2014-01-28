@@ -12,6 +12,7 @@
 #include "curt/include_windows.h"
 #include "uiglue/bindings.h"
 
+#include <Commctrl.h>
 #include <system_error>
 #include <sstream>
 
