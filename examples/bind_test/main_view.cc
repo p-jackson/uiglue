@@ -15,13 +15,7 @@
 #include "curt/util.h"
 #include "uiglue/bindings.h"
 
-enum {
-  NameLabel = 1,
-  NameEdit,
-  ModalButton,
-  ShoutCheckbox,
-  MessageLabel
-};
+enum { NameLabel = 1, NameEdit, ModalButton, ShoutCheckbox, MessageLabel };
 
 static HDWP moveCtrl(HDWP dwp, HWND wnd, int id, int x, int y, int w, int h) {
   auto ctrl = curt::getDlgItem(wnd, id);
@@ -50,30 +44,26 @@ static void resizeWindow(HWND wnd, int w, int h) {
   auto dwp = BeginDeferWindowPos(5);
 
   auto y = p;
-  dwp = moveCtrl(dwp, wnd, NameLabel, p, y, w - 2*p, 13);
+  dwp = moveCtrl(dwp, wnd, NameLabel, p, y, w - 2 * p, 13);
   y += 13;
 
   y += labelToEdit;
-  dwp = moveCtrl(dwp, wnd, NameEdit, p, y, w - 2*p - editToButton - 75, 23);
+  dwp = moveCtrl(dwp, wnd, NameEdit, p, y, w - 2 * p - editToButton - 75, 23);
   dwp = moveCtrl(dwp, wnd, ModalButton, w - p - 75 - 1, y - 1, 75 + 2, 23 + 2);
   y += 23;
 
   y += p;
-  dwp = moveCtrl(dwp, wnd, ShoutCheckbox, p, y, w - 2*p, 17);
+  dwp = moveCtrl(dwp, wnd, ShoutCheckbox, p, y, w - 2 * p, 17);
   y += 17;
 
   y += p;
-  dwp = moveCtrl(dwp, wnd, MessageLabel, p, y, w - 2*p, h - p - y);
+  dwp = moveCtrl(dwp, wnd, MessageLabel, p, y, w - 2 * p, h - p - y);
 
   EndDeferWindowPos(dwp);
 }
 
-static LRESULT CALLBACK MainViewProc(
-  HWND wnd,
-  UINT msg,
-  WPARAM wParam,
-  LPARAM lParam
-) {
+static LRESULT CALLBACK
+MainViewProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   try {
     switch (msg) {
     case WM_CREATE:
@@ -85,7 +75,7 @@ static LRESULT CALLBACK MainViewProc(
     }
 
     return curt::defWindowProc(wnd, msg, wParam, lParam);
-  }                      
+  }
   catch (...) {
     curt::saveCurrentException();
     return 0;
@@ -114,17 +104,18 @@ curt::Window makeMainView() {
 
   const auto x = CW_USEDEFAULT; // All dimensions are default
 
-  auto mainView = curt::createWindowEx(
-    WS_EX_APPWINDOW,
-    classAtom,
-    nullptr,
-    WS_OVERLAPPEDWINDOW,
-    x, x, x, x,
-    HWND_DESKTOP,
-    nullptr,
-    curt::thisModule(),
-    nullptr
-  );
+  auto mainView = curt::createWindowEx(WS_EX_APPWINDOW,
+                                       classAtom,
+                                       nullptr,
+                                       WS_OVERLAPPEDWINDOW,
+                                       x,
+                                       x,
+                                       x,
+                                       x,
+                                       HWND_DESKTOP,
+                                       nullptr,
+                                       curt::thisModule(),
+                                       nullptr);
 
   curt::subclassControlBackground(mainView, RGB(255, 255, 255));
   curt::subclassAppView(mainView);

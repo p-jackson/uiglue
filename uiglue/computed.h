@@ -16,7 +16,7 @@
 
 namespace uiglue {
 
-template<class T>
+template <class T>
 class Computed {
   using Self = Computed<T>;
   using ComputeFunction = std::function<T()>;
@@ -31,9 +31,7 @@ public:
   }
 
   Computed(ComputeFunction compute)
-    : m_compute{ std::move(compute) },
-      m_needsUpdated{ true }
-  {
+      : m_compute{ std::move(compute) }, m_needsUpdated{ true } {
     operator()();
   }
 
@@ -52,7 +50,8 @@ public:
 
       m_needsUpdated = false;
 
-      auto dependencyUpdated = std::bind(&Computed::dependencyUpdated, this, std::placeholders::_1);
+      auto dependencyUpdated = std::bind(
+          &Computed::dependencyUpdated, this, std::placeholders::_1);
 
       for (auto& observable : dependencies) {
         auto id = observable->subscribe(dependencyUpdated);

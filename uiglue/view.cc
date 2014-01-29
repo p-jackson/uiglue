@@ -25,12 +25,7 @@ using std::wstring;
 
 namespace {
 
-enum class BindType {
-  Literal,
-  Bind,
-  Resource,
-  File
-};
+enum class BindType { Literal, Bind, Resource, File };
 
 const string k_bind = "bind:";
 const string k_resource = "resource:";
@@ -77,7 +72,8 @@ struct MakeObservable : public boost::static_visitor<UntypedObservable> {
   IViewModelRef& m_vm;
 
   // GCC doesn't accept brace initialised references
-  MakeObservable(IViewModelRef& vm) : m_vm(vm) {}
+  MakeObservable(IViewModelRef& vm) : m_vm(vm) {
+  }
   MakeObservable& operator=(const MakeObservable&) = delete;
 
   UntypedObservable operator()(UntypedObservable value) {
@@ -109,7 +105,12 @@ namespace uiglue {
 const char* applyBindingsMsg = "UIGLUE_WM_APPLYBINDINGS";
 const char* detachVMMsg = "UIGLUE_WM_DETACHVM";
 
-LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR refData) {
+LRESULT __stdcall View::WndProc(HWND wnd,
+                                unsigned int msg,
+                                WPARAM w,
+                                LPARAM l,
+                                UINT_PTR,
+                                DWORD_PTR refData) {
   try {
     auto viewPtr = reinterpret_cast<View*>(refData);
 
@@ -130,9 +131,7 @@ LRESULT __stdcall View::WndProc(HWND wnd, unsigned int msg, WPARAM w, LPARAM l, 
   }
 }
 
-View::View(HWND wnd)
-  : m_wnd{ wnd }
-{
+View::View(HWND wnd) : m_wnd{ wnd } {
 }
 
 View::~View() = default;
@@ -146,17 +145,22 @@ WPARAM View::getCommandWParam(int commandCode, HWND control) {
   return ((commandCode << 16) | (id & 0xffff));
 }
 
-void View::addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler) {
+void View::addCommandHandler(int commandCode,
+                             HWND control,
+                             std::function<void(HWND)> handler) {
   auto key = getCommandWParam(commandCode, control);
   m_commandHandlers[key].push_back(std::move(handler));
 }
 
-void View::addCommandHandler(int commandCode, HWND control, string viewModelCommand) {
+void View::addCommandHandler(int commandCode,
+                             HWND control,
+                             string viewModelCommand) {
   auto key = getCommandWParam(commandCode, control);
   m_viewModelCommandHandlers[key].push_back(std::move(viewModelCommand));
 }
 
-void View::addMessageHandler(unsigned int msg, std::function<void(WPARAM, LPARAM)> handler) {
+void View::addMessageHandler(unsigned int msg,
+                             std::function<void(WPARAM, LPARAM)> handler) {
   m_msgHandlers[msg].push_back(std::move(handler));
 }
 
@@ -172,12 +176,17 @@ void View::addViewBinding(string bindingHandler, UntypedObservable value) {
   m_viewBindingDecls.emplace_back(move(bindingHandler), std::move(value));
 }
 
-void View::addControlBinding(int id, string bindingHandler, string bindingText) {
-  m_controlBindingDecls[id].emplace_back(move(bindingHandler), move(bindingText));
+void
+View::addControlBinding(int id, string bindingHandler, string bindingText) {
+  m_controlBindingDecls[id].emplace_back(move(bindingHandler),
+                                         move(bindingText));
 }
 
-void View::addControlBinding(int id, string bindingHandler, UntypedObservable value) {
-  m_controlBindingDecls[id].emplace_back(move(bindingHandler), std::move(value));
+void View::addControlBinding(int id,
+                             string bindingHandler,
+                             UntypedObservable value) {
+  m_controlBindingDecls[id].emplace_back(move(bindingHandler),
+                                         std::move(value));
 }
 
 bool View::onMessage(unsigned int msg, WPARAM wParam, LPARAM lParam, LRESULT&) {

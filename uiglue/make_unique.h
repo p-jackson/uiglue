@@ -14,21 +14,22 @@
 
 #include <memory>
 
-namespace uiglue { namespace detail {
+namespace uiglue {
+namespace detail {
 
 #if _MSC_VER >= 1800
 
-using std::make_unique;
+  using std::make_unique;
 
 #else
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
+  template <typename T, typename... Args>
+  std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
 
 #endif
-
-} } // end namespace uiglue::detail
+}
+} // end namespace uiglue::detail
 
 #endif

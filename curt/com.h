@@ -25,33 +25,31 @@ namespace curt {
 
 namespace detail {
 
-// Wrapper used by the getOut() function.
-template<class I>
-class ComPtrWrapper {
-  boost::intrusive_ptr<I>& m_ref;
-  I* m_ptr;
+  // Wrapper used by the getOut() function.
+  template <class I>
+  class ComPtrWrapper {
+    boost::intrusive_ptr<I>& m_ref;
+    I* m_ptr;
 
-public:
-  explicit ComPtrWrapper(boost::intrusive_ptr<I>& ref)
-    : m_ref(ref),
-      m_ptr{ nullptr }
-  {
-  }
+  public:
+    explicit ComPtrWrapper(boost::intrusive_ptr<I>& ref)
+        : m_ref(ref), m_ptr{ nullptr } {
+    }
 
-  ~ComPtrWrapper() {
-    m_ref = boost::intrusive_ptr<I>{ m_ptr, false };
-  }
+    ~ComPtrWrapper() {
+      m_ref = boost::intrusive_ptr<I>{ m_ptr, false };
+    }
 
-  ComPtrWrapper& operator=(const ComPtrWrapper&) = delete;
+    ComPtrWrapper& operator=(const ComPtrWrapper&) = delete;
 
-  operator I**() {
-    return &m_ptr;
-  }
+    operator I**() {
+      return &m_ptr;
+    }
 
-  operator void**() {
-    return reinterpret_cast<void**>(&m_ptr);
-  }
-};
+    operator void**() {
+      return reinterpret_cast<void**>(&m_ptr);
+    }
+  };
 
 } // end namespace
 
@@ -60,7 +58,7 @@ public:
 // usage:
 //   boost::intrusive_ptr<ISomeInterface> obj;
 //   SomeCOMFactory(curt::getOut(obj));
-template<class I>
+template <class I>
 detail::ComPtrWrapper<I> getOut(boost::intrusive_ptr<I>& ptr) {
   return detail::ComPtrWrapper<I>{ ptr };
 }

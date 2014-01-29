@@ -15,7 +15,7 @@
 #include <string>
 
 namespace curt {
-    
+
 HINSTANCE thisModule();
 
 std::string wideToUtf8(std::wstring wide);

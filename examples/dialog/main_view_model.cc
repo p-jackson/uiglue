@@ -10,7 +10,6 @@
 namespace dialogExample {
 
 MainViewModel::MainViewModel() {
-
 }
 
 } // end namespace dialogExample

@@ -14,10 +14,13 @@
 using uiglue::Observable;
 
 // Swallows the return statement in the FAIL macro
-#define CONSTRUCTOR_FAIL() ([] { FAIL(); })()
+#define CONSTRUCTOR_FAIL() \
+  ([] { FAIL(); })()
 
 
-TEST_CASE("An Observable<T> is default constructible if T is default constructible", "[observable]") {
+TEST_CASE(
+    "An Observable<T> is default constructible if T is default constructible",
+    "[observable]") {
   // The wrapped object equals a default constructed object
   auto o1 = Observable<std::string>{};
   REQUIRE(o1() == std::string{});
@@ -25,13 +28,18 @@ TEST_CASE("An Observable<T> is default constructible if T is default constructib
   // The wrapped object's default constructor will be called
   struct Obj {
     int count = 0;
-    Obj() { ++count; }
+    Obj() {
+      ++count;
+    }
   };
   auto o2 = Observable<Obj>{};
   REQUIRE(o2().count == 1);
 }
 
-TEST_CASE("Observables forward constructor arguments to the wrapped object's constructor", "[observable]") {
+TEST_CASE(
+    "Observables forward constructor arguments to the wrapped object's "
+    "constructor",
+    "[observable]") {
   // Forwards a single argument
   auto o1 = Observable<std::string>{ "test" };
   REQUIRE(o1() == "test");
@@ -44,9 +52,11 @@ TEST_CASE("Observables forward constructor arguments to the wrapped object's con
   struct Obj {
     bool copied = false;
     Obj() = default;
-    Obj(const Obj&) : copied{ true } {}
+    Obj(const Obj&) : copied{ true } {
+    }
     // MSVC doesn't support default'd move ctors yet
-    Obj(Obj&& o) : copied{ o.copied } {}
+    Obj(Obj&& o) : copied{ o.copied } {
+    }
   };
 
   auto obj = Obj{};
@@ -54,7 +64,8 @@ TEST_CASE("Observables forward constructor arguments to the wrapped object's con
   REQUIRE_FALSE(o3().copied);
 }
 
-TEST_CASE("An Observable<T> is copy constructible if T is copy constructible", "[observable]") {
+TEST_CASE("An Observable<T> is copy constructible if T is copy constructible",
+          "[observable]") {
   auto o1 = Observable<int>{ 113 };
   auto o2 = o1;
   REQUIRE(o2() == 113);
@@ -63,7 +74,8 @@ TEST_CASE("An Observable<T> is copy constructible if T is copy constructible", "
   static auto nextValue = 113;
   struct Obj {
     int value;
-    Obj() : value{ nextValue++ } {}
+    Obj() : value{ nextValue++ } {
+    }
   };
   auto o3 = Observable<Obj>{};
   REQUIRE(o3().value == 113);
@@ -80,8 +92,11 @@ TEST_CASE("Observables are move constructible", "[observable]") {
   static auto nextValue = 113;
   struct Obj {
     int value;
-    Obj() : value{ nextValue++ } {}
-    Obj(const Obj&) { CONSTRUCTOR_FAIL(); }
+    Obj() : value{ nextValue++ } {
+    }
+    Obj(const Obj&) {
+      CONSTRUCTOR_FAIL();
+    }
   };
   auto o3 = Observable<Obj>{};
   auto o4 = std::move(o3);
@@ -89,7 +104,8 @@ TEST_CASE("Observables are move constructible", "[observable]") {
   REQUIRE(nextValue == 114);
 }
 
-TEST_CASE("An Observable<T> is copy assignable if T is copyable", "[observable]") {
+TEST_CASE("An Observable<T> is copy assignable if T is copyable",
+          "[observable]") {
   Observable<int> o1;
   auto o2 = Observable<int>{ 113 };
   o1 = o2;
@@ -99,7 +115,8 @@ TEST_CASE("An Observable<T> is copy assignable if T is copyable", "[observable]"
   static auto nextValue = 113;
   struct Obj {
     int value;
-    Obj() : value{ nextValue++ } {}
+    Obj() : value{ nextValue++ } {
+    }
   };
   Observable<Obj> o3; // This increments nextValue;
   auto o4 = Observable<Obj>{};
@@ -118,8 +135,11 @@ TEST_CASE("Observables are move assignable", "[observable]") {
   static auto nextValue = 113;
   struct Obj {
     int value;
-    Obj() : value{ nextValue++ } {}
-    Obj(const Obj&) { CONSTRUCTOR_FAIL(); }
+    Obj() : value{ nextValue++ } {
+    }
+    Obj(const Obj&) {
+      CONSTRUCTOR_FAIL();
+    }
   };
   auto o3 = Observable<Obj>{};
   auto o4 = Observable<Obj>{};
@@ -138,7 +158,8 @@ TEST_CASE("Observables can return wrapped value types", "[observable]") {
   }
 }
 
-TEST_CASE("Observables can return wrapped non-trivial data types", "[observable]") {
+TEST_CASE("Observables can return wrapped non-trivial data types",
+          "[observable]") {
   auto o = Observable<std::tuple<int, int, int>>{ 1, 2, 3 };
   REQUIRE(o() == std::make_tuple(1, 2, 3));
 
@@ -161,8 +182,11 @@ TEST_CASE("Observables can set the wrapped data types", "[observable]") {
   static auto nextValue = 113;
   struct Obj {
     int value;
-    Obj() : value{ nextValue++ } {}
-    bool operator==(const Obj& o) { return value == o.value; }
+    Obj() : value{ nextValue++ } {
+    }
+    bool operator==(const Obj& o) {
+      return value == o.value;
+    }
   };
   auto obj = Obj{};
   auto o2 = Observable<Obj>{};
@@ -204,7 +228,9 @@ TEST_CASE("Can be notified of changes to the wrapped object", "[observable]") {
   REQUIRE(o2Count == 1);
 }
 
-TEST_CASE("Can unsubscribe to no longer be notified of changes to the wrapped object", "[observable]") {
+TEST_CASE(
+    "Can unsubscribe to no longer be notified of changes to the wrapped object",
+    "[observable]") {
   auto o = Observable<int>{ 113 };
 
   auto count1 = 0;
@@ -221,7 +247,8 @@ TEST_CASE("Can unsubscribe to no longer be notified of changes to the wrapped ob
   REQUIRE(count1 == 1);
 }
 
-TEST_CASE("Can unsubscribe from an observable in a different order", "[observable]") {
+TEST_CASE("Can unsubscribe from an observable in a different order",
+          "[observable]") {
   auto o = Observable<std::string>{ "a" };
 
   auto count1 = 0;
@@ -257,7 +284,8 @@ TEST_CASE("Can unsubscribe within the change handler", "[observable]") {
   REQUIRE(count == 1);
 }
 
-TEST_CASE("The wrapped object can be modified from within a change handler", "[observable]") {
+TEST_CASE("The wrapped object can be modified from within a change handler",
+          "[observable]") {
   auto o = Observable<int>{ 113 };
 
   auto count = 0;

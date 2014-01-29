@@ -32,7 +32,7 @@
 
 namespace curt {
 
-template<class Traits>
+template <class Traits>
 class Handle {
   using Type = typename Traits::Type;
   Type handle;

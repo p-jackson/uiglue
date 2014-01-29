@@ -54,13 +54,11 @@ class MainViewModel {
   UIGLUE_END_MEMBER_MAP()
 
   MainViewModel()
-    : shout{ false },
-      greeting{ std::bind(&MainViewModel::calculateGreeting, this) }
-  {
+      : shout{ false },
+        greeting{ std::bind(&MainViewModel::calculateGreeting, this) } {
   }
 
 private:
-
   Observable<string> name;
   Observable<bool> shout;
   Computed<string> greeting;
@@ -90,16 +88,11 @@ private:
     greeting += "!";
     return greeting;
   }
-
 };
 
 
-int APIENTRY wWinMain(
-  _In_ HINSTANCE hInst,
-  _In_opt_ HINSTANCE,
-  _In_ LPTSTR,
-  _In_ int show
-) {
+int APIENTRY
+wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPTSTR, _In_ int show) {
   // mainView declared outside of try/catch so the window isn't destroyed until
   // after the message boxes can be shown. Message boxes seem to stop working
   // after PostQuitMessage() has been called.

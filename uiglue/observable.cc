@@ -18,10 +18,9 @@ DependencyTracker* DependencyTracker::current = nullptr;
 
 DependencyTracker::DependencyTracker(DependencySet& dependencies)
     // GCC doesn't accept brace initialised references
-    : m_dependecies(dependencies)
-  {
-    current = this;
-  }
+    : m_dependecies(dependencies) {
+  current = this;
+}
 
 DependencyTracker::~DependencyTracker() {
   current = nullptr;

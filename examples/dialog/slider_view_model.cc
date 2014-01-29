@@ -14,7 +14,8 @@ static string formatPercentage(int percentage) {
   return std::to_string(percentage / 100) + "%";
 }
 
-static void adjustPercentages(int changed, Observable<int>& o1, Observable<int>& o2) {
+static void
+adjustPercentages(int changed, Observable<int>& o1, Observable<int>& o2) {
   static bool changing = false;
   if (changing)
     return;
@@ -27,22 +28,19 @@ static void adjustPercentages(int changed, Observable<int>& o1, Observable<int>&
     return;
 
   auto over = total - 10000;
-  p1 = p1 - over / 2 - over %2;
+  p1 = p1 - over / 2 - over % 2;
   p2 = p2 - over / 2;
 
   if (p1 < 0) {
     p1 = 0;
     p2 = 10000 - changed;
-  }
-  else if (p2 < 0) {
+  } else if (p2 < 0) {
     p2 = 0;
     p1 = 10000 - changed;
-  }
-  else if (p1 > 10000) {
+  } else if (p1 > 10000) {
     p1 = 100;
     p2 = 0;
-  }
-  else if (p2 > 10000) {
+  } else if (p2 > 10000) {
     p2 = 10000;
     p1 = 0;
   }
@@ -56,14 +54,13 @@ static void adjustPercentages(int changed, Observable<int>& o1, Observable<int>&
 namespace dialogExample {
 
 SliderViewModel::SliderViewModel()
-  : redPer10k{ 3334 },
-    redText{ std::bind(&SliderViewModel::computeRedText, this) },
-    greenPer10k{ 3333 },
-    greenText{ std::bind(&SliderViewModel::computeGreenText, this) },
-    bluePer10k{ 3333 },
-    blueText{ std::bind(&SliderViewModel::computeBlueText, this) },
-    rgbTriple{ std::bind(&SliderViewModel::computeTriple, this) }
-{
+    : redPer10k{ 3334 },
+      redText{ std::bind(&SliderViewModel::computeRedText, this) },
+      greenPer10k{ 3333 },
+      greenText{ std::bind(&SliderViewModel::computeGreenText, this) },
+      bluePer10k{ 3333 },
+      blueText{ std::bind(&SliderViewModel::computeBlueText, this) },
+      rgbTriple{ std::bind(&SliderViewModel::computeTriple, this) } {
   redPer10k.subscribe([this](int r) mutable {
     adjustPercentages(r, greenPer10k, bluePer10k);
   });

@@ -103,13 +103,11 @@ void Graph::updateGeometry(int red, int green, int blue) {
   const auto radius = 0.9f * std::min(width, height) / 2;
   const auto centre = Point2F(width / 2.f, height / 2.f);
 
-  auto arcSegment = ArcSegment(
-    Point2F(),
-    SizeF(radius, radius),
-    0.f,
-    D2D1_SWEEP_DIRECTION_CLOCKWISE,
-    D2D1_ARC_SIZE_SMALL
-  );
+  auto arcSegment = ArcSegment(Point2F(),
+                               SizeF(radius, radius),
+                               0.f,
+                               D2D1_SWEEP_DIRECTION_CLOCKWISE,
+                               D2D1_ARC_SIZE_SMALL);
 
   auto currentPos = Point2F(centre.x, centre.y - radius);
 
@@ -158,13 +156,12 @@ void Graph::createDeviceResources() {
     return;
 
   const auto props = RenderTargetProperties(
-    D2D1_RENDER_TARGET_TYPE_DEFAULT,
-    PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-    0,
-    0,
-    D2D1_RENDER_TARGET_USAGE_NONE,
-    D2D1_FEATURE_LEVEL_DEFAULT
-  );
+      D2D1_RENDER_TARGET_TYPE_DEFAULT,
+      PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
+      0,
+      0,
+      D2D1_RENDER_TARGET_USAGE_NONE,
+      D2D1_FEATURE_LEVEL_DEFAULT);
 
   m_d2dFactory->CreateDCRenderTarget(&props, getOut(m_rt));
   m_rt->CreateSolidColorBrush(ColorF(0), getOut(m_brush));
@@ -198,19 +195,15 @@ void Graph::paint() {
 
 // Custom message sent by the GraphHandler binding handler and handled by
 // the graphProc() procedure.
-enum {
-  k_graphUpdateTriple = WM_USER + 1
-};
+enum { k_graphUpdateTriple = WM_USER + 1 };
 
 // Windows procedure for the custom graph control.
-LRESULT CALLBACK graphProc(
-  HWND wnd,
-  unsigned int msg,
-  WPARAM wParam,
-  LPARAM lParam,
-  UINT_PTR,
-  DWORD_PTR data
-) {
+LRESULT CALLBACK graphProc(HWND wnd,
+                           unsigned int msg,
+                           WPARAM wParam,
+                           LPARAM lParam,
+                           UINT_PTR,
+                           DWORD_PTR data) {
   try {
     auto graph = reinterpret_cast<Graph*>(data);
 

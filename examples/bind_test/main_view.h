@@ -12,8 +12,7 @@
 
 namespace uiglue {
 
-  curt::Window makeMainView();
-
+curt::Window makeMainView();
 }
 
 #endif

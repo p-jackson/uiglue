@@ -20,7 +20,8 @@ struct IUntypedObservable;
 struct IViewModelRef {
   virtual ~IViewModelRef() {};
   virtual void runCommand(std::string name, HWND view) = 0;
-  virtual std::shared_ptr<IUntypedObservable> getObservable(std::string name) = 0;
+  virtual std::shared_ptr<IUntypedObservable> getObservable(std::string name)
+      = 0;
 
   IViewModelRef() = default;
   IViewModelRef(const IViewModelRef&) = delete;

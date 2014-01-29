@@ -20,7 +20,8 @@ class UntypedObservable;
 class View;
 
 struct IBindingHandler {
-  virtual ~IBindingHandler() {}
+  virtual ~IBindingHandler() {
+  }
   IBindingHandler() = default;
   IBindingHandler(const IBindingHandler&) = delete;
   IBindingHandler& operator=(const IBindingHandler&) = delete;
@@ -32,22 +33,23 @@ struct IBindingHandler {
 
 namespace detail {
 
-  template<class A, A> struct Helper {};
+  template <class A, A>
+  struct Helper {};
 
   using BindingFunc = void (*)(HWND, UntypedObservable, View&);
 
-  template<class T>
+  template <class T>
   struct HasInit {
-    template<class A>
+    template <class A>
     std::true_type static test(A*, Helper<BindingFunc, &A::init>* = nullptr);
     std::false_type static test(...);
 
     using type = decltype(test(static_cast<T*>(nullptr)));
   };
 
-  template<class T>
+  template <class T>
   struct HasUpdate {
-    template<class A>
+    template <class A>
     std::true_type static test(A*, Helper<BindingFunc, &A::update>* = nullptr);
     std::false_type static test(...);
 
@@ -57,17 +59,16 @@ namespace detail {
   // Methods for BindingHandler that don't depend on the template argument.
   class BindingHandlerNoTmpl {
   public:
-    void doInit(std::false_type, HWND, UntypedObservable, View&) const {}
-    void doUpdate(std::false_type, HWND, UntypedObservable, View&) const {}
+    void doInit(std::false_type, HWND, UntypedObservable, View&) const {
+    }
+    void doUpdate(std::false_type, HWND, UntypedObservable, View&) const {
+    }
   };
-
 }
 
-template<class Traits>
-class BindingHandler
-  : public IBindingHandler,
-    public detail::BindingHandlerNoTmpl
-{
+template <class Traits>
+class BindingHandler : public IBindingHandler,
+                       public detail::BindingHandlerNoTmpl {
 public:
   std::string name() const override {
     return Traits::name();

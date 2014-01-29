@@ -21,7 +21,7 @@ class BindingHandlerCache {
   std::unordered_map<std::string, HandlerPtr> m_handlers;
 
 public:
-  template<class T>
+  template <class T>
   void addBindingHandler() {
     addBindingHandler(std::make_shared<BindingHandler<T>>());
   }

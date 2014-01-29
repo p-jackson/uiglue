@@ -30,58 +30,58 @@ class BindingHandlerCache;
 
 namespace detail {
 
-struct MenuCommandT {};
-struct ThisViewT {};
+  struct MenuCommandT {};
+  struct ThisViewT {};
 
-class BindingDecl {
-  std::unique_ptr<View> m_viewData;
-  HWND m_handle;
+  class BindingDecl {
+    std::unique_ptr<View> m_viewData;
+    HWND m_handle;
 
-public:
-  BindingDecl(HWND handle, BindingHandlerCache cache);
-  ~BindingDecl();
+  public:
+    BindingDecl(HWND handle, BindingHandlerCache cache);
+    ~BindingDecl();
 
-  template<class T>
-  BindingDecl& operator()(ThisViewT, std::string handler, T t) {
-    using IsStringish = std::is_convertible<T, std::string>;
-    addViewBinding(IsStringish{}, move(handler), std::forward<T>(t));
-    return *this;
-  }
+    template <class T>
+    BindingDecl& operator()(ThisViewT, std::string handler, T t) {
+      using IsStringish = std::is_convertible<T, std::string>;
+      addViewBinding(IsStringish{}, move(handler), std::forward<T>(t));
+      return *this;
+    }
 
-  template<class T>
-  BindingDecl& operator()(int ctrlId, std::string handler, T t) {
-    using IsStringish = std::is_convertible<T, std::string>;
-    addCtrlBinding(IsStringish{}, ctrlId, move(handler), std::forward<T>(t));
-    return *this;
-  }
+    template <class T>
+    BindingDecl& operator()(int ctrlId, std::string handler, T t) {
+      using IsStringish = std::is_convertible<T, std::string>;
+      addCtrlBinding(IsStringish{}, ctrlId, move(handler), std::forward<T>(t));
+      return *this;
+    }
 
-  BindingDecl& operator()(MenuCommandT, int id, std::string handler);
+    BindingDecl& operator()(MenuCommandT, int id, std::string handler);
 
-private:
-  template<class T>
-  void addViewBinding(std::true_type, std::string handler, T t) {
-    auto s = std::string{ t };
-    m_viewData->addViewBinding(move(handler), move(s));
-  }
+  private:
+    template <class T>
+    void addViewBinding(std::true_type, std::string handler, T t) {
+      auto s = std::string{ t };
+      m_viewData->addViewBinding(move(handler), move(s));
+    }
 
-  template<class T>
-  void addViewBinding(std::false_type, std::string handler, T t) {
-    auto observable = Observable<T>{ t };
-    m_viewData->addViewBinding(move(handler), observable.asUntyped());
-  }
+    template <class T>
+    void addViewBinding(std::false_type, std::string handler, T t) {
+      auto observable = Observable<T>{ t };
+      m_viewData->addViewBinding(move(handler), observable.asUntyped());
+    }
 
-  template<class T>
-  void addCtrlBinding(std::true_type, int id, std::string handler, T t) {
-    auto s = std::string{ t };
-    m_viewData->addControlBinding(id, move(handler), move(s));
-  }
+    template <class T>
+    void addCtrlBinding(std::true_type, int id, std::string handler, T t) {
+      auto s = std::string{ t };
+      m_viewData->addControlBinding(id, move(handler), move(s));
+    }
 
-  template<class T>
-  void addCtrlBinding(std::false_type, int id, std::string handler, T t) {
-    auto observable = Observable<T>{ t };
-    m_viewData->addControlBinding(id, move(handler), observable.asUntyped());
-  }
-};
+    template <class T>
+    void addCtrlBinding(std::false_type, int id, std::string handler, T t) {
+      auto observable = Observable<T>{ t };
+      m_viewData->addControlBinding(id, move(handler), observable.asUntyped());
+    }
+  };
 
 } // end namespace detail
 

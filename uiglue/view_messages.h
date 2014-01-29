@@ -9,8 +9,8 @@
 #define UIGLUE_VIEW_MESSAGES_H
 
 namespace uiglue {
-  extern const char* applyBindingsMsg;
-  extern const char* detachVMMsg;
+extern const char* applyBindingsMsg;
+extern const char* detachVMMsg;
 }
 
 #endif

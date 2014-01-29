@@ -19,19 +19,13 @@
 using namespace curt;
 using namespace std;
 
-int APIENTRY wWinMain(
-  _In_ HINSTANCE,
-  _In_opt_ HINSTANCE,
-  _In_ LPTSTR,
-  _In_ int show
-) {
+int APIENTRY
+wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPTSTR, _In_ int show) {
   Window dialog;
 
   try {
-    auto iccex = INITCOMMONCONTROLSEX{
-      sizeof(INITCOMMONCONTROLSEX),
-      ICC_TAB_CLASSES
-    };
+    auto iccex
+        = INITCOMMONCONTROLSEX{ sizeof(INITCOMMONCONTROLSEX), ICC_TAB_CLASSES };
     initCommonControlsEx(&iccex);
 
     dialog = dialogExample::createMainView();

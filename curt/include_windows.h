@@ -17,15 +17,15 @@
 #include <SDKDDKVer.h>
 
 #if !defined(NOMINMAX)
-   #define NOMINMAX
+#define NOMINMAX
 #endif
 
 #if !defined(WIN32_LEAN_AND_MEAN)
-   #define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
 
 #if !defined(OEMRESOURCE)
-   #define OEMRESOURCE
+#define OEMRESOURCE
 #endif
 
 #include <Windows.h>
@@ -36,11 +36,11 @@
 // These macros break code so get rid of them.
 
 #if defined(min)
-  #undef min
+#undef min
 #endif
 
 #if defined(max)
-  #undef max
+#undef max
 #endif
 
 #endif

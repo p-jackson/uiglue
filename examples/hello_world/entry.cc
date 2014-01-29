@@ -22,10 +22,7 @@ public:
   uiglue::Observable<std::string> message;
   uiglue::Observable<std::string> title;
 
-  ViewModel()
-    : message{ "Hello, world!" },
-      title{ "Hello world example app" }
-  {
+  ViewModel() : message{ "Hello, world!" }, title{ "Hello world example app" } {
   }
 
   UIGLUE_BEGIN_MEMBER_MAP(ViewModel)
@@ -34,12 +31,8 @@ public:
   UIGLUE_END_MEMBER_MAP()
 };
 
-int APIENTRY wWinMain(
-  _In_ HINSTANCE,
-  _In_opt_ HINSTANCE,
-  _In_ wchar_t*,
-  _In_ int show
-) {
+int APIENTRY
+wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ wchar_t*, _In_ int show) {
   try {
     auto view = createView();
     auto vm = ViewModel{};

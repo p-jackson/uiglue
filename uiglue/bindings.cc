@@ -138,8 +138,7 @@ struct Checked {
       if (observable.is<int>()) {
         auto asInt = observable.as<int>();
         asInt(static_cast<int>(state));
-      }
-      else {
+      } else {
         auto boolObservable = observable.as<bool>();
         boolObservable(state == BST_CHECKED);
       }
@@ -151,8 +150,7 @@ struct Checked {
     if (observable.is<int>()) {
       auto asInt = observable.as<int>();
       state = asInt();
-    }
-    else {
+    } else {
       auto asBool = observable.as<bool>();
       state = asBool() ? BST_CHECKED : BST_UNCHECKED;
     }
@@ -220,37 +218,33 @@ detail::ThisViewT ThisView;
 
 namespace detail {
 
-BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
-  : m_viewData{ detail::make_unique<View>(handle) },
-    m_handle{ handle }
-{
-  m_viewData->addBindingHandlerCache(move(cache));
-}
+  BindingDecl::BindingDecl(HWND handle, BindingHandlerCache cache)
+      : m_viewData{ detail::make_unique<View>(handle) }, m_handle{ handle } {
+    m_viewData->addBindingHandlerCache(move(cache));
+  }
 
-// Once the binding declarations are complete the window is subclassed by View
-// so it can respond to commands and call the binding handlers.
-BindingDecl::~BindingDecl() {
-  auto asInt = reinterpret_cast<uintptr_t>(m_viewData.get());
-  setWindowSubclass(m_handle, &View::WndProc, 0, asInt);
+  // Once the binding declarations are complete the window is subclassed by View
+  // so it can respond to commands and call the binding handlers.
+  BindingDecl::~BindingDecl() {
+    auto asInt = reinterpret_cast<uintptr_t>(m_viewData.get());
+    setWindowSubclass(m_handle, &View::WndProc, 0, asInt);
 
-  // Ownership of m_viewData has been passed to the view
-  m_viewData.release();
-}
+    // Ownership of m_viewData has been passed to the view
+    m_viewData.release();
+  }
 
-// Handles menu commands
-BindingDecl& BindingDecl::operator()(MenuCommandT, int id, string handler) {
-  m_viewData->addMenuCommand(id, handler);
-  return *this;
-}
+  // Handles menu commands
+  BindingDecl& BindingDecl::operator()(MenuCommandT, int id, string handler) {
+    m_viewData->addMenuCommand(id, handler);
+    return *this;
+  }
 
 } // end namespace detail
 
 
 // Starts the binding DSL by returning a BindingDecl.
-detail::BindingDecl declareBindings(
-  HandleOr<HWND> view,
-  BindingHandlerCache cache
-) {
+detail::BindingDecl declareBindings(HandleOr<HWND> view,
+                                    BindingHandlerCache cache) {
   return { view, move(cache) };
 }
 

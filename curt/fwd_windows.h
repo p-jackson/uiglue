@@ -34,7 +34,7 @@ typedef void* LOCALHANDLE;
 
 
 #define CURT_DECLARE_HANDLE(name) \
-  struct name##__; \
+  struct name##__;                \
   typedef struct name##__* name
 
 CURT_DECLARE_HANDLE(HINSTANCE);
@@ -49,7 +49,7 @@ typedef HINSTANCE HMODULE;
 
 
 #define CURT_DECLARE_STRUCT(name) \
-  struct tag##name; \
+  struct tag##name;               \
   typedef struct tag##name name
 
 CURT_DECLARE_STRUCT(MSG);
@@ -69,7 +69,8 @@ typedef void* HGDIOBJ;
 typedef unsigned short ATOM;
 
 
-typedef INT_PTR (__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);
-typedef LRESULT (__stdcall* SUBCLASSPROC)(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
+typedef INT_PTR(__stdcall* DLGPROC)(HWND, unsigned int, WPARAM, LPARAM);
+typedef LRESULT(__stdcall* SUBCLASSPROC)(
+    HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
 #endif

@@ -35,7 +35,7 @@
 
 namespace uiglue {
 
-template<class VM>
+template <class VM>
 struct ViewModelMember;
 
 
@@ -63,47 +63,45 @@ protected:
 
 namespace detail {
 
-  template<class T, bool isFundamental>
+  template <class T, bool isFundamental>
   struct HasMemberMap;
 
-  template<class T>
+  template <class T>
   struct HasMemberMap<T, true> {
     using type = std::false_type;
   };
 
-  template<class T>
+  template <class T>
   struct HasMemberMap<T, false> {
 
     using Result = ViewModelMember<T>*;
 
-    template<class A, A> class Helper {};
+    template <class A, A>
+    class Helper {};
 
-    template<class A>
-    static std::true_type test(
-      A*,
-      Helper<Result (*)(), &A::uiglueGetMemberMap>* = nullptr
-    );
+    template <class A>
+    static std::true_type
+    test(A*, Helper<Result (*)(), &A::uiglueGetMemberMap>* = nullptr);
 
     static std::false_type test(...);
 
     using type = decltype(test(static_cast<T*>(nullptr)));
   };
 
-  template<class T>
+  template <class T>
   struct IsViewModel : HasMemberMap<T, std::is_fundamental<T>::value>::type {};
-
 }
 
 // Provides type-erasure for view model properties. This is lighter-weight than
 // an observable because it doesn't do subscription, dependency tracking, and
 // it holds on to a reference.
-template<class T>
-class ValueWrapper : public IUntypedObservable
-{
+template <class T>
+class ValueWrapper : public IUntypedObservable {
   T& m_value;
 
 public:
-  ValueWrapper(T& value) : m_value(value) {}
+  ValueWrapper(T& value) : m_value(value) {
+  }
 
   T get() {
     return m_value;
@@ -115,7 +113,8 @@ public:
     return -1;
   }
 
-  void unsubscribe(int) override {}
+  void unsubscribe(int) override {
+  }
 
   const std::type_info& type() const override {
     return typeid(T);
@@ -134,18 +133,15 @@ public:
   }
 };
 
-template<class T>
+template <class T>
 class TypedObservable
-  : public IUntypedObservable,
-    private TypedObservableSubscriberId,
-    public std::enable_shared_from_this<TypedObservable<T>>
-{
+    : public IUntypedObservable,
+      private TypedObservableSubscriberId,
+      public std::enable_shared_from_this<TypedObservable<T>> {
   T m_value;
 
-  using Callback = boost::variant<
-    std::function<void(T)>,
-    std::function<void(UntypedObservable)>
-  >;
+  using Callback = boost::variant<std::function<void(T)>,
+                                  std::function<void(UntypedObservable)>>;
 
   std::unordered_map<int, Callback> m_subscribers;
 
@@ -153,7 +149,8 @@ class TypedObservable
     TypedObservable& m_ref;
 
     // GCC doesn't accept brace initialised references
-    NotifySubscriber(TypedObservable& ref) : m_ref(ref) {}
+    NotifySubscriber(TypedObservable& ref) : m_ref(ref) {
+    }
 
     NotifySubscriber& operator=(NotifySubscriber&) = delete;
 
@@ -168,10 +165,9 @@ class TypedObservable
   };
 
 public:
-  template<class... P>
+  template <class... P>
   TypedObservable(P&&... a)
-    : m_value{ std::forward<P>(a)... }
-  {
+      : m_value{ std::forward<P>(a)... } {
   }
 
   T& get() {
@@ -236,14 +232,14 @@ public:
 };
 
 
-template<class T>
+template <class T>
 class Observable {
   using Self = Observable<T>;
 
   std::shared_ptr<TypedObservable<T>> m_inner;
 
 public:
-  template<class...>
+  template <class...>
   struct CanForward : std::true_type {};
 
   template<class P>
@@ -255,30 +251,22 @@ public:
   {
   };
 
-  template<
-    class... P,
-    class = typename std::enable_if<CanForward<P...>::value>::type
-  >
+  template <class... P,
+            class = typename std::enable_if<CanForward<P...>::value>::type>
   explicit Observable(P&&... a)
-    : m_inner { std::make_shared<TypedObservable<T>>(std::forward<P>(a)...) }
-  {
+      : m_inner{ std::make_shared<TypedObservable<T>>(std::forward<P>(a)...) } {
   }
 
-  Observable(const Observable& o)
-    : m_inner{ o.m_inner->copy() }
-  {
+  Observable(const Observable& o) : m_inner{ o.m_inner->copy() } {
     // Bug in VS2013 means this isn't working for =delete'd copy constructors
     // so the compile error will be produced further down the stack.
     // Will catch some cases though.
     static_assert(
-      std::is_copy_constructible<T>::value,
-      "Copy constructing Observable<T> but T has no copy constructor"
-    );
+        std::is_copy_constructible<T>::value,
+        "Copy constructing Observable<T> but T has no copy constructor");
   }
 
-  Observable(Observable&& o)
-    : m_inner{ std::move(o.m_inner) }
-  {
+  Observable(Observable&& o) : m_inner{ std::move(o.m_inner) } {
   }
 
   Self& operator=(const Observable& o) {
@@ -316,8 +304,7 @@ public:
 private:
   friend UntypedObservable;
   explicit Observable(std::shared_ptr<TypedObservable<T>> i)
-    : m_inner{ std::move(i) }
-  {
+      : m_inner{ std::move(i) } {
   }
 };
 
@@ -326,11 +313,10 @@ class UntypedObservable {
 
 public:
   explicit UntypedObservable(std::shared_ptr<IUntypedObservable> i)
-    : m_inner{ std::move(i) }
-  {
+      : m_inner{ std::move(i) } {
   }
 
-  template<class T>
+  template <class T>
   Observable<T> as() {
     if (!is<T>())
       throw std::bad_cast();
@@ -343,7 +329,7 @@ public:
     return Observable<T>{ asValueWrapper->get() };
   }
 
-  template<class T>
+  template <class T>
   bool is() {
     if (DependencyTracker::isTracking())
       DependencyTracker::track(m_inner);
@@ -366,7 +352,7 @@ public:
   }
 };
 
-template<class T>
+template <class T>
 UntypedObservable Observable<T>::asUntyped() {
   return UntypedObservable{ m_inner };
 }

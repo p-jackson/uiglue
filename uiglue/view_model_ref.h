@@ -18,21 +18,24 @@
 
 namespace uiglue {
 
-template<class> struct ViewModelMember;
+template <class>
+struct ViewModelMember;
 
-template<class ViewModel>
+template <class ViewModel>
 class ViewModelRef : public IViewModelRef {
   ViewModel& vm;
 
 public:
   // GCC doesn't accept brace initialised references
-  ViewModelRef(ViewModel& vm_) : vm(vm_) {}
+  ViewModelRef(ViewModel& vm_) : vm(vm_) {
+  }
 
   void runCommand(std::string name, HWND view) override {
     auto handler = getMember(name).handler;
-    
+
     if (!handler)
-      throw std::runtime_error("The member \"" + name + "\" is not a command handler");
+      throw std::runtime_error("The member \"" + name
+                               + "\" is not a command handler");
 
     handler(vm, view);
   }

@@ -36,26 +36,40 @@ class View {
   BindingDeclarations m_controlBindingDecls;
   BindingHandlerCache m_handlerCache;
 
-  std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>> m_commandHandlers;
-  std::unordered_map<WPARAM, std::vector<std::string>> m_viewModelCommandHandlers;
-  std::unordered_map<unsigned int, std::vector<std::function<void(WPARAM, LPARAM)>>> m_msgHandlers;
+  std::unordered_map<WPARAM, std::vector<std::function<void(HWND)>>>
+  m_commandHandlers;
+  std::unordered_map<WPARAM, std::vector<std::string>>
+  m_viewModelCommandHandlers;
+  std::unordered_map<unsigned int,
+                     std::vector<std::function<void(WPARAM, LPARAM)>>>
+  m_msgHandlers;
 
 public:
   explicit View(HWND wnd);
   ~View();
 
   void addMenuCommand(int id, std::string command);
-  void addCommandHandler(int commandCode, HWND control, std::function<void(HWND)> handler);
-  void addCommandHandler(int commandCode, HWND control, std::string viewModelCommand);
-  void addMessageHandler(unsigned int msg, std::function<void(WPARAM, LPARAM)> handler);
+  void addCommandHandler(int commandCode,
+                         HWND control,
+                         std::function<void(HWND)> handler);
+  void addCommandHandler(int commandCode,
+                         HWND control,
+                         std::string viewModelCommand);
+  void addMessageHandler(unsigned int msg,
+                         std::function<void(WPARAM, LPARAM)> handler);
 
   void addBindingHandlerCache(BindingHandlerCache cache);
   void addViewBinding(std::string bindingHandler, std::string bindingText);
   void addViewBinding(std::string bindingHandler, UntypedObservable value);
-  void addControlBinding(int id, std::string bindingHandler, std::string bindingText);
-  void addControlBinding(int id, std::string bindingHandler, UntypedObservable value);
+  void addControlBinding(int id,
+                         std::string bindingHandler,
+                         std::string bindingText);
+  void addControlBinding(int id,
+                         std::string bindingHandler,
+                         UntypedObservable value);
 
-  static LRESULT __stdcall WndProc(HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
+  static LRESULT __stdcall WndProc(
+      HWND, unsigned int, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
 
 private:
   bool onMessage(unsigned int, WPARAM, LPARAM, LRESULT& result);

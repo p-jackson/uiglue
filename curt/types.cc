@@ -10,9 +10,13 @@
 #include "include_windows.h"
 
 namespace curt {
-  namespace detail {
-    // These are called in destructors, so not throwing on errors.
-    void HandleTraits<HWND>::release(HWND h) { DestroyWindow(h); }
-    void HandleTraits<HFONT>::release(HFONT h) { DeleteObject(h); }
+namespace detail {
+  // These are called in destructors, so not throwing on errors.
+  void HandleTraits<HWND>::release(HWND h) {
+    DestroyWindow(h);
   }
+  void HandleTraits<HFONT>::release(HFONT h) {
+    DeleteObject(h);
+  }
+}
 }

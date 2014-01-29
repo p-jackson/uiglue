@@ -30,12 +30,10 @@ using namespace std;
 
 namespace curt {
 
-void adjustWindowRectEx(
-  RECT* rect,
-  unsigned long style,
-  bool menu,
-  unsigned long exStyle
-) {
+void adjustWindowRectEx(RECT* rect,
+                        unsigned long style,
+                        bool menu,
+                        unsigned long exStyle) {
   if (!AdjustWindowRectEx(rect, style, menu, exStyle))
     throwLastWin32Error();
 }
@@ -48,12 +46,10 @@ HDC beginPaint(HandleOr<HWND> wnd, PAINTSTRUCT* ps) {
   return dc;
 }
 
-Window createDialog(
-  HINSTANCE instance,
-  StringOrId templateName,
-  HandleOr<HWND> parent,
-  DLGPROC proc
-) {
+Window createDialog(HINSTANCE instance,
+                    StringOrId templateName,
+                    HandleOr<HWND> parent,
+                    DLGPROC proc) {
   Window dlg = CreateDialogParamW(instance, templateName, parent, proc, 0);
   throwIfSavedException();
   if (!dlg)
@@ -69,28 +65,30 @@ Font createFontIndirect(const LOGFONTW* logfont) {
   return { CreateFontIndirectW(logfont) };
 }
 
-Window createWindowEx(
-  unsigned long exStyle,
-  StringOrAtom className,
-  OptString windowName,
-  unsigned long style,
-  int x, int y, int w, int h,
-  HandleOr<HWND> parent,
-  HMENU menu,
-  HINSTANCE hInst,
-  void *createParam
-) {
-  Window newWindow = CreateWindowExW(
-    exStyle,
-    className,
-    windowName,
-    style,
-    x, y, w, h,
-    parent,
-    menu,
-    hInst,
-    createParam
-    );
+Window createWindowEx(unsigned long exStyle,
+                      StringOrAtom className,
+                      OptString windowName,
+                      unsigned long style,
+                      int x,
+                      int y,
+                      int w,
+                      int h,
+                      HandleOr<HWND> parent,
+                      HMENU menu,
+                      HINSTANCE hInst,
+                      void* createParam) {
+  Window newWindow = CreateWindowExW(exStyle,
+                                     className,
+                                     windowName,
+                                     style,
+                                     x,
+                                     y,
+                                     w,
+                                     h,
+                                     parent,
+                                     menu,
+                                     hInst,
+                                     createParam);
 
   throwIfSavedException();
 
@@ -119,25 +117,21 @@ void destroyWindow(HandleOr<HWND> wnd) {
     throwLastWin32Error();
 }
 
-intptr_t dialogBox(
-  HINSTANCE hInst,
-  StringOrId templateName,
-  HandleOr<HWND> parent,
-  DLGPROC proc
-) {
+intptr_t dialogBox(HINSTANCE hInst,
+                   StringOrId templateName,
+                   HandleOr<HWND> parent,
+                   DLGPROC proc) {
   auto result = DialogBoxParamW(hInst, templateName, parent, proc, 0);
   throwIfSavedException();
   throwIfWin32Error();
   return result;
 }
 
-intptr_t dialogBoxParam(
-  HINSTANCE hInst,
-  StringOrId templateName,
-  HandleOr<HWND> parent,
-  DLGPROC proc,
-  intptr_t param
-) {
+intptr_t dialogBoxParam(HINSTANCE hInst,
+                        StringOrId templateName,
+                        HandleOr<HWND> parent,
+                        DLGPROC proc,
+                        intptr_t param) {
   auto result = DialogBoxParamW(hInst, templateName, parent, proc, param);
   throwIfSavedException();
   throwIfWin32Error();
@@ -210,12 +204,10 @@ void mapDialogRect(HandleOr<HWND> dlg, RECT* rect) {
     throwLastWin32Error();
 }
 
-int messageBox(
-  HandleOr<HWND> parent,
-  String text,
-  String caption,
-  unsigned int type
-) {
+int messageBox(HandleOr<HWND> parent,
+               String text,
+               String caption,
+               unsigned int type) {
   auto result = MessageBoxW(parent, text, caption, type);
   throwIfSavedException();
   if (!result)
@@ -223,26 +215,22 @@ int messageBox(
   return result;
 }
 
-bool getMessage(
-  MSG* msg,
-  HandleOr<HWND> wnd,
-  unsigned int msgFilterMin,
-  unsigned int msgFilterMax
-) {
+bool getMessage(MSG* msg,
+                HandleOr<HWND> wnd,
+                unsigned int msgFilterMin,
+                unsigned int msgFilterMax) {
   auto result = GetMessageW(msg, wnd, msgFilterMin, msgFilterMax);
   if (result < 0)
     throwLastWin32Error();
   return result != 0;
 }
 
-int multiByteToWideChar(
-  unsigned int cp,
-  unsigned long flags,
-  const char* mbStr,
-  int mbSize,
-  wchar_t* wideStr,
-  int numChars
-) {
+int multiByteToWideChar(unsigned int cp,
+                        unsigned long flags,
+                        const char* mbStr,
+                        int mbSize,
+                        wchar_t* wideStr,
+                        int numChars) {
   auto res = MultiByteToWideChar(cp, flags, mbStr, mbSize, wideStr, numChars);
   if (!res)
     throwLastWin32Error();
@@ -275,13 +263,11 @@ unsigned int registerWindowMessage(String str) {
   return msg;
 }
 
-LRESULT sendDlgItemMessage(
-  HandleOr<HWND> dlg,
-  int dlgItemId,
-  unsigned int msg,
-  WPARAM wParam,
-  LPARAM lParam
-) {
+LRESULT sendDlgItemMessage(HandleOr<HWND> dlg,
+                           int dlgItemId,
+                           unsigned int msg,
+                           WPARAM wParam,
+                           LPARAM lParam) {
   auto result = SendDlgItemMessageW(dlg, dlgItemId, msg, wParam, lParam);
   throwIfSavedException();
   return result;
@@ -310,12 +296,13 @@ long setWindowLong(HandleOr<HWND> wnd, int index, long newLong) {
   return result;
 }
 
-void setWindowPos(
-  HandleOr<HWND> wnd,
-  HandleOr<HWND> insertAfter,
-  int x, int y, int w, int h,
-  unsigned int flags
-) {
+void setWindowPos(HandleOr<HWND> wnd,
+                  HandleOr<HWND> insertAfter,
+                  int x,
+                  int y,
+                  int w,
+                  int h,
+                  unsigned int flags) {
   auto result = SetWindowPos(wnd, insertAfter, x, y, w, h, flags);
   throwIfSavedException();
   if (!result)
@@ -333,15 +320,14 @@ void setWindowPos(HandleOr<HWND> wnd, POINT p, unsigned int flags) {
 }
 
 void setWindowPos(HandleOr<HWND> wnd, SIZE s, unsigned int flags) {
-  setWindowPos(wnd, nullptr, 0, 0, s.cx, s.cy, SWP_NOZORDER | SWP_NOMOVE | flags);
+  setWindowPos(
+      wnd, nullptr, 0, 0, s.cx, s.cy, SWP_NOZORDER | SWP_NOMOVE | flags);
 }
 
-void setWindowSubclass(
-  HandleOr<HWND> wnd,
-  SUBCLASSPROC subclassProc,
-  std::uintptr_t subclassId,
-  std::uintptr_t refData
-) {
+void setWindowSubclass(HandleOr<HWND> wnd,
+                       SUBCLASSPROC subclassProc,
+                       std::uintptr_t subclassId,
+                       std::uintptr_t refData) {
   if (!SetWindowSubclass(wnd, subclassProc, subclassId, refData))
     throwLastWin32Error();
 }
@@ -363,12 +349,10 @@ bool showWindow(HandleOr<HWND> wnd, int showCmd) {
   return result != 0;
 }
 
-void systemParametersInfo(
-  unsigned int action,
-  unsigned int uiParam,
-  void* pvParam,
-  unsigned int winIni
-) {
+void systemParametersInfo(unsigned int action,
+                          unsigned int uiParam,
+                          void* pvParam,
+                          unsigned int winIni) {
   if (!SystemParametersInfoW(action, uiParam, pvParam, winIni))
     throwLastWin32Error();
 }
@@ -416,7 +400,7 @@ int getWindowTextLength(HandleOr<HWND> wnd) {
   return result;
 }
 
-template<class CharT, class Func>
+template <class CharT, class Func>
 int getTextInner(HWND wnd, CharT* buffer, int bufferSize, Func func) {
   auto result = func(wnd, buffer, bufferSize);
 
@@ -475,30 +459,26 @@ int loadString(HINSTANCE hInst, unsigned int id, wchar_t* buffer, int buffSz) {
   return result;
 }
 
-int wideCharToMultiByte(
-  unsigned int codePage,
-  unsigned long flags,
-  const wchar_t* wideStr,
-  int numChars,
-  char* multiByteStr,
-  int multiByteSize,
-  const char* defaultChar,
-  bool* usedDefaultChar
-) {
+int wideCharToMultiByte(unsigned int codePage,
+                        unsigned long flags,
+                        const wchar_t* wideStr,
+                        int numChars,
+                        char* multiByteStr,
+                        int multiByteSize,
+                        const char* defaultChar,
+                        bool* usedDefaultChar) {
   auto localUsedDefault = 0;
   if (usedDefaultChar && *usedDefaultChar)
     localUsedDefault = 1;
 
-  auto res = WideCharToMultiByte(
-    codePage,
-    flags,
-    wideStr,
-    numChars,
-    multiByteStr,
-    multiByteSize,
-    defaultChar,
-    usedDefaultChar ? &localUsedDefault : nullptr
-  );
+  auto res = WideCharToMultiByte(codePage,
+                                 flags,
+                                 wideStr,
+                                 numChars,
+                                 multiByteStr,
+                                 multiByteSize,
+                                 defaultChar,
+                                 usedDefaultChar ? &localUsedDefault : nullptr);
 
   if (!res)
     throwLastWin32Error();

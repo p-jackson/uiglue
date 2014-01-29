@@ -15,9 +15,7 @@
 
 #include <windowsx.h>
 
-enum ControlIds {
-  Message
-};
+enum ControlIds { Message };
 
 bool onCreate(HWND wnd, LPCREATESTRUCT) {
   curt::createStatic(wnd, Message, SS_CENTER | SS_CENTERIMAGE);
@@ -35,8 +33,8 @@ LRESULT CALLBACK viewProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
       HANDLE_MSG(wnd, WM_CREATE, onCreate);
       HANDLE_MSG(wnd, WM_SIZE, onSize);
-      default:
-        return curt::defWindowProc(wnd, msg, wParam, lParam);
+    default:
+      return curt::defWindowProc(wnd, msg, wParam, lParam);
     }
   }
   catch (...) {
@@ -59,17 +57,18 @@ curt::Window createView() {
 
   const auto x = CW_USEDEFAULT;
 
-  auto view = curt::createWindowEx(
-    WS_EX_APPWINDOW,
-    atom,
-    nullptr,
-    WS_OVERLAPPEDWINDOW,
-    x, x, x, x,
-    HWND_DESKTOP,
-    nullptr,
-    curt::thisModule(),
-    nullptr
-  );
+  auto view = curt::createWindowEx(WS_EX_APPWINDOW,
+                                   atom,
+                                   nullptr,
+                                   WS_OVERLAPPEDWINDOW,
+                                   x,
+                                   x,
+                                   x,
+                                   x,
+                                   HWND_DESKTOP,
+                                   nullptr,
+                                   curt::thisModule(),
+                                   nullptr);
 
   curt::subclassControlBackground(view, RGB(255, 255, 255));
   curt::subclassAppView(view);

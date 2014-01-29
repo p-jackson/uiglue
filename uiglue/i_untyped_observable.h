@@ -17,7 +17,8 @@ class UntypedObservable;
 struct IViewModelRef;
 
 struct IUntypedObservable {
-  virtual ~IUntypedObservable() {}
+  virtual ~IUntypedObservable() {
+  }
   virtual const std::type_info& type() const = 0;
   virtual int subscribe(std::function<void(UntypedObservable)> f) = 0;
   virtual void unsubscribe(int id) = 0;

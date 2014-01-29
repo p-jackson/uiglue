@@ -14,11 +14,12 @@
 
 #include <type_traits>
 
-namespace uiglue { namespace detail {
+namespace uiglue {
+namespace detail {
 
-template<typename T>
-using remove_cv_t = typename std::remove_cv<T>::type;
-
-} } // end namespace uiglue::detail
+  template <typename T>
+  using remove_cv_t = typename std::remove_cv<T>::type;
+}
+} // end namespace uiglue::detail
 
 #endif
