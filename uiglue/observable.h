@@ -120,6 +120,10 @@ public:
     return typeid(T);
   }
 
+  bool isViewModel() override {
+    return detail::IsViewModel<T>::value;
+  }
+
   std::unique_ptr<IViewModelRef> asViewModelRef() override {
     return asViewModelRefInner(detail::IsViewModel<T>{});
   }
@@ -212,11 +216,15 @@ public:
     return typeid(T);
   }
 
+  bool isViewModel() override {
+    return detail::IsViewModel<T>::value;
+  }
+
   std::unique_ptr<IViewModelRef> asViewModelRef() override {
     return asViewModelRefInner(detail::IsViewModel<T>{});
   }
 
-  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) const {
+  std::unique_ptr<IViewModelRef> asViewModelRefInner(std::true_type) {
     return detail::make_unique<ViewModelRef<T>>(m_value);
   }
 
@@ -338,9 +346,17 @@ public:
   }
 
   std::unique_ptr<IViewModelRef> asViewModelRef() {
+    if (!isViewModel())
+      throw std::bad_cast();
+
+    return m_inner->asViewModelRef();
+  }
+
+  bool isViewModel() {
     if (DependencyTracker::isTracking())
       DependencyTracker::track(m_inner);
-    return m_inner->asViewModelRef();
+
+    return m_inner->isViewModel();
   }
 
   int subscribe(std::function<void(UntypedObservable)> f) {

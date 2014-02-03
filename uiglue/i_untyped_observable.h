@@ -23,6 +23,7 @@ struct IUntypedObservable {
   virtual int subscribe(std::function<void(UntypedObservable)> f) = 0;
   virtual void unsubscribe(int id) = 0;
   virtual std::unique_ptr<IViewModelRef> asViewModelRef() = 0;
+  virtual bool isViewModel() = 0;
 
   IUntypedObservable() = default;
   IUntypedObservable(const IUntypedObservable&) = delete;

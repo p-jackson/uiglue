@@ -15,23 +15,26 @@
 
 #include <string>
 
-#define UIGLUE_BEGIN_MEMBER_MAP(VM)                          \
-public:                                                      \
-  static uiglue::ViewModelMember<VM>* uiglueGetMemberMap() { \
-    using ThisVM = VM;                                       \
-  static uiglue::ViewModelMember<VM> memberMap[] = {
+#define UIGLUE_BEGIN_MEMBER_MAP(VM)                                         \
+public:                                                                     \
+  static uiglue::ViewModelMember<VM>* uiglueGetMemberMap() {                \
+    using ThisVM = VM;                                                      \
+    static_assert(                                                          \
+        std::is_same<ThisVM, VM>::value,                                    \
+        "Silences unused typedef warning on GCC when member map is empty"); \
+    static uiglue::ViewModelMember<VM> memberMap[] = {
 
-#define UIGLUE_DECLARE_COMMAND(command)                                 \
-  {                                                                     \
-    #command, [](ThisVM& vm, HWND view) { vm.command(view); }, nullptr, \
-  }                                                                     \
+#define UIGLUE_DECLARE_COMMAND(command)                                \
+  {                                                                    \
+    #command, [](ThisVM& vm, HWND view) { vm.command(view); }, nullptr \
+  }                                                                    \
   ,
 
-#define UIGLUE_DECLARE_PROPERTY(property)                          \
-  {                                                                \
-    #property, nullptr,                                            \
-        [](ThisVM& vm) { return uiglue::asUntyped(vm.property); }, \
-  }                                                                \
+#define UIGLUE_DECLARE_PROPERTY(property)                         \
+  {                                                               \
+    #property, nullptr,                                           \
+        [](ThisVM& vm) { return uiglue::asUntyped(vm.property); } \
+  }                                                               \
   ,
 
 #define UIGLUE_END_MEMBER_MAP() \
@@ -40,7 +43,6 @@ public:                                                      \
   ;                             \
   return memberMap;             \
   }
-
 namespace uiglue {
 
 struct IUntypedObservable;
