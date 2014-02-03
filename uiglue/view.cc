@@ -9,8 +9,8 @@
 
 #include "binding_handler.h"
 #include "i_view_model_ref.h"
+#include "value_accessor.h"
 #include "view_messages.h"
-
 
 #include "curt/curt.h"
 #include "curt/error.h"
@@ -245,11 +245,12 @@ void View::applyBindingsToWindow(const KeyValues& bindings, HWND wnd) {
     MakeObservable makeObservable(*m_vm);
 
     auto observable = boost::apply_visitor(makeObservable, binding.second);
-    handler->init(wnd, observable, *this);
-    handler->update(wnd, observable, *this);
+    auto accessor = ValueAccessor{ observable };
+    handler->init(wnd, accessor, *this);
+    handler->update(wnd, accessor, *this);
 
     observable.subscribe([handler, wnd, this](UntypedObservable o) {
-      handler->update(wnd, o, *this);
+      handler->update(wnd, ValueAccessor{ o }, *this);
     });
   }
 }

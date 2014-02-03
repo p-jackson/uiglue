@@ -238,20 +238,15 @@ LRESULT CALLBACK graphProc(HWND wnd,
 // a custom graph control. Works for Observable<T>s where T is a
 // std::tuple<int, int, int>
 struct GraphHandler {
-  using UntypedObservable = uiglue::UntypedObservable;
+  using ValueAccessor = uiglue::ValueAccessor;
   using View = uiglue::View;
 
   static std::string name() {
     return { "graph" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    GraphHandler::update(wnd, observable, view);
-  }
-
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    auto asTuple = observable.as<std::tuple<int, int, int>>();
-    auto tuple = asTuple();
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    auto tuple = accessor.as<std::tuple<int, int, int>>();
     auto asLParam = reinterpret_cast<LPARAM>(&tuple);
     sendMessage(wnd, k_graphUpdateTriple, 0, asLParam);
   }

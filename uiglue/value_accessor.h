@@ -5,6 +5,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#ifndef UIGLUE_VALUE_ACCESSOR_H
+#define UIGLUE_VALUE_ACCESSOR_H
+
 #include "observable.h"
 
 #include <memory>
@@ -45,3 +48,5 @@ public:
 };
 
 } // end namespace uiglue
+
+#endif

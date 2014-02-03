@@ -22,7 +22,7 @@ public:                                                                     \
     static_assert(                                                          \
         std::is_same<ThisVM, VM>::value,                                    \
         "Silences unused typedef warning on GCC when member map is empty"); \
-    static uiglue::ViewModelMember<VM> memberMap[] = {
+  static uiglue::ViewModelMember<VM> memberMap[] = {
 
 #define UIGLUE_DECLARE_COMMAND(command)                                \
   {                                                                    \

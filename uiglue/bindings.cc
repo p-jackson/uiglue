@@ -35,26 +35,14 @@ using namespace uiglue;
 // The following namespace contains the built-in binding handlers.
 namespace {
 
-void setTextFromObservable(HWND wnd, UntypedObservable observable) {
-  auto asStr = observable.as<string>();
-  curt::setWindowText(wnd, asStr());
-}
-
-void setTextIfChanged(HWND wnd, UntypedObservable observable) {
-  auto asStr = observable.as<string>();
-  auto text = asStr();
-  if (text != curt::getWindowTextString(wnd))
-    curt::setWindowText(wnd, text);
-}
-
 // Sets the window text using SetWindowText()
 struct Text {
   static string name() {
     return { "text" };
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    setTextFromObservable(wnd, observable);
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    curt::setWindowText(wnd, accessor.as<string>());
   }
 };
 
@@ -71,32 +59,40 @@ struct Value {
     return { "value" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    view.addCommandHandler(EN_CHANGE, wnd, [observable](HWND control) mutable {
-      auto text = getWindowTextString(control);
-      auto asString = observable.as<string>();
-      asString(text);
-    });
+  static void init(HWND wnd, ValueAccessor accessor, View& view) {
+    if (accessor.isWriteableObservable<string>()) {
 
-    auto scrollHandler = [observable, wnd](WPARAM, LPARAM lParam) mutable {
-      if (wnd != reinterpret_cast<HWND>(lParam))
-        return;
+      auto changeHandler = [accessor](HWND control) mutable {
+        auto text = getWindowTextString(control);
+        auto observable = accessor.asWriteableObservable<string>();
+        observable(text);
+      };
 
-      auto pos = sendMessage(wnd, TBM_GETPOS, 0, 0);
-      auto asInt = observable.as<int>();
-      asInt(static_cast<int>(pos));
-    };
+      view.addCommandHandler(EN_CHANGE, wnd, changeHandler);
+    } else if (accessor.isWriteableObservable<int>()) {
 
-    view.addMessageHandler(WM_VSCROLL, scrollHandler);
-    view.addMessageHandler(WM_HSCROLL, scrollHandler);
+      auto scrollHandler = [accessor, wnd](WPARAM, LPARAM lParam) mutable {
+        if (wnd != reinterpret_cast<HWND>(lParam))
+          return;
+
+        auto pos = sendMessage(wnd, TBM_GETPOS, 0, 0);
+        auto observable = accessor.asWriteableObservable<int>();
+        observable(static_cast<int>(pos));
+      };
+
+      view.addMessageHandler(WM_VSCROLL, scrollHandler);
+      view.addMessageHandler(WM_HSCROLL, scrollHandler);
+    }
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    if (observable.is<string>())
-      setTextIfChanged(wnd, observable);
-    else {
-      auto asInt = observable.as<int>();
-      sendMessage(wnd, TBM_SETPOS, 1, asInt());
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    if (accessor.is<string>()) {
+      auto text = accessor.as<string>();
+      if (text != curt::getWindowTextString(wnd))
+        curt::setWindowText(wnd, text);
+    } else {
+      auto value = accessor.as<int>();
+      sendMessage(wnd, TBM_SETPOS, 1, value);
     }
   }
 };
@@ -107,9 +103,9 @@ struct Visible {
     return { "visible" };
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    auto asBool = observable.as<bool>();
-    curt::showWindow(wnd, asBool() ? SW_SHOWNA : SW_HIDE);
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    auto visible = accessor.as<bool>();
+    curt::showWindow(wnd, visible ? SW_SHOWNA : SW_HIDE);
   }
 };
 
@@ -120,9 +116,9 @@ struct Hidden {
     return { "hidden" };
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    auto asBool = observable.as<bool>();
-    curt::showWindow(wnd, asBool() ? SW_HIDE : SW_SHOWNA);
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    auto hidden = accessor.as<bool>();
+    curt::showWindow(wnd, hidden ? SW_HIDE : SW_SHOWNA);
   }
 };
 
@@ -132,28 +128,29 @@ struct Checked {
     return { "checked" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    view.addCommandHandler(BN_CLICKED, wnd, [observable](HWND control) mutable {
+  static void init(HWND wnd, ValueAccessor accessor, View& view) {
+    if (!accessor.isWriteableObservable<bool>()
+        && !accessor.isWriteableObservable<int>())
+      return;
+
+    view.addCommandHandler(BN_CLICKED, wnd, [accessor](HWND control) mutable {
       auto state = curt::sendMessage(control, BM_GETCHECK, 0, 0);
-      if (observable.is<int>()) {
-        auto asInt = observable.as<int>();
+      if (accessor.isWriteableObservable<int>()) {
+        auto asInt = accessor.asWriteableObservable<int>();
         asInt(static_cast<int>(state));
       } else {
-        auto boolObservable = observable.as<bool>();
+        auto boolObservable = accessor.asWriteableObservable<bool>();
         boolObservable(state == BST_CHECKED);
       }
     });
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
     int state;
-    if (observable.is<int>()) {
-      auto asInt = observable.as<int>();
-      state = asInt();
-    } else {
-      auto asBool = observable.as<bool>();
-      state = asBool() ? BST_CHECKED : BST_UNCHECKED;
-    }
+    if (accessor.is<int>())
+      state = accessor.as<int>();
+    else
+      state = accessor.as<bool>() ? BST_CHECKED : BST_UNCHECKED;
 
     curt::sendMessage(wnd, BM_SETCHECK, state, 0);
   }
@@ -165,9 +162,9 @@ struct Click {
     return { "click" };
   }
 
-  static void init(HWND wnd, UntypedObservable observable, View& view) {
-    auto stringObservable = observable.as<string>();
-    view.addCommandHandler(BN_CLICKED, wnd, stringObservable());
+  static void init(HWND wnd, ValueAccessor accessor, View& view) {
+    auto commandName = accessor.as<string>();
+    view.addCommandHandler(BN_CLICKED, wnd, commandName);
   }
 };
 
@@ -177,9 +174,9 @@ struct Min {
     return { "min" };
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    auto asInt = observable.as<int>();
-    sendMessage(wnd, TBM_SETRANGEMIN, 1, asInt());
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    auto min = accessor.as<int>();
+    sendMessage(wnd, TBM_SETRANGEMIN, 1, min);
   }
 };
 
@@ -189,9 +186,9 @@ struct Max {
     return { "max" };
   }
 
-  static void update(HWND wnd, UntypedObservable observable, View&) {
-    auto asInt = observable.as<int>();
-    sendMessage(wnd, TBM_SETRANGEMAX, 1, asInt());
+  static void update(HWND wnd, ValueAccessor accessor, View&) {
+    auto max = accessor.as<int>();
+    sendMessage(wnd, TBM_SETRANGEMAX, 1, max);
   }
 };
 
@@ -201,8 +198,8 @@ struct With {
     return { "with" };
   }
 
-  static void update(HWND view, UntypedObservable observable, View&) {
-    auto vm = observable.asViewModelRef();
+  static void update(HWND view, ValueAccessor accessor, View&) {
+    auto vm = accessor.asViewModelRef();
     uiglue::applyBindings(std::move(vm), view);
   }
 };

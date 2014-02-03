@@ -8,7 +8,7 @@
 #ifndef UIGLUE_BINDING_HANDLER_H
 #define UIGLUE_BINDING_HANDLER_H
 
-#include "observable.h"
+#include "value_accessor.h"
 
 #include "curt/fwd_windows.h"
 
@@ -16,7 +16,6 @@
 
 namespace uiglue {
 
-class UntypedObservable;
 class View;
 
 struct IBindingHandler {
@@ -27,8 +26,8 @@ struct IBindingHandler {
   IBindingHandler& operator=(const IBindingHandler&) = delete;
 
   virtual std::string name() const = 0;
-  virtual void init(HWND ctrl, UntypedObservable ob, View& view) const = 0;
-  virtual void update(HWND ctrl, UntypedObservable ob, View& view) const = 0;
+  virtual void init(HWND ctrl, ValueAccessor accessor, View& view) const = 0;
+  virtual void update(HWND ctrl, ValueAccessor accessor, View& view) const = 0;
 };
 
 namespace detail {
@@ -36,7 +35,7 @@ namespace detail {
   template <class A, A>
   struct Helper {};
 
-  using BindingFunc = void (*)(HWND, UntypedObservable, View&);
+  using BindingFunc = void(*)(HWND, ValueAccessor, View&);
 
   template <class T>
   struct HasInit {
@@ -59,9 +58,9 @@ namespace detail {
   // Methods for BindingHandler that don't depend on the template argument.
   class BindingHandlerNoTmpl {
   public:
-    void doInit(std::false_type, HWND, UntypedObservable, View&) const {
+    void doInit(std::false_type, HWND, ValueAccessor, View&) const {
     }
-    void doUpdate(std::false_type, HWND, UntypedObservable, View&) const {
+    void doUpdate(std::false_type, HWND, ValueAccessor, View&) const {
     }
   };
 }
@@ -74,14 +73,14 @@ public:
     return Traits::name();
   }
 
-  void init(HWND h, UntypedObservable o, View& v) const override {
+  void init(HWND h, ValueAccessor accessor, View& v) const override {
     using HasInit = typename detail::HasInit<Traits>::type;
-    doInit(HasInit{}, h, std::move(o), v);
+    doInit(HasInit{}, h, std::move(accessor), v);
   }
 
-  void update(HWND h, UntypedObservable o, View& v) const override {
+  void update(HWND h, ValueAccessor accessor, View& v) const override {
     using HasUpdate = typename detail::HasUpdate<Traits>::type;
-    doUpdate(HasUpdate{}, h, std::move(o), v);
+    doUpdate(HasUpdate{}, h, std::move(accessor), v);
   }
 
 private:
@@ -89,12 +88,12 @@ private:
   using detail::BindingHandlerNoTmpl::doInit;
   using detail::BindingHandlerNoTmpl::doUpdate;
 
-  void doInit(std::true_type, HWND h, UntypedObservable o, View& v) const {
-    Traits::init(h, std::move(o), v);
+  void doInit(std::true_type, HWND h, ValueAccessor accessor, View& v) const {
+    Traits::init(h, std::move(accessor), v);
   }
 
-  void doUpdate(std::true_type, HWND h, UntypedObservable o, View& v) const {
-    Traits::update(h, std::move(o), v);
+  void doUpdate(std::true_type, HWND h, ValueAccessor accessor, View& v) const {
+    Traits::update(h, std::move(accessor), v);
   }
 };
 
